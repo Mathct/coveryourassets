@@ -170,7 +170,7 @@ class Game extends \Bga\GameFramework\Table
 
         //Building deck
         
-
+        
         
         // Init global values with their initial values.
 

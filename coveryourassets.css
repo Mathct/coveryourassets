@@ -86,6 +86,50 @@
     z-index: 100;
 }
 
+.card {
+    width: 128px;
+    height: 179px;
+    background-image: url('img/Cards.jpg');
+    background-size: 1000% 100%;
+    box-shadow: 1px 2px 1px 1px rgba(0, 0, 0, 0.44);
+    border-radius: 5%;
+}
+
+.card_back {
+    width: 128px;
+    height: 179px;
+    background-image: url('img/CardBack.jpg');
+    background-size: 100% 100%;
+    box-shadow: 1px 2px 1px 1px rgba(0, 0, 0, 0.44);
+    border-radius: 5%;
+}
+
+.card_wild {
+    width: 128px;
+    height: 179px;
+    background-image: url('img/WildCards.jpg');
+    background-size: 200% 100%;
+    box-shadow: 1px 2px 1px 1px rgba(0, 0, 0, 0.44);
+    border-radius: 5%;
+}
+
+.card_advanced_wild {
+    width: 128px;
+    height: 179px;
+    background-image: url('img/AdvancedWildCards.jpg');
+    background-size: 100% 100%;
+    box-shadow: 1px 2px 1px 1px rgba(0, 0, 0, 0.44);
+    border-radius: 5%;
+}
+
+.card_action {
+    width: 128px;
+    height: 179px;
+    background-image: url('img/ActionCards.jpg');
+    background-size: 200% 100%;
+    box-shadow: 1px 2px 1px 1px rgba(0, 0, 0, 0.44);
+    border-radius: 5%;
+}
 
 
 
