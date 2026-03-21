@@ -75,7 +75,7 @@
     border-radius: 4px;
     box-shadow: 0 0 3px yellow;
     z-index: 100;
-  }
+}
 
    
 .selected, .selectedmulti {
@@ -83,7 +83,9 @@
     border-radius: 4px;
     box-shadow: 0 0 3px yellow;
     z-index: 100;
-  }
+}
+
+
 
 
 

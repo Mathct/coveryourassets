@@ -325,7 +325,7 @@ export class Game {
     const gameBoardHTML = `
       <div id="board_id">
 
-
+      
       </div>
     `;
 
