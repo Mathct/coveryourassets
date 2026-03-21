@@ -63,3 +63,28 @@
 
 
 
+#board_id {
+  position: relative;
+  
+}
+
+.selectable, .selectablemulti {
+    cursor: pointer !important;
+    pointer-events: auto !important;
+    outline: 4px dashed yellow; 
+    border-radius: 4px;
+    box-shadow: 0 0 3px yellow;
+    z-index: 100;
+  }
+
+   
+.selected, .selectedmulti {
+    outline: 4px solid yellow; 
+    border-radius: 4px;
+    box-shadow: 0 0 3px yellow;
+    z-index: 100;
+  }
+
+
+
+

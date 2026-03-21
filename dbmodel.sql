@@ -30,3 +30,15 @@
 
 -- Example 2: add a custom field to the standard "player" table
 -- ALTER TABLE `player` ADD `player_my_custom_field` INT UNSIGNED NOT NULL DEFAULT 0;
+
+CREATE TABLE IF NOT EXISTS `pending` (
+  `id` int(10) NOT NULL AUTO_INCREMENT,
+  `player_id` int(10) NULL,  
+  `function` varchar(50) NULL,
+  `target` varchar(50) NULL,
+  `arg` varchar(50) NULL,  
+  `arg2` varchar(50) NULL,
+  `arg3` varchar(50) NULL,
+  `arg4` varchar(50) NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1000 ;

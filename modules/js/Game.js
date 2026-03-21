@@ -16,7 +16,10 @@
  * onEnteringState, onLeavingState and onPlayerActivationChange are predefined names that will be called by the framework.
  * When executing code in this state, you can access the args using this.args
  */
-class PlayerTurn {
+
+const BgaAnimations = await importEsmLib("bga-animations", "1.x");
+
+class NormalTurn {
     constructor(game, bga) {
         this.game = game;
         this.bga = bga;
@@ -26,27 +29,99 @@ class PlayerTurn {
      * This method is called each time we are entering the game state. You can use this method to perform some user interface changes at this moment.
      */
     onEnteringState(args, isCurrentPlayerActive) {
-        this.bga.statusBar.setTitle(isCurrentPlayerActive ? 
-            _('${you} must play a card or pass') :
-            _('${actplayer} must play a card or pass')
-        );
-      
+        
         if (isCurrentPlayerActive) {
-            const playableCardsIds = args.playableCardsIds; // returned by the PlayerTurn::getArgs
 
-            // Add test action buttons in the action status bar, simulating a card click:
-            playableCardsIds.forEach(
-                cardId => this.bga.statusBar.addActionButton(_('Play card with id ${card_id}').replace('${card_id}', cardId), () => this.onCardClick(cardId))
-            ); 
+      this.possibles = [];
+                      
+      // selectable
+      if (Array.isArray(args.selectable) && args.selectable.length > 0) {
+        args.selectable.forEach((sid) => {
+          this.game.safeClass(sid, "add", "selectable");
+          this.possibles.push(sid);
+        });
+      }
 
-            this.bga.statusBar.addActionButton(_('Pass'), () => this.bga.actions.performAction("actPass"), { color: 'secondary' }); 
+      // selected
+      if (Array.isArray(args.selected) && args.selected.length > 0) {
+        args.selected.forEach((sid) => {
+          this.game.safeClass(sid, "add", "selected");
+        });
+      }
+
+      // event listeners uniquement s'il y a quelque chose à connecter
+      if (this.possibles.length > 0) {
+        this.game.setupConnections(this.possibles);
+      }
+    }
+
+    // PART 2 Titles
+    if (isCurrentPlayerActive && args.titleyou) {
+      this.bga.statusBar.setTitle(
+        this.bga.gameui.format_string_recursive(
+          args.titleyou
+            .replace("${you}", this.game.divYou())
+            .replace(/#opponent#/g, args.opponent ?? "")
+            .replace("#nb#", args.nb ?? "")
+            .replace("#nb2#", args.nb2 ?? "")
+            .replace("#icon#", args.icon ?? "")
+            .replace("#icon2#", args.icon2 ?? ""),
+          args,
+        ),
+      );
+    } else if (args.title) {
+      $("pagemaintitletext").innerHTML = this.bga.gameui.format_string_recursive(
+        _(args.title)
+          .replace("${actplayer}", this.game.divActPlayer())
+          .replace("#nb#", args.nb ?? "")
+          .replace("#nb2#", args.nb2 ?? "")
+          .replace("#icon#", args.icon ?? "")
+          .replace("#icon2#", args.icon2 ?? ""),
+        args,
+      );
+    }
+
+    // PART 3 updateActionButtons
+    if (isCurrentPlayerActive && Array.isArray(args.buttons) && args.buttons.length > 0) {
+      for (const key of args.buttons) {
+        switch (key) {
+          case "yes_btn":
+            this.bga.statusBar.addActionButton(
+              _("Yes"),
+              () =>
+                this.bga.actions.performAction("actButton", {
+                  arg1: key,
+                }),
+              { color: "primary"},
+            );
+            break;
+
+          case "no_btn":
+            this.bga.statusBar.addActionButton(
+              _("No"),
+              () =>
+                this.bga.actions.performAction("actButton", {
+                  arg1: key,
+                }),
+              { color: "alert" },
+            );
+            break;
+          
+          
         }
+      }
+    }
+
+
     }
 
     /**
      * This method is called each time we are leaving the game state. You can use this method to perform some user interface changes at this moment.
      */
     onLeavingState(args, isCurrentPlayerActive) {
+        this.game.safeClass(".selectable", "remove", "selectable");
+        this.game.safeClass(".selected", "remove", "selected");
+        this.game.removeConnections();
     }
 
     /**
@@ -57,17 +132,6 @@ class PlayerTurn {
     onPlayerActivationChange(args, isCurrentPlayerActive) {
     }
 
-    
-    onCardClick(card_id) {
-        console.log( 'onCardClick', card_id );
-
-        this.bga.actions.performAction("actPlayCard", { 
-            card_id,
-        }).then(() =>  {                
-            // What to do after the server call if it succeeded
-            // (most of the time, nothing, as the game will react to notifs / change of state instead, so you can delete the `then`)
-        });        
-    }
 }
 
 export class Game {
@@ -76,8 +140,8 @@ export class Game {
         this.bga = bga;
 
         // Declare the State classes
-        this.playerTurn = new PlayerTurn(this, bga);
-        this.bga.states.register('PlayerTurn', this.playerTurn);
+        this.normalTurn = new NormalTurn(this, bga);
+        this.bga.states.register("NormalTurn", this.normalTurn);
 
         // Uncomment the next line to show debug informations about state changes in the console. Remove before going to production!
         // this.bga.states.logger = console.log;
@@ -104,34 +168,17 @@ export class Game {
         console.log( "Starting game setup" );
         this.gamedatas = gamedatas;
 
-        // Example to add a div on the game area
-        this.bga.gameArea.getElement().insertAdjacentHTML('beforeend', `
-            <div id="player-tables"></div>
-        `);
-        
-        // Setting up player boards
-        Object.values(gamedatas.players).forEach(player => {
-            // example of setting up players boards
-            this.bga.playerPanels.getElement(player.id).insertAdjacentHTML('beforeend', `
-                <span id="energy-player-counter-${player.id}"></span> Energy
-            `);
-            const counter = new ebg.counter();
-            counter.create(`energy-player-counter-${player.id}`, {
-                value: player.energy,
-                playerCounter: 'energy',
-                playerId: player.id
-            });
-
-            // example of adding a div for each player
-            document.getElementById('player-tables').insertAdjacentHTML('beforeend', `
-                <div id="player-table-${player.id}">
-                    <strong>${player.name}</strong>
-                    <div>Player zone content goes here</div>
-                </div>
-            `);
+        this.animationManager = new BgaAnimations.Manager({
+        animationsActive: () => this.bga.gameui.bgaAnimationsActive(),
         });
-        
-        // TODO: Set up your game interface here, according to "gamedatas"
+
+        this.players = gamedatas.players; // A RAJOUTER POUR MOTEUR (UTILITY METHODS)
+        this.players_ordered = gamedatas.players_ordered;
+
+        this.setupPlayersPannel();
+        this.setupBoard();
+
+        this.connections = [];
         
 
         // Setup game notifications to handle (see "setupNotifications" method below)
@@ -149,6 +196,146 @@ export class Game {
         script. Typically, functions that are used in multiple state classes or outside a state class.
     
     */
+
+    divYou() {
+        var color = this.players[this.bga.players.getCurrentPlayerId()].color;
+        var color_bg = "";
+        var you = '<span style="font-weight:bold;color:#' + color + ";" + color_bg + '">' + _("You") + "</span>";
+        return you;
+    }
+
+    divActPlayer() {
+        var color = this.players[this.bga.players.getActivePlayerId()].color;
+        var name = this.players[this.bga.players.getActivePlayerId()].name;
+        var color_bg = "";
+        var you = '<span style="font-weight:bold;color:#' + color + ";" + color_bg + '">' + name + "</span>";
+        return you;
+    }
+
+    safeClass(target, action, className) {
+        let elements = [];
+
+        if (typeof target == "string") {
+        // c’est un sélecteur ou id brut
+        let selectors = [];
+        if (target.startsWith("#") || target.startsWith(".")) {
+            selectors = [target];
+        } else {
+            selectors = [`#${target}`, `.${target}`];
+        }
+        selectors.forEach((sel) => {
+            const els = document.querySelectorAll(sel);
+            if (els.length > 0) elements.push(...els);
+        });
+        } else if (target instanceof Element) {
+        // c’est un élément DOM direct
+        elements = [target];
+        }
+
+        if (elements.length == 0) {
+        //console.log(`❌ No element found for "${target}"`);
+        return;
+        }
+
+        elements.forEach((el) => {
+        try {
+            if (typeof el.classList[action] == "function") {
+            el.classList[action](className);
+            } else {
+            console.log(`❌ Invalid action "${action}" on "${target}"`);
+            }
+        } catch (e) {
+            console.log(`❌ Error on "${target}": ${e.message}`);
+        }
+        });
+    }
+
+
+    /*************************************************
+   *
+   *  setup connections from this.args.selectable
+   * on each beginning of new State (Player Turn)
+   *
+   ************************************************/
+
+    setupConnections(selectables) {
+        this.connections = [];
+
+        selectables.forEach((elt_id) => {
+        const element = document.getElementById(elt_id);
+        if (!element) return;
+
+        const clickHandler = (evt) => this.onSelect(evt);
+        element.addEventListener("click", clickHandler);
+        this.connections.push({
+            element,
+            event: "click",
+            handler: clickHandler,
+        });
+
+        });
+    }
+
+    /*************************************************
+   *
+   *  reset all connections
+   *  on leaving a State
+   *
+   ************************************************/
+
+    removeConnections() {
+        this.connections.forEach((connection) => {
+        const { element, event, handler } = connection;
+        if (element) {
+            element.removeEventListener(event, handler);
+        }
+        });
+
+        this.connections = [];
+    }
+
+    onSelect(evt) {
+        // Preventing default browser reaction
+        dojo.stopEvent(evt);
+
+        if (evt.currentTarget.classList.contains("selectable")) {
+        this.bga.actions.performAction("actSelect", { arg1: evt.currentTarget.id });
+        }
+    }
+
+
+    setupPlayersPannel() {
+
+        Object.values(this.gamedatas.players).forEach((player) => {
+
+        this.bga.playerPanels.getElement(player.id).insertAdjacentHTML(
+            "beforeend",
+            `
+            <div>
+
+            </div>
+            `,
+        );
+        });
+
+    }
+
+    setupBoard() {  
+  
+    const gameBoardHTML = `
+      <div id="board_id">
+
+
+      </div>
+    `;
+
+    // Injecte le board
+    document.getElementById("game_play_area").insertAdjacentHTML("beforeend", gameBoardHTML);
+
+    }
+
+  
+
 
     
     ///////////////////////////////////////////////////
