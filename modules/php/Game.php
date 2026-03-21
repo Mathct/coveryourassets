@@ -37,7 +37,7 @@ class Game extends \Bga\GameFramework\Table
     //public playerCounter $counterplayer;
     
     //databases decks
-    //public $table_DB;
+    public $cards_DB;
     
 
 
@@ -78,7 +78,7 @@ class Game extends \Bga\GameFramework\Table
        
 
         // Deck db_card created with table card 
-        //$this->$table_DB = $this->deckFactory->createDeck("table_db");
+        $this->cards_DB = $this->deckFactory->createDeck("cards");
         
 
 
@@ -169,7 +169,25 @@ class Game extends \Bga\GameFramework\Table
         //INIT DES TABLES DB
 
         //Building deck
+        $cards = [];
+        $cards[] = ['type' => 1, 'type_arg' => 0, 'nbr' => 10];
+        $cards[] = ['type' => 2, 'type_arg' => 0, 'nbr' => 10];
+        $cards[] = ['type' => 3, 'type_arg' => 0, 'nbr' => 10];
+        $cards[] = ['type' => 4, 'type_arg' => 0, 'nbr' => 10];
+        $cards[] = ['type' => 5, 'type_arg' => 0, 'nbr' => 10];
+        $cards[] = ['type' => 6, 'type_arg' => 0, 'nbr' => 10];
+        $cards[] = ['type' => 7, 'type_arg' => 0, 'nbr' => 10];
+        $cards[] = ['type' => 8, 'type_arg' => 0, 'nbr' => 10];
+        $cards[] = ['type' => 9, 'type_arg' => 0, 'nbr' => 10];
+        $cards[] = ['type' => 10, 'type_arg' => 0, 'nbr' => 10];
+
+        $this->cards_DB->createCards($cards, 'deck');
+        $this->cards_DB->shuffle('deck');
         
+        foreach ($players as $player_id => $player) {
+            $this->cards_DB->pickCards(5, 'deck', (int) $player_id);
+        }
+
         
         
         // Init global values with their initial values.
