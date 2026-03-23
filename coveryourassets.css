@@ -90,46 +90,64 @@
     width: 128px;
     height: 179px;
     background-image: url('img/Cards.jpg');
-    background-size: 1000% 100%;
+    background-size: 1000% 200%;
     box-shadow: 1px 2px 1px 1px rgba(0, 0, 0, 0.44);
     border-radius: 5%;
 }
 
-.card_back {
-    width: 128px;
-    height: 179px;
-    background-image: url('img/CardBack.jpg');
-    background-size: 100% 100%;
+.titre {
+  font-family: 'Garamond', 'Montserrat', 'Raleway', 'Segoe UI', Arial, sans-serif;
+  font-size: 20px;
+  margin-bottom: 30px;
+  cursor: default;
+}
+
+.cards-container {
+  margin: 10px auto;
+  width: calc(100% - 100px);
+  border-radius: 20px;
+  z-index: 50;
+  
+}
+
+#table_cards {
+  margin-top: 20px;
+}
+
+.stockitem{
+  /* font-family: 'Garamond', 'Montserrat', 'Raleway', 'Segoe UI', Arial, sans-serif; */
+	position: absolute;
+	top: -1.3em;
+  font-size: 16pt;
+	/* font-weight: bold; */
+	width: 100%;
+	text-align: center;
+	box-shadow: 1px 2px 1px 1px rgba(0, 0, 0, 0.44);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.stockitem {
+/* useful pour resizing sprites */
+    position: absolute;
+    background-image: url('img/Cards.png');
+    background-size: 1000% 200%;
     box-shadow: 1px 2px 1px 1px rgba(0, 0, 0, 0.44);
     border-radius: 5%;
 }
 
-.card_wild {
-    width: 128px;
-    height: 179px;
-    background-image: url('img/WildCards.jpg');
-    background-size: 200% 100%;
-    box-shadow: 1px 2px 1px 1px rgba(0, 0, 0, 0.44);
-    border-radius: 5%;
+#hand_container .stockitem:hover{
+  transform: scale(1.1) !important;
+  z-index: 100 !important;
 }
 
-.card_advanced_wild {
-    width: 128px;
-    height: 179px;
-    background-image: url('img/AdvancedWildCards.jpg');
-    background-size: 100% 100%;
-    box-shadow: 1px 2px 1px 1px rgba(0, 0, 0, 0.44);
-    border-radius: 5%;
+
+
+.hidden {
+  display: none !important;
 }
 
-.card_action {
-    width: 128px;
-    height: 179px;
-    background-image: url('img/ActionCards.jpg');
-    background-size: 200% 100%;
-    box-shadow: 1px 2px 1px 1px rgba(0, 0, 0, 0.44);
-    border-radius: 5%;
-}
 
 
 

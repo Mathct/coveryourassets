@@ -168,25 +168,31 @@ class Game extends \Bga\GameFramework\Table
 
         //INIT DES TABLES DB
 
-        //Building deck
+        //creation du deck
         $cards = [];
         $cards[] = ['type' => 1, 'type_arg' => 0, 'nbr' => 10];
         $cards[] = ['type' => 2, 'type_arg' => 0, 'nbr' => 10];
         $cards[] = ['type' => 3, 'type_arg' => 0, 'nbr' => 10];
-        $cards[] = ['type' => 4, 'type_arg' => 0, 'nbr' => 10];
-        $cards[] = ['type' => 5, 'type_arg' => 0, 'nbr' => 10];
-        $cards[] = ['type' => 6, 'type_arg' => 0, 'nbr' => 10];
-        $cards[] = ['type' => 7, 'type_arg' => 0, 'nbr' => 10];
-        $cards[] = ['type' => 8, 'type_arg' => 0, 'nbr' => 10];
-        $cards[] = ['type' => 9, 'type_arg' => 0, 'nbr' => 10];
-        $cards[] = ['type' => 10, 'type_arg' => 0, 'nbr' => 10];
+        $cards[] = ['type' => 4, 'type_arg' => 0, 'nbr' => 9];
+        $cards[] = ['type' => 5, 'type_arg' => 0, 'nbr' => 9];
+        $cards[] = ['type' => 6, 'type_arg' => 0, 'nbr' => 9];
+        $cards[] = ['type' => 7, 'type_arg' => 0, 'nbr' => 9];
+        $cards[] = ['type' => 8, 'type_arg' => 0, 'nbr' => 9];
+        $cards[] = ['type' => 9, 'type_arg' => 0, 'nbr' => 9];
+        $cards[] = ['type' => 10, 'type_arg' => 0, 'nbr' => 8];
+        $cards[] = ['type' => 11, 'type_arg' => 0, 'nbr' => 8];
+        $cards[] = ['type' => 12, 'type_arg' => 0, 'nbr' => 4];
 
         $this->cards_DB->createCards($cards, 'deck');
         $this->cards_DB->shuffle('deck');
         
+        //distribution des cartes
         foreach ($players as $player_id => $player) {
             $this->cards_DB->pickCards(5, 'deck', (int) $player_id);
         }
+
+        //mise en defausse de la premier carte du deck
+        $this->cards_DB->pickCardForLocation('deck', 'discard', 1);
 
         
         
@@ -274,20 +280,9 @@ class Game extends \Bga\GameFramework\Table
             "SELECT `player_id` `id`, `player_score` `score` FROM `player`"
         );
 
-        $sql = "SELECT player_no no FROM player WHERE player_id = $current_player_id";
-        $current_player_no = $this->getUniqueValueFromDb($sql);
-        if (is_null($current_player_no)) {
-            $current_player_no = 0;
-        }
-
-        // ordered players list
-        $sql = "SELECT player_no no, player_id id, player_score score, player_name name, player_color color 
-                FROM player
-                ORDER BY (player_no >= $current_player_no) DESC, player_no ASC";
-        $ordered_list = $this->getObjectListFromDB($sql);
-        $result['players_ordered'] = $ordered_list;
-
-        
+                
+        $result['my_hand'] = self::getCollectionFromDB( "SELECT `card_id` `id`, `card_type` `type`, `card_type_arg` `type_arg`, `card_location` location, `card_location_arg` location_arg FROM `cards` WHERE `card_location` ='hand' AND `card_location_arg`='{$current_player_id}'" );
+        $result['table'] = self::getCollectionFromDB( "SELECT `card_id` `id`, `card_type` `type`, `card_type_arg` `type_arg`, `card_location` location, `card_location_arg` location_arg FROM `cards` WHERE `card_location` ='table'" );
 
         //counters
         //$this->deck_1->fillResult($result);

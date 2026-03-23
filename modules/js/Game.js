@@ -18,6 +18,12 @@
  */
 
 const BgaAnimations = await importEsmLib("bga-animations", "1.x");
+const [stock] = await importDojoLibs(['ebg/stock']);
+
+// STOCK constants
+var CARD_WIDTH = 128;
+var CARD_HEIGHT = 179;
+var CARDS_PER_ROW = 10;
 
 class NormalTurn {
     constructor(game, bga) {
@@ -173,7 +179,9 @@ export class Game {
         });
 
         this.players = gamedatas.players; // A RAJOUTER POUR MOTEUR (UTILITY METHODS)
-        this.players_ordered = gamedatas.players_ordered;
+        
+        this.my_hand = gamedatas.my_hand;
+        this.table = gamedatas.table;
 
         this.setupPlayersPannel();
         this.setupBoard();
@@ -325,12 +333,92 @@ export class Game {
     const gameBoardHTML = `
       <div id="board_id">
 
+      <div id="table_cards_container" class="cards-container">
+        <div class="titre">${_("Cards played")}</div>
+        <div id="table_cards" class="cards"></div>
+      </div> 
+                    
+      <div id="hand_container" class="cards-container">
+        <div class="titre" id="my_cards_title">${_("My hand")}</div>
+        <div id="my_cards" class="cards"></div>
+      </div>
       
       </div>
     `;
 
     // Injecte le board
     document.getElementById("game_play_area").insertAdjacentHTML("beforeend", gameBoardHTML);
+
+
+    this.setupStocks();
+
+    }
+
+
+    // CARDS AND STOCKS AND INFOS MOMIE AND INFOS CLONE
+
+    getStockCardType(card) {
+        // Les cartes issues du Deck PHP arrivent avec { id, type, type_arg, location, location_arg }.
+        // Le Stock attend un type numérique correspondant à addItemType(...).
+        const type = Number(card?.type);
+        return Number.isFinite(type) ? type : 0;
+    }
+     
+    createStockForCards(element)
+    {
+        let stock = new ebg.stock();
+        stock.create(this.bga.gameui, element, CARD_WIDTH, CARD_HEIGHT);
+        stock.image_items_per_row = CARDS_PER_ROW;
+
+        return stock;
+    }
+
+    
+    setupStocks() {
+
+    // Stock pour la main du joueur
+    this.handStock = this.createStockForCards($('my_cards'));
+    this.handStock.setSelectionMode(0);
+    this.handStock.setOverlap(60, 0);
+    this.handStock.use_vertical_overlap_as_offset = false;
+    this.handStock.vertical_overlap = -5;
+    for( var card_id = 1; card_id <= 15; card_id++) {
+        this.handStock.addItemType(card_id, card_id, g_gamethemeurl + 'img/Cards.png', card_id-1);
+    }
+
+
+    // Stock pour la table : pas de weight pour la table pour ne pas classer les cartes selon leur type.
+    this.tableStock = this.createStockForCards($('table_cards'));
+    for( var card_id = 1; card_id <= 15; card_id++) {
+        this.tableStock.addItemType(card_id, 0, g_gamethemeurl + 'img/Cards.png', card_id-1);
+    }
+    this.tableStock.setSelectionMode(0);
+    this.tableStock.use_vertical_overlap_as_offset = false;
+    this.tableStock.vertical_overlap = -15;
+
+
+    
+    // Cards in player's hand
+    Object.values(this.my_hand).forEach( card =>
+    {
+        const card_type = this.getStockCardType(card);
+        this.handStock.addToStockWithId(card_type, card.id);
+    } );
+    this.handStock.updateDisplay();
+
+
+    //Cards in table
+    Object.values(this.table).forEach((card) => {
+
+        
+        const card_type = this.getStockCardType(card);
+        this.tableStock.addToStockWithId(card_type, card.id);
+
+        //const player = this.players[card.location_arg];
+        //const card_div = document.getElementById('table_cards_item_' + card.id);
+        //dojo.place('<div class="player-title" style="color: #' + player.color + '">' + player.name + '</div>', card_div);
+    });
+   
 
     }
 
