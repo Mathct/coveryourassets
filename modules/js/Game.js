@@ -48,10 +48,22 @@ class NormalTurn {
         });
       }
 
+      // selectablemulti
+      if (Array.isArray(args.selectablemulti) && args.selectablemulti.length > 0) {
+        this.game.setupMultiConnections(args.selectablemulti);
+      }
+
       // selected
       if (Array.isArray(args.selected) && args.selected.length > 0) {
         args.selected.forEach((sid) => {
           this.game.safeClass(sid, "add", "selected");
+        });
+      }
+
+      // selectedmulti
+      if (Array.isArray(args.selectedmulti) && args.selectedmulti.length > 0) {
+        args.selectedmulti.forEach((sid) => {
+          this.game.safeClass(sid, "add", "selectedmulti");
         });
       }
 
@@ -126,7 +138,10 @@ class NormalTurn {
      */
     onLeavingState(args, isCurrentPlayerActive) {
         this.game.safeClass(".selectable", "remove", "selectable");
+        this.game.safeClass(".selectablemulti", "remove", "selectablemulti");
         this.game.safeClass(".selected", "remove", "selected");
+        this.game.safeClass(".selectedmulti", "remove", "selectedmulti");
+        this.game.selectedMultiIds = [];
         this.game.removeConnections();
     }
 
@@ -144,6 +159,7 @@ export class Game {
     constructor(bga) {
         console.log('coveryourassets constructor');
         this.bga = bga;
+        this.selectedMultiIds = [];
 
         // Declare the State classes
         this.normalTurn = new NormalTurn(this, bga);
@@ -284,6 +300,22 @@ export class Game {
         });
     }
 
+    setupMultiConnections(selectables) {
+        selectables.forEach((elt_id) => {
+        const element = document.getElementById(elt_id);
+        if (!element) return;
+
+        this.safeClass(element, "add", "selectablemulti");
+        const clickHandler = (evt) => this.onSelectMulti(evt);
+        element.addEventListener("click", clickHandler);
+        this.connections.push({
+            element,
+            event: "click",
+            handler: clickHandler,
+        });
+        });
+    }
+
     /*************************************************
    *
    *  reset all connections
@@ -308,6 +340,26 @@ export class Game {
 
         if (evt.currentTarget.classList.contains("selectable")) {
         this.bga.actions.performAction("actSelect", { arg1: evt.currentTarget.id });
+        }
+    }
+
+    onSelectMulti(evt) {
+        dojo.stopEvent(evt);
+
+        const el = evt.currentTarget;
+        if (!el.classList.contains("selectablemulti")) {
+            return;
+        }
+
+        const cardId = el.id;
+        if (el.classList.contains("selectedmulti")) {
+            el.classList.remove("selectedmulti");
+            this.selectedMultiIds = this.selectedMultiIds.filter((id) => id !== cardId);
+        } else {
+            el.classList.add("selectedmulti");
+            if (!this.selectedMultiIds.includes(cardId)) {
+                this.selectedMultiIds.push(cardId);
+            }
         }
     }
 
@@ -379,7 +431,10 @@ export class Game {
     // Stock pour la main du joueur
     this.handStock = this.createStockForCards($('my_cards'));
     this.handStock.setSelectionMode(0);
-    this.handStock.setOverlap(60, 0);
+    this.handStock.centerItems = false;
+    this.handStock.autowidth = true;
+    this.handStock.setOverlap(0, 0);
+    this.handStock.item_margin = 12;
     this.handStock.use_vertical_overlap_as_offset = false;
     this.handStock.vertical_overlap = -5;
     for( var card_id = 1; card_id <= 15; card_id++) {

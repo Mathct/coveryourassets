@@ -47,11 +47,17 @@ class Pending extends Game
     {
         $ret = [];
         $ret["selectable"] = [];
+        $ret["selectablemulti"] = [];
         $ret["selected"] = [];
+        $ret["selectedmulti"] = [];
         $ret['buttons'] = [];
         $ret['title'] = clienttranslate('${actplayer} must ...');
         $ret['titleyou'] = clienttranslate('${you} must ...');
 
+        $handCards = game::$instance->cards_DB->getCardsInLocation('hand', $this->player_id);
+        foreach ($handCards as $card) {
+            $ret["selectablemulti"][] = 'my_cards_item_' . $card['id'];
+        }
 
         $ret['buttons'][] = 'yes_btn';
         $ret['buttons'][] = 'no_btn';
