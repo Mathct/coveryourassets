@@ -526,14 +526,18 @@ export class Game {
     }
 
 
-    // Stock pour la table : pas de weight pour la table pour ne pas classer les cartes selon leur type.
+    // Stock pour la table : mêmes réglages de layout que la main (hauteur cohérente)
     this.tableStock = this.createStockForCards($('table_cards'));
+    this.tableStock.setSelectionMode(0);
+    this.tableStock.centerItems = false;
+    this.tableStock.autowidth = true;
+    this.tableStock.setOverlap(0, 0);
+    this.tableStock.item_margin = 12;
+    this.tableStock.use_vertical_overlap_as_offset = false;
+    this.tableStock.vertical_overlap = -5;
     for( var card_id = 1; card_id <= 15; card_id++) {
         this.tableStock.addItemType(card_id, 0, g_gamethemeurl + 'img/Cards.png', card_id-1);
     }
-    this.tableStock.setSelectionMode(0);
-    this.tableStock.use_vertical_overlap_as_offset = false;
-    this.tableStock.vertical_overlap = -15;
 
 
     
@@ -557,7 +561,7 @@ export class Game {
         //const card_div = document.getElementById('table_cards_item_' + card.id);
         //dojo.place('<div class="player-title" style="color: #' + player.color + '">' + player.name + '</div>', card_div);
     });
-   
+    this.tableStock.updateDisplay();
 
     }
 
