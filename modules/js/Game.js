@@ -590,14 +590,48 @@ export class Game {
         });
     }
     
-    // TODO: from this point and below, you can write your game notifications handling methods
-    
-    /*
-    Example:
-    async notif_cardPlayed( args ) {
-        // Note: args contains the arguments specified during you "notifyAllPlayers" / "notifyPlayer" PHP call
-        
-        // TODO: play the card in the user interface.
+    /**
+     * Après create set côté serveur : retire les cartes du stock main et les ajoute au stock table.
+     * Tous les joueurs reçoivent la notif (pour mettre à jour la table ; seul le joueur actif retire de sa main).
+     */
+    async notif_cardsMovedToTable(args) {
+        const myId = Number(this.bga.players.getCurrentPlayerId());
+        const actorId = Number(args.player_id);
+        const isMe = actorId === myId;
+
+        const cards = Array.isArray(args.cards) ? args.cards : [];
+        for (const card of cards) {
+            const idStr = String(card.id);
+            if (isMe) {
+                if (this.handStock) {
+                    this.handStock.removeFromStockById(idStr);
+                }
+                if (this.my_hand) {
+                    delete this.my_hand[card.id];
+                    delete this.my_hand[String(card.id)];
+                }
+            }
+            const entry = {
+                id: Number(card.id),
+                type: Number(card.type),
+                location: "table",
+                location_arg: 0,
+            };
+            this.table[entry.id] = entry;
+            const stockType = this.getStockCardType(entry);
+            if (this.tableStock) {
+                this.tableStock.addToStockWithId(stockType, entry.id);
+            }
+        }
+
+        if (this.tableStock) {
+            this.tableStock.updateDisplay();
+        }
+        if (isMe && this.handStock) {
+            this.handStock.updateDisplay();
+            this.selectedMultiIds = [];
+            this.updateCreateSetButtonState();
+            this.updateDiscardButtonState();
+        }
     }
-    */
 }

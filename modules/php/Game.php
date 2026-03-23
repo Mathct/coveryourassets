@@ -23,6 +23,7 @@ namespace Bga\Games\coveryourassets;
 use Bga\Games\coveryourassets\States\NormalTurn;
 use Bga\GameFramework\Components\Counters\PlayerCounter;
 use Bga\GameFramework\Components\Counters\TableCounter;
+use Bga\GameFramework\UserException;
 
 class Game extends \Bga\GameFramework\Table
 {
@@ -82,26 +83,13 @@ class Game extends \Bga\GameFramework\Table
         
 
 
-        /* example of notification decorator.
-        // automatically complete notification args when needed
-        $this->notify->addDecorator(function(string $message, array $args) {
-            if (isset($args['player_id']) && !isset($args['player_name']) && str_contains($message, '${player_name}')) {
-                $args['player_name'] = $this->getPlayerNameById($args['player_id']);
-            }
-        
-            if (isset($args['card_id']) && !isset($args['card_name']) && str_contains($message, '${card_name}')) {
-                $args['card_name'] = self::$CARD_TYPES[$args['card_id']]['card_name'];
-                $args['i18n'][] = ['card_name'];
-            }
-            
-            return $args;
-        });*/
-
+        // Complète les args des notifications : le 1er paramètre du décorateur est souvent le *type* de notif
+        // (ex. cardsMovedToTable), pas le texte du log — ne pas tester str_contains($message, '${player_name}').
         $this->notify->addDecorator(function (string $message, array $args) {
-            if (isset($args['player_id']) && !isset($args['player_name']) && str_contains($message, '${player_name}')) {
+            if (isset($args['player_id']) && !isset($args['player_name'])) {
                 $args['player_name'] = $this->getPlayerNameById((int) $args['player_id']);
-                // no need to add player_name.
             }
+
             return $args;
         });
     }
@@ -382,6 +370,83 @@ class Game extends \Bga\GameFramework\Table
 
         // On retourne le résultat de la fonction appelée
         return $ret;
+    }
+
+    /**
+     * Carte en main du joueur (ou null).
+     *
+     * @return ?array{id: int, type: int, type_arg: int, location: string, location_arg: int}
+     */
+    public function getHandCard(int $playerId, int $cardId): ?array
+    {
+        $cards = $this->cards_DB->getCardsInLocation('hand', $playerId);
+        foreach ($cards as $card) {
+            if ((int) $card['id'] === $cardId) {
+                return $card;
+            }
+        }
+
+        return null;
+    }
+
+    public function canCreateSetTypes(int $typeA, int $typeB): bool
+    {
+        $isAsset = static fn (int $t): bool => $t >= 1 && $t <= 10;
+        $isJoker = static fn (int $t): bool => $t === 11 || $t === 12;
+
+        if ($isAsset($typeA) && $isAsset($typeB) && $typeA === $typeB) {
+            return true;
+        }
+
+        if (($isAsset($typeA) && $isJoker($typeB)) || ($isAsset($typeB) && $isJoker($typeA))) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Valide et joue un set : les 2 cartes passent de la main à la table, puis notification à tous.
+     *
+     * @throws UserException
+     */
+    public function createSetFromHand(int $playerId, int $cardId1, int $cardId2): void
+    {
+        if ((int) $this->getActivePlayerId() !== $playerId) {
+            throw new UserException(clienttranslate('This is not your turn.'));
+        }
+
+        if ($cardId1 === $cardId2) {
+            throw new UserException(clienttranslate('You must select two different cards.'));
+        }
+
+        $c1 = $this->getHandCard($playerId, $cardId1);
+        $c2 = $this->getHandCard($playerId, $cardId2);
+        if ($c1 === null || $c2 === null) {
+            throw new UserException(clienttranslate('These cards are not in your hand.'));
+        }
+
+        $t1 = (int) $c1['type'];
+        $t2 = (int) $c2['type'];
+        if (!$this->canCreateSetTypes($t1, $t2)) {
+            throw new UserException(clienttranslate('This is not a valid set.'));
+        }
+
+        $this->cards_DB->moveCard($cardId1, 'table', 0);
+        $this->cards_DB->moveCard($cardId2, 'table', 0);
+
+        $this->notifyAllPlayers(
+            'cardsMovedToTable',
+            clienttranslate('${player_name} played a set'),
+            [
+                'player_id' => $playerId,
+                'player_name' => $this->getPlayerNameById($playerId),
+                'cards' => [
+                    ['id' => $cardId1, 'type' => $t1],
+                    ['id' => $cardId2, 'type' => $t2],
+                ],
+            ]
+        );
     }
 
 

@@ -95,9 +95,18 @@ class Pending extends Game
 
     function PlayerTurn($parg1, $parg2, $varg1, $varg2, $varg3, $varg4)
     {
+        $g = game::$instance;
 
-        
-        game::$instance->addPending($this->player_id, "PlayerTurn");
+        // Clic sur un bouton d’action : varg1 = id du bouton, varg2 = données (ex. ids de cartes séparés par des virgules)
+        if ($varg1 === 'create_set_btn' && $varg2 !== null && $varg2 !== '') {
+            $ids = array_values(array_filter(array_map('intval', explode(',', (string) $varg2))));
+            if (count($ids) !== 2) {
+                throw new UserException(clienttranslate('You must select exactly two cards.'));
+            }
+            $g->createSetFromHand($this->player_id, $ids[0], $ids[1]);
+        }
+
+        $g->addPending($this->player_id, "PlayerTurn");
     }
 
    
