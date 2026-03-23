@@ -55,12 +55,36 @@ class Pending extends Game
         $ret['titleyou'] = clienttranslate('${you} must ...');
 
         $handCards = game::$instance->cards_DB->getCardsInLocation('hand', $this->player_id);
+        $assetCounts = [];
+        $jokerCount = 0;
         foreach ($handCards as $card) {
             $ret["selectablemulti"][] = 'my_cards_item_' . $card['id'];
+            $type = (int) $card['type'];
+            if ($type >= 1 && $type <= 10) {
+                if (!isset($assetCounts[$type])) {
+                    $assetCounts[$type] = 0;
+                }
+                $assetCounts[$type]++;
+            } else if ($type === 11 || $type === 12) {
+                $jokerCount++;
+            }
         }
 
-        $ret['buttons'][] = 'yes_btn';
-        $ret['buttons'][] = 'no_btn';
+        $canCreateSet = false;
+        foreach ($assetCounts as $count) {
+            if ($count >= 2) {
+                $canCreateSet = true;
+                break;
+            }
+        }
+        if (!$canCreateSet && $jokerCount > 0 && count($assetCounts) > 0) {
+            $canCreateSet = true;
+        }
+
+        if ($canCreateSet) {
+            $ret['buttons'][] = 'create_set_btn';
+        }
+        $ret['buttons'][] = 'discard_btn';
         
 
 

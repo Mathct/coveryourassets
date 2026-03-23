@@ -71,6 +71,9 @@ class NormalTurn {
       if (this.possibles.length > 0) {
         this.game.setupConnections(this.possibles);
       }
+
+      this.game.updateCreateSetButtonState();
+      this.game.updateDiscardButtonState();
     }
 
     // PART 2 Titles
@@ -125,6 +128,30 @@ class NormalTurn {
             );
             break;
           
+          case "create_set_btn":
+            this.bga.statusBar.addActionButton(
+              _("Create set"),
+              () =>
+                this.bga.actions.performAction("actButton", {
+                  arg1: key,
+                  arg2: this.game.getSelectedCardIdsForAction().join(","),
+                }),
+              { color: "primary", id: "create_set_btn", disabled: true },
+            );
+            break;
+
+          case "discard_btn":
+            this.bga.statusBar.addActionButton(
+              _("Discard"),
+              () =>
+                this.bga.actions.performAction("actButton", {
+                  arg1: key,
+                  arg2: this.game.getSelectedCardIdsForAction().join(","),
+                }),
+              { color: "primary", id: "discard_btn", disabled: true },
+            );
+            break;
+          
           
         }
       }
@@ -142,6 +169,8 @@ class NormalTurn {
         this.game.safeClass(".selected", "remove", "selected");
         this.game.safeClass(".selectedmulti", "remove", "selectedmulti");
         this.game.selectedMultiIds = [];
+        this.game.updateCreateSetButtonState();
+        this.game.updateDiscardButtonState();
         this.game.removeConnections();
     }
 
@@ -361,6 +390,61 @@ export class Game {
                 this.selectedMultiIds.push(cardId);
             }
         }
+
+        this.updateCreateSetButtonState();
+        this.updateDiscardButtonState();
+    }
+
+    getSelectedCardIdsForAction() {
+        return this.selectedMultiIds
+            .map((domId) => Number(String(domId).replace("my_cards_item_", "")))
+            .filter((id) => Number.isFinite(id) && id > 0);
+    }
+
+    getCardTypeByCardId(cardId) {
+        if (this.my_hand && this.my_hand[cardId]) {
+            return Number(this.my_hand[cardId].type);
+        }
+        const card = Object.values(this.my_hand ?? {}).find((c) => Number(c.id) === Number(cardId));
+        return card ? Number(card.type) : NaN;
+    }
+
+    canCreateSetFromSelection() {
+        const ids = this.getSelectedCardIdsForAction();
+        if (ids.length !== 2) {
+            return false;
+        }
+
+        const [typeA, typeB] = ids.map((id) => this.getCardTypeByCardId(id));
+        const isAsset = (t) => Number.isFinite(t) && t >= 1 && t <= 10;
+        const isJoker = (t) => t === 11 || t === 12;
+
+        if (isAsset(typeA) && isAsset(typeB) && typeA === typeB) {
+            return true;
+        }
+
+        if ((isAsset(typeA) && isJoker(typeB)) || (isAsset(typeB) && isJoker(typeA))) {
+            return true;
+        }
+
+        return false;
+    }
+
+    updateCreateSetButtonState() {
+        const button = document.getElementById("create_set_btn");
+        if (!button) {
+            return;
+        }
+        button.disabled = !this.canCreateSetFromSelection();
+    }
+
+    updateDiscardButtonState() {
+        const button = document.getElementById("discard_btn");
+        if (!button) {
+            return;
+        }
+        const ids = this.getSelectedCardIdsForAction();
+        button.disabled = ids.length !== 1;
     }
 
 
