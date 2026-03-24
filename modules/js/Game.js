@@ -31,14 +31,18 @@ class NormalTurn {
         this.bga = bga;
     }
 
-    /**
-     * This method is called each time we are entering the game state. You can use this method to perform some user interface changes at this moment.
-     */
+    /*************************************************
+   *
+   *  onEnteringState
+   *
+   ************************************************/
+
     onEnteringState(args, isCurrentPlayerActive) {
         
         if (isCurrentPlayerActive) {
 
       this.possibles = [];
+      this.possiblesMulti = [];
                       
       // selectable
       if (Array.isArray(args.selectable) && args.selectable.length > 0) {
@@ -48,15 +52,18 @@ class NormalTurn {
         });
       }
 
-      // selectablemulti
-      if (Array.isArray(args.selectablemulti) && args.selectablemulti.length > 0) {
-        this.game.setupMultiConnections(args.selectablemulti);
-      }
-
       // selected
       if (Array.isArray(args.selected) && args.selected.length > 0) {
         args.selected.forEach((sid) => {
           this.game.safeClass(sid, "add", "selected");
+        });
+      }
+
+      // selectablemulti
+      if (Array.isArray(args.selectablemulti) && args.selectablemulti.length > 0) {
+        args.selectablemulti.forEach((sid) => {
+          this.game.safeClass(sid, "add", "selectablemulti");
+          this.possiblesMulti.push(sid);
         });
       }
 
@@ -71,12 +78,18 @@ class NormalTurn {
       if (this.possibles.length > 0) {
         this.game.setupConnections(this.possibles);
       }
+      if (this.possiblesMulti.length > 0) {
+        this.game.setupConnectionsMulti(this.possiblesMulti);
+      }
 
-      this.game.updateCreateSetButtonState();
-      this.game.updateDiscardButtonState();
     }
 
-    // PART 2 Titles
+    /*************************************************
+   *
+   *  Titles
+   *
+   ************************************************/
+
     if (isCurrentPlayerActive && args.titleyou) {
       this.bga.statusBar.setTitle(
         this.bga.gameui.format_string_recursive(
@@ -102,7 +115,11 @@ class NormalTurn {
       );
     }
 
-    // PART 3 updateActionButtons
+    /*************************************************
+   *
+   *  Buttons
+   *
+   ************************************************/
     if (isCurrentPlayerActive && Array.isArray(args.buttons) && args.buttons.length > 0) {
       for (const key of args.buttons) {
         switch (key) {
@@ -134,7 +151,7 @@ class NormalTurn {
               () =>
                 this.bga.actions.performAction("actButton", {
                   arg1: key,
-                  arg2: this.game.getSelectedCardIdsForAction().join(","),
+                  //arg2: this.game.getSelectedCardIdsForAction().join(","),
                 }),
               { color: "primary", id: "create_set_btn", disabled: true },
             );
@@ -146,7 +163,7 @@ class NormalTurn {
               () =>
                 this.bga.actions.performAction("actButton", {
                   arg1: key,
-                  arg2: this.game.getSelectedCardIdsForAction().join(","),
+                  //arg2: this.game.getSelectedCardIdsForAction().join(","),
                 }),
               { color: "primary", id: "discard_btn", disabled: true },
             );
@@ -160,19 +177,26 @@ class NormalTurn {
 
     }
 
-    /**
-     * This method is called each time we are leaving the game state. You can use this method to perform some user interface changes at this moment.
-     */
+    /*************************************************
+   *
+   *  onLeavingState
+   *
+   ************************************************/
+
     onLeavingState(args, isCurrentPlayerActive) {
         this.game.safeClass(".selectable", "remove", "selectable");
         this.game.safeClass(".selectablemulti", "remove", "selectablemulti");
         this.game.safeClass(".selected", "remove", "selected");
         this.game.safeClass(".selectedmulti", "remove", "selectedmulti");
-        this.game.selectedMultiIds = [];
-        this.game.updateCreateSetButtonState();
-        this.game.updateDiscardButtonState();
         this.game.removeConnections();
     }
+
+
+     /*************************************************
+   *
+   *  onPlayerActivationChange
+   *
+   ************************************************/
 
     /**
      * This method is called each time the current player becomes active or inactive in a MULTIPLE_ACTIVE_PLAYER state. You can use this method to perform some user interface changes at this moment.
@@ -184,12 +208,18 @@ class NormalTurn {
 
 }
 
+
+
+
+
+
+
+
 export class Game {
     constructor(bga) {
         console.log('coveryourassets constructor');
         this.bga = bga;
-        this.selectedMultiIds = [];
-
+      
         // Declare the State classes
         this.normalTurn = new NormalTurn(this, bga);
         this.bga.states.register("NormalTurn", this.normalTurn);
@@ -202,18 +232,11 @@ export class Game {
         // this.myGlobalValue = 0;
     }
     
-    /*
-        setup:
-        
-        This method must set up the game user interface according to current game situation specified
-        in parameters.
-        
-        The method is called each time the game interface is displayed to a player, ie:
-        _ when the game starts
-        _ when a player refreshes the game page (F5)
-        
-        "gamedatas" argument contains all datas retrieved by your "getAllDatas" PHP method.
-    */
+    /*************************************************
+   *
+   *  Gamedatas
+   *
+   ************************************************/
     
     setup( gamedatas ) {
         console.log( "Starting game setup" );
@@ -232,6 +255,7 @@ export class Game {
         this.setupBoard();
 
         this.connections = [];
+        this.connectionsMulti = [];
         
 
         // Setup game notifications to handle (see "setupNotifications" method below)
@@ -240,15 +264,11 @@ export class Game {
         console.log( "Ending game setup" );
     }
 
-    ///////////////////////////////////////////////////
-    //// Utility methods
-    
-    /*
-    
-        Here, you can defines some utility methods that you can use everywhere in your javascript
-        script. Typically, functions that are used in multiple state classes or outside a state class.
-    
-    */
+     /*************************************************
+   *
+   *  Utility
+   *
+   ************************************************/
 
     divYou() {
         var color = this.players[this.bga.players.getCurrentPlayerId()].color;
@@ -306,8 +326,7 @@ export class Game {
 
     /*************************************************
    *
-   *  setup connections from this.args.selectable
-   * on each beginning of new State (Player Turn)
+   *  Connections
    *
    ************************************************/
 
@@ -329,28 +348,23 @@ export class Game {
         });
     }
 
-    setupMultiConnections(selectables) {
+    setupConnectionsMulti(selectables) {
+        this.connectionsMulti = [];
+
         selectables.forEach((elt_id) => {
         const element = document.getElementById(elt_id);
         if (!element) return;
 
-        this.safeClass(element, "add", "selectablemulti");
         const clickHandler = (evt) => this.onSelectMulti(evt);
         element.addEventListener("click", clickHandler);
-        this.connections.push({
+        this.connectionsMulti.push({
             element,
             event: "click",
             handler: clickHandler,
         });
+
         });
     }
-
-    /*************************************************
-   *
-   *  reset all connections
-   *  on leaving a State
-   *
-   ************************************************/
 
     removeConnections() {
         this.connections.forEach((connection) => {
@@ -360,8 +374,22 @@ export class Game {
         }
         });
 
+        this.connectionsMulti.forEach((connection) => {
+        const { element, event, handler } = connection;
+        if (element) {
+            element.removeEventListener(event, handler);
+        }
+        });
+
         this.connections = [];
+        this.connectionsMulti = [];
     }
+
+    /*************************************************
+   *
+   *  Selects
+   *
+   ************************************************/
 
     onSelect(evt) {
         // Preventing default browser reaction
@@ -376,77 +404,32 @@ export class Game {
         dojo.stopEvent(evt);
 
         const el = evt.currentTarget;
-        if (!el.classList.contains("selectablemulti")) {
-            return;
-        }
-
-        const cardId = el.id;
-        if (el.classList.contains("selectedmulti")) {
-            el.classList.remove("selectedmulti");
-            this.selectedMultiIds = this.selectedMultiIds.filter((id) => id !== cardId);
-        } else {
+        
+        if (el.classList.contains("selectablemulti")) {
+            el.classList.remove("selectablemulti");
             el.classList.add("selectedmulti");
-            if (!this.selectedMultiIds.includes(cardId)) {
-                this.selectedMultiIds.push(cardId);
-            }
+        } 
+
+        else if (el.classList.contains("selectedmulti")) {
+            el.classList.remove("selectedmulti");
+            el.classList.add("selectablemulti");
         }
 
-        this.updateCreateSetButtonState();
-        this.updateDiscardButtonState();
+        this.TestSetButton();
+        
     }
 
-    getSelectedCardIdsForAction() {
-        return this.selectedMultiIds
-            .map((domId) => Number(String(domId).replace("my_cards_item_", "")))
-            .filter((id) => Number.isFinite(id) && id > 0);
+    TestSetButton() {
+        console.warn(this.my_hand)
     }
 
-    getCardTypeByCardId(cardId) {
-        if (this.my_hand && this.my_hand[cardId]) {
-            return Number(this.my_hand[cardId].type);
-        }
-        const card = Object.values(this.my_hand ?? {}).find((c) => Number(c.id) === Number(cardId));
-        return card ? Number(card.type) : NaN;
-    }
+    
 
-    canCreateSetFromSelection() {
-        const ids = this.getSelectedCardIdsForAction();
-        if (ids.length !== 2) {
-            return false;
-        }
-
-        const [typeA, typeB] = ids.map((id) => this.getCardTypeByCardId(id));
-        const isAsset = (t) => Number.isFinite(t) && t >= 1 && t <= 10;
-        const isJoker = (t) => t === 11 || t === 12;
-
-        if (isAsset(typeA) && isAsset(typeB) && typeA === typeB) {
-            return true;
-        }
-
-        if ((isAsset(typeA) && isJoker(typeB)) || (isAsset(typeB) && isJoker(typeA))) {
-            return true;
-        }
-
-        return false;
-    }
-
-    updateCreateSetButtonState() {
-        const button = document.getElementById("create_set_btn");
-        if (!button) {
-            return;
-        }
-        button.disabled = !this.canCreateSetFromSelection();
-    }
-
-    updateDiscardButtonState() {
-        const button = document.getElementById("discard_btn");
-        if (!button) {
-            return;
-        }
-        const ids = this.getSelectedCardIdsForAction();
-        button.disabled = ids.length !== 1;
-    }
-
+    /*************************************************
+   *
+   *  Setup
+   *
+   ************************************************/
 
     setupPlayersPannel() {
 
@@ -489,6 +472,14 @@ export class Game {
     this.setupStocks();
 
     }
+
+
+
+    /*************************************************
+   *
+   *  Functions
+   *
+   ************************************************/
 
 
     // CARDS AND STOCKS AND INFOS MOMIE AND INFOS CLONE
@@ -536,7 +527,7 @@ export class Game {
     this.tableStock.use_vertical_overlap_as_offset = false;
     this.tableStock.vertical_overlap = -5;
     for( var card_id = 1; card_id <= 15; card_id++) {
-        this.tableStock.addItemType(card_id, 0, g_gamethemeurl + 'img/Cards.png', card_id-1);
+        this.tableStock.addItemType(card_id, card_id, g_gamethemeurl + 'img/Cards.png', card_id-1);
     }
 
 
@@ -567,19 +558,13 @@ export class Game {
 
   
 
-
+    /*************************************************
+   *
+   *  Notifs
+   *
+   ************************************************/
     
-    ///////////////////////////////////////////////////
-    //// Reaction to cometD notifications
-
-    /*
-        setupNotifications:
-        
-        In this method, you associate each of your game notifications with your local method to handle it.
-        
-        Note: game notification names correspond to "bga->notify->all" calls in your Game.php file.
     
-    */
     setupNotifications() {
         console.log( 'notifications subscriptions setup' );
         
@@ -590,48 +575,28 @@ export class Game {
         });
     }
     
-    /**
-     * Après create set côté serveur : retire les cartes du stock main et les ajoute au stock table.
-     * Tous les joueurs reçoivent la notif (pour mettre à jour la table ; seul le joueur actif retire de sa main).
-     */
+    
     async notif_cardsMovedToTable(args) {
-        const myId = Number(this.bga.players.getCurrentPlayerId());
-        const actorId = Number(args.player_id);
-        const isMe = actorId === myId;
-
-        const cards = Array.isArray(args.cards) ? args.cards : [];
+       
+        const cards = args.cards;
+        console.warn(cards)
         for (const card of cards) {
-            const idStr = String(card.id);
-            if (isMe) {
-                if (this.handStock) {
-                    this.handStock.removeFromStockById(idStr);
-                }
-                if (this.my_hand) {
-                    delete this.my_hand[card.id];
-                    delete this.my_hand[String(card.id)];
-                }
+
+            this.table[card.id] = card; // remplacer l'indice par table.length si ça sert à quelque chose...
+            const div_id = this.player_id == card.location_arg ? `my_cards_item_${card.id}` : undefined;
+            const card_type = this.getStockCardType(card);
+            const player = this.players[card.location_arg];
+            this.tableStock.addToStockWithId(card_type, card.id, div_id);
+
+            // Destroy the card for the current player
+            if (this.player_id == card.location_arg) {
+
+                this.handStock.removeFromStockById(card.id);
             }
-            const entry = {
-                id: Number(card.id),
-                type: Number(card.type),
-                location: "table",
-                location_arg: 0,
-            };
-            this.table[entry.id] = entry;
-            const stockType = this.getStockCardType(entry);
-            if (this.tableStock) {
-                this.tableStock.addToStockWithId(stockType, entry.id);
-            }
+         
         }
 
-        if (this.tableStock) {
-            this.tableStock.updateDisplay();
-        }
-        if (isMe && this.handStock) {
-            this.handStock.updateDisplay();
-            this.selectedMultiIds = [];
-            this.updateCreateSetButtonState();
-            this.updateDiscardButtonState();
-        }
+        
+
     }
 }
