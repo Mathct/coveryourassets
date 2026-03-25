@@ -107,24 +107,18 @@ class Pending extends Game
         );
 
         $maxSetPosition = (int) $g->getUniqueValueFromDB(
-            "SELECT COALESCE(MAX(`position`), 0) FROM cards WHERE card_location = 'set'"
+            "SELECT COALESCE(MAX(`position`), 0) FROM cards WHERE card_location = 'set' AND card_location_arg = {$this->player_id}"
         );
         $newSetPosition = $maxSetPosition + 1;
 
-        $g->cards_DB->moveCard($id1, 'table', $this->player_id);
-        $g->cards_DB->moveCard($id2, 'table', $this->player_id);
+        $g->cards_DB->moveCard($id1, 'set', $this->player_id);
+        $g->cards_DB->moveCard($id2, 'set', $this->player_id);
 
         $g->DbQuery(
             "UPDATE cards SET `position` = {$newSetPosition} WHERE card_id IN ({$id1}, {$id2})"
         );
 
-        foreach ($cards as &$card) {
-            $card['position'] = $newSetPosition;
-            $card['location'] = 'table';
-            $card['location_arg'] = $this->player_id;
-        }
-        unset($card);
-
+        
         $txt = clienttranslate('${player_name} set ....');
         $g->notify->all(
             "cardsMovedToTable",

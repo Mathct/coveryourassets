@@ -173,6 +173,20 @@ class Game extends \Bga\GameFramework\Table
 
         $this->cards_DB->createCards($cards, 'deck');
         $this->cards_DB->shuffle('deck');
+
+        //valeur des cartes
+        $this->DbQuery("UPDATE cards SET `value` = 5000 WHERE `card_type` = 1");
+        $this->DbQuery("UPDATE cards SET `value` = 5000 WHERE `card_type` = 2");
+        $this->DbQuery("UPDATE cards SET `value` = 5000 WHERE `card_type` = 3");
+        $this->DbQuery("UPDATE cards SET `value` = 10000 WHERE `card_type` = 4");
+        $this->DbQuery("UPDATE cards SET `value` = 10000 WHERE `card_type` = 5");
+        $this->DbQuery("UPDATE cards SET `value` = 10000 WHERE `card_type` = 6");
+        $this->DbQuery("UPDATE cards SET `value` = 15000 WHERE `card_type` = 7");
+        $this->DbQuery("UPDATE cards SET `value` = 15000 WHERE `card_type` = 8");
+        $this->DbQuery("UPDATE cards SET `value` = 15000 WHERE `card_type` = 9");
+        $this->DbQuery("UPDATE cards SET `value` = 20000 WHERE `card_type` = 10");
+        $this->DbQuery("UPDATE cards SET `value` = 25000 WHERE `card_type` = 11");
+        $this->DbQuery("UPDATE cards SET `value` = 50000 WHERE `card_type` = 12");
         
         //distribution des cartes
         foreach ($players as $player_id => $player) {
