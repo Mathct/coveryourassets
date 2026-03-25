@@ -96,30 +96,46 @@ class Pending extends Game
 
     function PlayerTurn($parg1, $parg2, $varg1, $varg2, $varg3, $varg4)
     {
-        // $maxSetPosition = (int)  game::$instance->getUniqueValueFromDB(
-        //     "SELECT COALESCE(MAX(`position`), 0) FROM cards WHERE card_location = 'set'"
-        // );
+        $g = game::$instance;
 
         $ids = explode('_', $varg2);
-        $cards = game::$instance->getObjectListFromDB(
-            "SELECT `card_id` `id`, `card_type` `type`, `card_type_arg` `type_arg`, `card_location` `location`, `card_location_arg` `location_arg`, `position` `position` FROM cards WHERE card_id = '{$ids[0]}' OR card_id = '{$ids[1]}'"
+        $id1 = (int) $ids[0];
+        $id2 = (int) $ids[1];
+
+        $cards = $g->getObjectListFromDB(
+            "SELECT `card_id` `id`, `card_type` `type`, `card_type_arg` `type_arg`, `card_location` `location`, `card_location_arg` `location_arg`, `position` `position` FROM cards WHERE card_id IN ({$id1}, {$id2})"
         );
 
-        game::$instance->cards_DB->moveCard($ids[0], 'table', $this->player_id);
-        game::$instance->cards_DB->moveCard($ids[1], 'table', $this->player_id);
+        $maxSetPosition = (int) $g->getUniqueValueFromDB(
+            "SELECT COALESCE(MAX(`position`), 0) FROM cards WHERE card_location = 'set'"
+        );
+        $newSetPosition = $maxSetPosition + 1;
+
+        $g->cards_DB->moveCard($id1, 'table', $this->player_id);
+        $g->cards_DB->moveCard($id2, 'table', $this->player_id);
+
+        $g->DbQuery(
+            "UPDATE cards SET `position` = {$newSetPosition} WHERE card_id IN ({$id1}, {$id2})"
+        );
+
+        foreach ($cards as &$card) {
+            $card['position'] = $newSetPosition;
+            $card['location'] = 'table';
+            $card['location_arg'] = $this->player_id;
+        }
+        unset($card);
 
         $txt = clienttranslate('${player_name} set ....');
-            game::$instance->notify->all(
-                "cardsMovedToTable",
-                $txt,
-                [
-                    'player_id' => $this->player_id,
-                    'cards' => $cards,
+        $g->notify->all(
+            "cardsMovedToTable",
+            $txt,
+            [
+                'player_id' => $this->player_id,
+                'cards' => $cards,
+            ]
+        );
 
-                ]
-            );
-
-        game::$instance->addPending($this->player_id, "PlayerTurn");
+        $g->addPending($this->player_id, "PlayerTurn");
     }
 
    
