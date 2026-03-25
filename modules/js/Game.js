@@ -151,7 +151,7 @@ class NormalTurn {
               () =>
                 this.bga.actions.performAction("actButton", {
                   arg1: key,
-                  //arg2: this.game.getSelectedCardIdsForAction().join(","),
+                  arg2: this.game.SelectSet(),
                 }),
               { color: "primary", id: "create_set_btn", disabled: true },
             );
@@ -163,7 +163,7 @@ class NormalTurn {
               () =>
                 this.bga.actions.performAction("actButton", {
                   arg1: key,
-                  //arg2: this.game.getSelectedCardIdsForAction().join(","),
+                  arg2: this.game.SelectDiscard(),
                 }),
               { color: "primary", id: "discard_btn", disabled: true },
             );
@@ -416,12 +416,78 @@ export class Game {
         }
 
         this.TestSetButton();
+        this.TestDiscardButton();
         
     }
 
     TestSetButton() {
-        console.warn(this.my_hand)
+      const ids = Array.from(document.querySelectorAll('.selectedmulti')).map(el => el.id);
+      const count = ids.length;
+      const btn = document.getElementById('create_set_btn');
+
+      if(count == 2)
+      { 
+        const id1 = ids[0].split("_");
+        const id2 = ids[1].split("_");
+        const type1 = this.my_hand[id1[3]].type;  
+        const type2 = this.my_hand[id2[3]].type;
+        if((type1 <= 10)&&(type2 <= 10)&&(type1 == type2))
+        {
+          btn.disabled = false;
+        }
+
+        else if ((type1 <= 10 && type2 == 11)||(type1 <= 10 && type2 == 12)||(type2 <= 10 && type1 == 11)||(type2 <= 10 && type1 == 12))
+        {
+          btn.disabled = false;
+        }
+
+        else{
+          btn.disabled = true;
+        }
+        
+      }
+
+      else
+      {        
+        btn.disabled = true;
+      }
+
     }
+
+    TestDiscardButton() {
+      const ids = Array.from(document.querySelectorAll('.selectedmulti')).map(el => el.id);
+      const count = ids.length;
+      const btn = document.getElementById('discard_btn');
+
+      if(count == 1)
+      { 
+        btn.disabled = false;
+      }
+
+      else
+      {        
+        btn.disabled = true;
+      }        
+        
+    }
+
+    SelectSet() {
+
+      const ids = Array.from(document.querySelectorAll('.selectedmulti')).map(el => el.id);
+      const id1 = ids[0].split("_")[3];
+      const id2 = ids[1].split("_")[3];
+
+      return id1+'_'+id2;
+        
+        
+    }
+
+    SelectDiscard() {
+
+        
+        
+    }
+
 
     
 
@@ -579,18 +645,19 @@ export class Game {
     async notif_cardsMovedToTable(args) {
        
         const cards = args.cards;
-        console.warn(cards)
+        const player_id = this.bga.players.getCurrentPlayer().id;
         for (const card of cards) {
 
             this.table[card.id] = card; // remplacer l'indice par table.length si ça sert à quelque chose...
-            const div_id = this.player_id == card.location_arg ? `my_cards_item_${card.id}` : undefined;
+            const div_id = player_id == card.location_arg ? `my_cards_item_${card.id}` : undefined;
             const card_type = this.getStockCardType(card);
             const player = this.players[card.location_arg];
             this.tableStock.addToStockWithId(card_type, card.id, div_id);
 
+            
             // Destroy the card for the current player
-            if (this.player_id == card.location_arg) {
-
+            if (player_id == card.location_arg) {
+                
                 this.handStock.removeFromStockById(card.id);
             }
          

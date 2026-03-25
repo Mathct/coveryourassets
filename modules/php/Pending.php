@@ -84,6 +84,7 @@ class Pending extends Game
         if ($canCreateSet) {
             $ret['buttons'][] = 'create_set_btn';
         }
+
         $ret['buttons'][] = 'discard_btn';
         
 
@@ -95,18 +96,30 @@ class Pending extends Game
 
     function PlayerTurn($parg1, $parg2, $varg1, $varg2, $varg3, $varg4)
     {
-        $g = game::$instance;
+        // $maxSetPosition = (int)  game::$instance->getUniqueValueFromDB(
+        //     "SELECT COALESCE(MAX(`position`), 0) FROM cards WHERE card_location = 'set'"
+        // );
 
-        // Clic sur un bouton d’action : varg1 = id du bouton, varg2 = données (ex. ids de cartes séparés par des virgules)
-        if ($varg1 === 'create_set_btn' && $varg2 !== null && $varg2 !== '') {
-            $ids = array_values(array_filter(array_map('intval', explode(',', (string) $varg2))));
-            if (count($ids) !== 2) {
-                throw new UserException(clienttranslate('You must select exactly two cards.'));
-            }
-            $g->createSetFromHand($this->player_id, $ids[0], $ids[1]);
-        }
+        $ids = explode('_', $varg2);
+        $cards = game::$instance->getObjectListFromDB(
+            "SELECT `card_id` `id`, `card_type` `type`, `card_type_arg` `type_arg`, `card_location` `location`, `card_location_arg` `location_arg`, `position` `position` FROM cards WHERE card_id = '{$ids[0]}' OR card_id = '{$ids[1]}'"
+        );
 
-        $g->addPending($this->player_id, "PlayerTurn");
+        game::$instance->cards_DB->moveCard($ids[0], 'table', $this->player_id);
+        game::$instance->cards_DB->moveCard($ids[1], 'table', $this->player_id);
+
+        $txt = clienttranslate('${player_name} set ....');
+            game::$instance->notify->all(
+                "cardsMovedToTable",
+                $txt,
+                [
+                    'player_id' => $this->player_id,
+                    'cards' => $cards,
+
+                ]
+            );
+
+        game::$instance->addPending($this->player_id, "PlayerTurn");
     }
 
    

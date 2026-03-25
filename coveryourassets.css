@@ -83,6 +83,10 @@
     z-index: 100;
 }
 
+.selectedmulti{
+  cursor: pointer !important;
+}
+
 .card {
     width: 128px;
     height: 179px;
