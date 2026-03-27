@@ -518,45 +518,45 @@ export class Game {
     setupBoard() {  
       const player_id = this.bga.players.getCurrentPlayer().id;
       
-    const gameBoardHTML = `
-      <div id="board_id">
+      const gameBoardHTML = `
+        <div id="board_id">
 
-      <div id="deck_discard_container" class="deck-discard-container">
-        <div id="deck_container" class="deck-container">
-          <div id="deck_cards" class="cards"></div>
+        <div id="deck_discard_container" class="deck-discard-container">
+          <div id="deck_container" class="deck-container">
+            <div id="deck_cards" class="cards"></div>
+          </div>
+
+          <div id="discard_container" class="discard-container">
+            <div id="discard_card" class="discard_card"></div>
+          </div>
         </div>
 
-        <div id="discard_container" class="discard-container">
-          <div id="discard_card" class="discard_card"></div>
+        <div id="table_cards_container" class="cards-container hidden">
+          <!--<div class="titre">${_("Cards played")}</div>-->
+          <div id="table_cards" class="cards"></div>
+        </div> 
+                      
+        <div id="hand_container" class="cards-container">
+          <!--<div class="titre" id="my_cards_title">${_("My hand")}</div>-->
+          <div id="my_cards" class="cards"></div>
         </div>
-      </div>
 
-      <div id="table_cards_container" class="cards-container hidden">
-        <!--<div class="titre">${_("Cards played")}</div>-->
-        <div id="table_cards" class="cards"></div>
-      </div> 
-                    
-      <div id="hand_container" class="cards-container">
-        <!--<div class="titre" id="my_cards_title">${_("My hand")}</div>-->
-        <div id="my_cards" class="cards"></div>
-      </div>
+        <div id="set_container_${player_id}" class="set-container">
+          <div id="set_cards_impaire_${player_id}" class="set-cards-impaire"></div>
+          <div id="set_cards_paire_${player_id}" class="set-cards-paire"></div>
+        </div>
 
-      <div id="set_container" class="set-container">
-        <div id="set_cards_impaire_${player_id}" class="set-cards-impaire"></div>
-        <div id="set_cards_paire_${player_id}" class="set-cards-paire"></div>
-      </div>
+        </div>
 
-      </div>
+        
+      `;
 
-      
-    `;
-
-    // Injecte le board
-    document.getElementById("game_play_area").insertAdjacentHTML("beforeend", gameBoardHTML);
+      // Injecte le board
+      document.getElementById("game_play_area").insertAdjacentHTML("beforeend", gameBoardHTML);
 
 
-    this.setupStocks();
-    this.setupDiscard();
+      this.setupStocks();
+      this.setupDiscard();
 
     }
 
