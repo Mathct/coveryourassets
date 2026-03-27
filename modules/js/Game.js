@@ -250,6 +250,7 @@ export class Game {
         
         this.my_hand = gamedatas.my_hand;
         this.table = gamedatas.table;
+        this.discard = gamedatas.discard;
 
         this.setupPlayersPannel();
         this.setupBoard();
@@ -484,8 +485,9 @@ export class Game {
 
     SelectDiscard() {
 
-        
-        
+      const ids = Array.from(document.querySelectorAll('.selectedmulti')).map(el => el.id);
+      const id1 = ids[0].split("_")[3];
+      return id1;
     }
 
 
@@ -514,21 +516,39 @@ export class Game {
     }
 
     setupBoard() {  
-  
+      const player_id = this.bga.players.getCurrentPlayer().id;
+      
     const gameBoardHTML = `
       <div id="board_id">
 
-      <div id="table_cards_container" class="cards-container">
-        <div class="titre">${_("Cards played")}</div>
+      <div id="deck_discard_container" class="deck-discard-container">
+        <div id="deck_container" class="deck-container">
+          <div id="deck_cards" class="cards"></div>
+        </div>
+
+        <div id="discard_container" class="discard-container">
+          <div id="discard_card" class="discard_card"></div>
+        </div>
+      </div>
+
+      <div id="table_cards_container" class="cards-container hidden">
+        <!--<div class="titre">${_("Cards played")}</div>-->
         <div id="table_cards" class="cards"></div>
       </div> 
                     
       <div id="hand_container" class="cards-container">
-        <div class="titre" id="my_cards_title">${_("My hand")}</div>
+        <!--<div class="titre" id="my_cards_title">${_("My hand")}</div>-->
         <div id="my_cards" class="cards"></div>
       </div>
-      
+
+      <div id="set_container" class="set-container">
+        <div id="set_cards_impaire_${player_id}" class="set-cards-impaire"></div>
+        <div id="set_cards_paire_${player_id}" class="set-cards-paire"></div>
       </div>
+
+      </div>
+
+      
     `;
 
     // Injecte le board
@@ -536,6 +556,7 @@ export class Game {
 
 
     this.setupStocks();
+    this.setupDiscard();
 
     }
 
@@ -622,7 +643,20 @@ export class Game {
 
     }
 
-  
+    setupDiscard() {
+      const discard_type = this.discard;
+      
+      const discard_div = document.getElementById('discard_card');
+      if(discard_type <= 10) {
+        discard_div.style.backgroundPosition = `-${(discard_type-1) * 100}% 0%`;
+      }
+      else if(discard_type == 11) {
+        discard_div.style.backgroundPosition = `-100% -100%`;
+      }
+      else if(discard_type == 12) {
+        discard_div.style.backgroundPosition = `-200% -100%`;
+      }
+    }
 
     /*************************************************
    *
@@ -643,7 +677,10 @@ export class Game {
     
     
     async notif_cardsMovedToTable(args) {
-       
+
+        const container = document.getElementById('table_cards_container');
+        container.classList.remove('hidden');
+        
         const cards = args.cards;
         const player_id = this.bga.players.getCurrentPlayer().id;
         for (const card of cards) {
@@ -651,7 +688,6 @@ export class Game {
             this.table[card.id] = card; // remplacer l'indice par table.length si ça sert à quelque chose...
             const div_id = player_id == card.location_arg ? `my_cards_item_${card.id}` : undefined;
             const card_type = this.getStockCardType(card);
-            const player = this.players[card.location_arg];
             this.tableStock.addToStockWithId(card_type, card.id, div_id);
 
             
@@ -663,7 +699,51 @@ export class Game {
          
         }
 
-        
+    }
 
+    async notif_cardsMovedToDiscard(args) {
+        const player_id = this.bga.players.getCurrentPlayer().id;
+        const card_id = String(args.card.id);
+        const cardDivId = 'my_cards_item_' + card_id;
+        const card = document.getElementById(cardDivId);
+
+        if (card) {
+            card.style.outline = 'none';
+        }
+
+        if (player_id == args.card.location_arg) {
+            // Anime un clone temporaire (pas l'item du stock), puis retire la vraie carte.
+            if (card) {
+                const anim = this.bga.gameui.slideTemporaryObject(
+                    card.outerHTML,
+                    'game_play_area',
+                    cardDivId,
+                    'discard_card',
+                    500,
+                    0
+                );
+                await anim.promise;
+            }
+            this.handStock.removeFromStockById(card_id);
+        }
+
+        const discard_type = args.card.type;
+        const discard_div = document.getElementById('discard_card');
+
+        
+          if(discard_type <= 10) {
+            discard_div.style.backgroundPosition = `-${(discard_type-1) * 100}% 0%`;
+          }
+          else if(discard_type == 11) {
+            discard_div.style.backgroundPosition = `-100% -100%`;
+          }
+          else if(discard_type == 12) {
+            discard_div.style.backgroundPosition = `-200% -100%`;
+          }
+
+       
+
+
+        
     }
 }

@@ -194,7 +194,7 @@ class Game extends \Bga\GameFramework\Table
         }
 
         //mise en defausse de la premier carte du deck
-        $this->cards_DB->pickCardForLocation('deck', 'discard', 1);
+        $this->cards_DB->pickCardForLocation('deck', 'discard', 0);
 
         
         
@@ -285,6 +285,7 @@ class Game extends \Bga\GameFramework\Table
                 
         $result['my_hand'] = self::getCollectionFromDB( "SELECT `card_id` `id`, `card_type` `type`, `card_type_arg` `type_arg`, `card_location` `location`, `card_location_arg` `location_arg`, `position` `position` FROM `cards` WHERE `card_location` ='hand' AND `card_location_arg`='{$current_player_id}'" );
         $result['table'] = self::getCollectionFromDB( "SELECT `card_id` `id`, `card_type` `type`, `card_type_arg` `type_arg`, `card_location` `location`, `card_location_arg` `location_arg`, `position` `position` FROM `cards` WHERE `card_location` ='table'" );
+        $result['discard'] = self::getUniqueValueFromDB( "SELECT `card_type` `type` FROM `cards` WHERE `card_location` ='discard' ORDER BY `position` DESC LIMIT 1" );
 
         //counters
         //$this->deck_1->fillResult($result);

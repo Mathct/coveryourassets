@@ -98,36 +98,67 @@ class Pending extends Game
     {
         $g = game::$instance;
 
-        $ids = explode('_', $varg2);
-        $id1 = (int) $ids[0];
-        $id2 = (int) $ids[1];
+        if($varg1 == 'create_set_btn') {
 
-        $cards = $g->getObjectListFromDB(
-            "SELECT `card_id` `id`, `card_type` `type`, `card_type_arg` `type_arg`, `card_location` `location`, `card_location_arg` `location_arg`, `position` `position` FROM cards WHERE card_id IN ({$id1}, {$id2})"
-        );
+            $ids = explode('_', $varg2);
+            $id1 = (int) $ids[0];
+            $id2 = (int) $ids[1];
 
-        $maxSetPosition = (int) $g->getUniqueValueFromDB(
-            "SELECT COALESCE(MAX(`position`), 0) FROM cards WHERE card_location = 'set' AND card_location_arg = {$this->player_id}"
-        );
-        $newSetPosition = $maxSetPosition + 1;
+            $cards = $g->getObjectListFromDB(
+                "SELECT `card_id` `id`, `card_type` `type`, `card_type_arg` `type_arg`, `card_location` `location`, `card_location_arg` `location_arg`, `position` `position` FROM cards WHERE card_id IN ({$id1}, {$id2})"
+            );
 
-        $g->cards_DB->moveCard($id1, 'set', $this->player_id);
-        $g->cards_DB->moveCard($id2, 'set', $this->player_id);
+            $maxSetPosition = (int) $g->getUniqueValueFromDB(
+                "SELECT COALESCE(MAX(`position`), 0) FROM cards WHERE card_location = 'set' AND card_location_arg = {$this->player_id}"
+            );
+            $newSetPosition = $maxSetPosition + 1;
 
-        $g->DbQuery(
-            "UPDATE cards SET `position` = {$newSetPosition} WHERE card_id IN ({$id1}, {$id2})"
-        );
+            $g->cards_DB->moveCard($id1, 'set', $this->player_id);
+            $g->cards_DB->moveCard($id2, 'set', $this->player_id);
 
-        
-        $txt = clienttranslate('${player_name} set ....');
-        $g->notify->all(
-            "cardsMovedToTable",
-            $txt,
-            [
-                'player_id' => $this->player_id,
-                'cards' => $cards,
-            ]
-        );
+            $g->DbQuery(
+                "UPDATE cards SET `position` = {$newSetPosition} WHERE card_id IN ({$id1}, {$id2})"
+            );
+
+            
+            $txt = clienttranslate('${player_name} set ....');
+            $g->notify->all(
+                "cardsMovedToTable",
+                $txt,
+                [
+                    'player_id' => $this->player_id,
+                    'cards' => $cards,
+                ]
+            );
+        }
+
+        if($varg1 == 'discard_btn') {
+            $ids = explode('_', $varg2);
+            $id1 = (int) $ids[0];
+
+            $card = $g->cards_DB->getCard($id1);
+
+            $maxDiscardPosition = (int) $g->getUniqueValueFromDB(
+                "SELECT COALESCE(MAX(`position`), 0) FROM cards WHERE card_location = 'discard' AND card_location_arg = {$this->player_id}"
+            );
+            $newDiscardPosition = $maxDiscardPosition + 1;
+
+            $g->DbQuery(
+                "UPDATE cards SET `position` = {$newDiscardPosition} WHERE card_id = {$id1}"
+            );
+
+            $g->cards_DB->moveCard($id1, 'discard', 0);
+
+            $txt = clienttranslate('${player_name} discarded ....');
+            $g->notify->all(
+                "cardsMovedToDiscard",
+                $txt,
+                [
+                    'player_id' => $this->player_id,
+                    'card' => $card,
+                ]
+            );
+        }
 
         $g->addPending($this->player_id, "PlayerTurn");
     }
