@@ -252,6 +252,8 @@ export class Game {
         this.table = gamedatas.table;
         this.discard = gamedatas.discard;
 
+        this.players_order = gamedatas.players_ordered;
+
         this.setupPlayersPannel();
         this.setupBoard();
 
@@ -517,6 +519,8 @@ export class Game {
 
     setupBoard() {  
       const player_id = this.bga.players.getCurrentPlayer().id;
+
+      console.warn(this.players_order)
       
       const gameBoardHTML = `
         <div id="board_id">
@@ -541,10 +545,14 @@ export class Game {
           <div id="my_cards" class="cards"></div>
         </div>
 
-        <div id="set_container_${player_id}" class="set-container">
-          <div id="set_cards_impaire_${player_id}" class="set-cards-impaire"></div>
-          <div id="set_cards_paire_${player_id}" class="set-cards-paire"></div>
+        <div id="set_my_container" class="set-my-container">
+          <div id="set_${player_id}" class="set">
+            <div id="set_cards_impaire_${player_id}" class="set-cards-impaire"></div>
+            <div id="set_cards_paire_${player_id}" class="set-cards-paire"></div>
+          </div>
         </div>
+
+        <div id="set_opponent_container" class="set-opponent-container"></div>
 
         </div>
 
@@ -553,6 +561,18 @@ export class Game {
 
       // Injecte le board
       document.getElementById("game_play_area").insertAdjacentHTML("beforeend", gameBoardHTML);
+
+      for(const player of this.players_order) {
+        const set_container = document.getElementById(`set_opponent_container`);
+        if(player.id != player_id) {
+          set_container.insertAdjacentHTML("beforeend", `
+            <div id="set_${player.id}" class="set">
+            <div id="set_cards_impaire_${player.id}" class="set-cards-impaire"></div>
+            <div id="set_cards_paire_${player.id}" class="set-cards-paire"></div>
+          </div>
+        `);
+        }
+      }
 
 
       this.setupStocks();

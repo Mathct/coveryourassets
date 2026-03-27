@@ -282,6 +282,19 @@ class Game extends \Bga\GameFramework\Table
             "SELECT `player_id` `id`, `player_score` `score` FROM `player`"
         );
 
+        $sql = "SELECT player_no no FROM player WHERE player_id = $current_player_id";
+        $current_player_no = $this->getUniqueValueFromDb($sql);
+        if (is_null($current_player_no)) {
+            $current_player_no = 0;
+        }
+
+        // ordered players list
+        $sql = "SELECT player_no no, player_id id, player_score score, player_name name, player_color color 
+                FROM player
+                ORDER BY (player_no >= $current_player_no) DESC, player_no ASC";
+        $ordered_list = $this->getObjectListFromDB($sql);
+        $result['players_ordered'] = $ordered_list;
+
                 
         $result['my_hand'] = self::getCollectionFromDB( "SELECT `card_id` `id`, `card_type` `type`, `card_type_arg` `type_arg`, `card_location` `location`, `card_location_arg` `location_arg`, `position` `position` FROM `cards` WHERE `card_location` ='hand' AND `card_location_arg`='{$current_player_id}'" );
         $result['table'] = self::getCollectionFromDB( "SELECT `card_id` `id`, `card_type` `type`, `card_type_arg` `type_arg`, `card_location` `location`, `card_location_arg` `location_arg`, `position` `position` FROM `cards` WHERE `card_location` ='table'" );

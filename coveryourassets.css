@@ -208,3 +208,48 @@
   border-radius: 5%;
 
 }
+
+.set-my-container{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 179px;
+  margin-bottom: 20px;
+}
+
+.set{
+  width: 210px;
+  height: 179px;
+  position: relative;
+}
+
+.set-cards-impaire{
+  position: absolute;
+  width: 128px;
+  height: 179px;
+  border-radius: 5%;
+  background-color: red;
+  rotate: 90deg;
+  bottom: -25px;
+  left: 25px;
+}
+
+.set-cards-paire{
+  position: absolute;
+  width: 128px;
+  height: 179px;
+  border-radius: 5%;
+  background-color: blue;
+  bottom: 0;
+  right: 0;
+}
+
+.set-opponent-container{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 179px;
+  gap: 20px;
+}
