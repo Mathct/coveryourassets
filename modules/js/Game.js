@@ -602,6 +602,21 @@ export class Game {
         const type = Number(card?.type);
         return Number.isFinite(type) ? type : 0;
     }
+
+    /** Sprite carte (Cards.png) sur un div : même logique que discard / setupSet. */
+    applyCardFaceToElement(element, type) {
+        const t = Number(type);
+        if (!element || !Number.isFinite(t)) {
+            return;
+        }
+        if (t <= 10) {
+            element.style.backgroundPosition = `-${(t - 1) * 100}% 0%`;
+        } else if (t === 11) {
+            element.style.backgroundPosition = `-100% -100%`;
+        } else if (t === 12) {
+            element.style.backgroundPosition = `-200% -100%`;
+        }
+    }
      
     createStockForCards(element)
     {
@@ -755,22 +770,80 @@ export class Game {
         
         const cards = args.cards;
         const player_id = this.bga.players.getCurrentPlayer().id;
-        for (const card of cards) {
+        let position = 0;
 
-            this.table[card.id] = card; // remplacer l'indice par table.length si ça sert à quelque chose...
+        for (const card of cards) {
+            position = Number(card.position);
+
+            this.table[card.id] = card;
             const div_id = player_id == card.location_arg ? `my_cards_item_${card.id}` : undefined;
             const card_type = this.getStockCardType(card);
             this.tableStock.addToStockWithId(card_type, card.id, div_id);
 
-            
-            // Destroy the card for the current player
             if (player_id == card.location_arg) {
-                
                 this.handStock.removeFromStockById(card.id);
             }
-         
         }
 
+        const actorId = Number(args.player_id);
+        // card.position vient du SELECT *avant* UPDATE PHP : faux pour le slot. Utiliser set_position (nouvel indice de set).
+        const setSlotPosition = Number(
+            args.set_position !== undefined && args.set_position !== null ? args.set_position : position,
+        );
+        const targetSetDivId =
+            setSlotPosition % 2 === 0
+                ? `set_cards_paire_${actorId}`
+                : `set_cards_impaire_${actorId}`;
+        const targetFallbackId = `set_${actorId}`;
+        const targetId =
+            document.getElementById(targetSetDivId) != null ? targetSetDivId : targetFallbackId;
+
+        await this.bga.gameui.wait(2500);
+
+        await Promise.all(
+            cards.map((card, i) => {
+                const tableItemId = `table_cards_item_${card.id}`;
+                const el = document.getElementById(tableItemId);
+                if (!el) {
+                    return Promise.resolve();
+                }
+                const html = el.outerHTML;
+                const anim = this.bga.gameui.slideTemporaryObject(
+                    html,
+                    "game_play_area",
+                    tableItemId,
+                    targetId,
+                    500,
+                    i * 150,
+                );
+                // Éviter double affichage : seul le clone animé reste visible.
+                el.style.opacity = "0";
+                el.style.visibility = "hidden";
+                el.style.pointerEvents = "none";
+                return anim.promise;
+            }),
+        );
+
+        const types = cards
+            .map((c) => this.getStockCardType(c))
+            .filter((t) => Number.isFinite(t) && t > 0);
+        const faceType = types.length ? Math.min(...types) : 0;
+        const emplacement =
+            document.getElementById(targetSetDivId) || document.getElementById(targetFallbackId);
+        this.applyCardFaceToElement(emplacement, faceType);
+        if (emplacement) {
+            emplacement.classList.add(setSlotPosition % 2 === 0 ? "card-paire" : "card-impaire");
+            emplacement.style.zIndex = String(setSlotPosition * 100);
+        }
+
+        for (const card of cards) {
+            this.tableStock.removeFromStockById(String(card.id));
+            delete this.table[card.id];
+        }
+        this.tableStock.updateDisplay();
+
+        await this.bga.gameui.wait(250);
+        container.classList.add("hidden");
     }
 
     async notif_cardsMovedToDiscard(args) {
@@ -800,22 +873,7 @@ export class Game {
         }
 
         const discard_type = args.card.type;
-        const discard_div = document.getElementById('discard_card');
-
-        
-          if(discard_type <= 10) {
-            discard_div.style.backgroundPosition = `-${(discard_type-1) * 100}% 0%`;
-          }
-          else if(discard_type == 11) {
-            discard_div.style.backgroundPosition = `-100% -100%`;
-          }
-          else if(discard_type == 12) {
-            discard_div.style.backgroundPosition = `-200% -100%`;
-          }
-
-       
-
-
-        
+        const discard_div = document.getElementById("discard_card");
+        this.applyCardFaceToElement(discard_div, discard_type);
     }
 }

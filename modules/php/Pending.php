@@ -127,6 +127,7 @@ class Pending extends Game
                 $txt,
                 [
                     'player_id' => $this->player_id,
+                    'set_position' => $newSetPosition,
                     'cards' => $cards,
                 ]
             );

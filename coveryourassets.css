@@ -248,9 +248,9 @@
 .set-opponent-container{
   display: flex;
   justify-content: center;
+  flex-wrap: wrap;
   align-items: center;
   width: 100%;
-  height: 179px;
   gap: 20px;
   margin-top: 20px;
 }
