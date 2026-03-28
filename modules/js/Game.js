@@ -428,31 +428,33 @@ export class Game {
       const count = ids.length;
       const btn = document.getElementById('create_set_btn');
 
-      if(count == 2)
-      { 
-        const id1 = ids[0].split("_");
-        const id2 = ids[1].split("_");
-        const type1 = this.my_hand[id1[3]].type;  
-        const type2 = this.my_hand[id2[3]].type;
-        if((type1 <= 10)&&(type2 <= 10)&&(type1 == type2))
-        {
-          btn.disabled = false;
+      if(btn) {
+        if(count == 2)
+        { 
+          const id1 = ids[0].split("_");
+          const id2 = ids[1].split("_");
+          const type1 = this.my_hand[id1[3]].type;  
+          const type2 = this.my_hand[id2[3]].type;
+          if((type1 <= 10)&&(type2 <= 10)&&(type1 == type2))
+          {
+            btn.disabled = false;
+          }
+
+          else if ((type1 <= 10 && type2 == 11)||(type1 <= 10 && type2 == 12)||(type2 <= 10 && type1 == 11)||(type2 <= 10 && type1 == 12))
+          {
+            btn.disabled = false;
+          }
+
+          else{
+            btn.disabled = true;
+          }
+          
         }
 
-        else if ((type1 <= 10 && type2 == 11)||(type1 <= 10 && type2 == 12)||(type2 <= 10 && type1 == 11)||(type2 <= 10 && type1 == 12))
-        {
-          btn.disabled = false;
-        }
-
-        else{
+        else
+        {        
           btn.disabled = true;
         }
-        
-      }
-
-      else
-      {        
-        btn.disabled = true;
       }
 
     }
@@ -462,14 +464,16 @@ export class Game {
       const count = ids.length;
       const btn = document.getElementById('discard_btn');
 
-      if(count == 1)
-      { 
-        btn.disabled = false;
-      }
+      if(btn) {
+        if(count == 1)
+        { 
+          btn.disabled = false;
+        }
 
-      else
-      {        
-        btn.disabled = true;
+        else
+        {        
+          btn.disabled = true;
+        }
       }        
         
     }
@@ -520,8 +524,7 @@ export class Game {
     setupBoard() {  
       const player_id = this.bga.players.getCurrentPlayer().id;
 
-      console.warn(this.players_order)
-      
+            
       const gameBoardHTML = `
         <div id="board_id">
 
