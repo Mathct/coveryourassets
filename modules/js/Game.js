@@ -251,6 +251,7 @@ export class Game {
         this.my_hand = gamedatas.my_hand;
         this.table = gamedatas.table;
         this.discard = gamedatas.discard;
+        this.sets = gamedatas.set;
 
         this.players_order = gamedatas.players_ordered;
 
@@ -538,6 +539,8 @@ export class Game {
           </div>
         </div>
 
+        <div id="set_opponent_container" class="set-opponent-container"></div>
+
         <div id="table_cards_container" class="cards-container hidden">
           <!--<div class="titre">${_("Cards played")}</div>-->
           <div id="table_cards" class="cards"></div>
@@ -554,9 +557,7 @@ export class Game {
             <div id="set_cards_paire_${player_id}" class="set-cards-paire"></div>
           </div>
         </div>
-
-        <div id="set_opponent_container" class="set-opponent-container"></div>
-
+        
         </div>
 
         
@@ -580,6 +581,7 @@ export class Game {
 
       this.setupStocks();
       this.setupDiscard();
+      this.setupSet();
 
     }
 
@@ -679,6 +681,53 @@ export class Game {
       else if(discard_type == 12) {
         discard_div.style.backgroundPosition = `-200% -100%`;
       }
+    }
+
+    setupSet() {
+      const sets = this.sets;
+      let emplacement = '';
+
+      if(sets != null)
+        {
+
+      Object.values(sets).forEach(set_players => {
+      Object.values(set_players).forEach(set => {
+
+        
+
+        if (Number(set.position) % 2 === 0)
+        {
+          emplacement = document.getElementById('set_cards_paire_'+set.location_arg);
+          emplacement.classList.add('card-paire');
+        }
+        else
+        {
+          emplacement = document.getElementById('set_cards_impaire_'+set.location_arg);
+          emplacement.classList.add('card-impaire');
+        }
+        
+        
+        if(set.type <= 10) {
+        emplacement.style.backgroundPosition = `-${(set.type-1) * 100}% 0%`;
+        }
+        else if(set.type == 11) {
+          emplacement.style.backgroundPosition = `-100% -100%`;
+        }
+        else if(set.type == 12) {
+          emplacement.style.backgroundPosition = `-200% -100%`;
+        }
+
+        emplacement.style.zIndex = set.position * 100;
+      
+        
+      })       
+      });
+
+      }
+
+      
+      // if(sets[1] != null)
+      // console.warn(sets[1])
     }
 
     /*************************************************

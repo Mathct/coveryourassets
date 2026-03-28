@@ -275,6 +275,7 @@ class Game extends \Bga\GameFramework\Table
 
         // WARNING: We must only return information visible by the current player.
         $current_player_id = (int) $this->getCurrentPlayerId();
+        $players = self::getObjectListFromDB( "SELECT `player_id` FROM `player`", true );
 
         // Get information about players.
         // NOTE: you can retrieve some extra field you added for "player" table in `dbmodel.sql` if you need it.
@@ -299,6 +300,25 @@ class Game extends \Bga\GameFramework\Table
         $result['my_hand'] = self::getCollectionFromDB( "SELECT `card_id` `id`, `card_type` `type`, `card_type_arg` `type_arg`, `card_location` `location`, `card_location_arg` `location_arg`, `position` `position` FROM `cards` WHERE `card_location` ='hand' AND `card_location_arg`='{$current_player_id}'" );
         $result['table'] = self::getCollectionFromDB( "SELECT `card_id` `id`, `card_type` `type`, `card_type_arg` `type_arg`, `card_location` `location`, `card_location_arg` `location_arg`, `position` `position` FROM `cards` WHERE `card_location` ='table'" );
         $result['discard'] = self::getUniqueValueFromDB( "SELECT `card_type` `type` FROM `cards` WHERE `card_location` ='discard' ORDER BY `position` DESC LIMIT 1" );
+
+        
+        foreach ($players as $player)
+        {
+            $sets = self::getObjectListFromDB( "SELECT `card_id` `id`, `card_type` `type`, `card_type_arg` `type_arg`, `card_location` `location`, `card_location_arg` `location_arg`, `position` `position` FROM `cards` WHERE `card_location` ='set' AND `card_location_arg`='{$player}' AND position >= 1 ORDER BY position ASC, card_type ASC");
+            
+            
+
+            foreach ($sets as $card) {
+                // On garde la première carte rencontrée par position
+                if (!isset($result['set'][$player][$card['position']])) {
+                    $result['set'][$player][$card['position']] = $card;
+                }
+            }
+
+            
+        }
+
+
 
         //counters
         //$this->deck_1->fillResult($result);
