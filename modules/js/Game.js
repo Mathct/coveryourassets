@@ -876,4 +876,17 @@ export class Game {
         const discard_div = document.getElementById("discard_card");
         this.applyCardFaceToElement(discard_div, discard_type);
     }
+
+    async notif_drawCards(args) {
+        const cards = args.cards;
+        const player_id = args.player_id;
+        const deck_container = document.getElementById('deck_container');
+        if(player_id == this.bga.players.getCurrentPlayer().id) {
+          for(const card of cards) {
+            const card_type = this.getStockCardType(card);
+            this.handStock.addToStockWithId(card_type, card.id, deck_container);
+          }
+          this.handStock.updateDisplay();
+        }
+    }
 }

@@ -97,6 +97,7 @@ class Pending extends Game
     function PlayerTurn($parg1, $parg2, $varg1, $varg2, $varg3, $varg4)
     {
         $g = game::$instance;
+        $count_deck = count($g->getObjectListFromDB( "SELECT `card_id` `id` FROM cards WHERE card_location = 'deck'", true ));
 
         if($varg1 == 'create_set_btn') {
 
@@ -131,6 +132,26 @@ class Pending extends Game
                     'cards' => $cards,
                 ]
             );
+
+            if($count_deck > 0) {
+                if($count_deck >= 2) {
+                    $newcards = $g->cards_DB->pickCards(2, 'deck', $this->player_id);
+                }
+                if($count_deck == 1) {
+                    $newcards = $g->cards_DB->pickCard('deck', $this->player_id);
+                }
+
+                $g->notify->player(
+                    $this->player_id,
+                    "drawCards",
+                    '',
+                    [
+                        'player_id' => $this->player_id,
+                        'cards' => $newcards,
+                    ]
+                );
+            }
+
         }
 
         if($varg1 == 'discard_btn') {
@@ -159,9 +180,22 @@ class Pending extends Game
                     'card' => $card,
                 ]
             );
+
+            if($count_deck >= 1) {
+                $newcards = $g->cards_DB->pickCards(1,'deck', $this->player_id);
+                $g->notify->player(
+                    $this->player_id,
+                    "drawCards",
+                    '',
+                    [
+                        'player_id' => $this->player_id,
+                        'cards' => $newcards,
+                    ]
+                );
+            }
         }
 
-        $g->addPending($this->player_id, "PlayerTurn");
+        $g->addPendingFirst($this->player_id, "PlayerTurn");
     }
 
    
