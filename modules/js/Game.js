@@ -612,9 +612,9 @@ export class Game {
         if (t <= 10) {
             element.style.backgroundPosition = `-${(t - 1) * 100}% 0%`;
         } else if (t === 11) {
-            element.style.backgroundPosition = `-100% -100%`;
+            element.style.backgroundPosition = `0% -100%`;
         } else if (t === 12) {
-            element.style.backgroundPosition = `-200% -100%`;
+            element.style.backgroundPosition = `-100% -100%`;
         }
     }
      
@@ -691,10 +691,10 @@ export class Game {
         discard_div.style.backgroundPosition = `-${(discard_type-1) * 100}% 0%`;
       }
       else if(discard_type == 11) {
-        discard_div.style.backgroundPosition = `-100% -100%`;
+        discard_div.style.backgroundPosition = `0% -100%`;
       }
       else if(discard_type == 12) {
-        discard_div.style.backgroundPosition = `-200% -100%`;
+        discard_div.style.backgroundPosition = `-100% -100%`;
       }
     }
 
@@ -726,10 +726,10 @@ export class Game {
         emplacement.style.backgroundPosition = `-${(set.type-1) * 100}% 0%`;
         }
         else if(set.type == 11) {
-          emplacement.style.backgroundPosition = `-100% -100%`;
+          emplacement.style.backgroundPosition = `0% -100%`;
         }
         else if(set.type == 12) {
-          emplacement.style.backgroundPosition = `-200% -100%`;
+          emplacement.style.backgroundPosition = `-100% -100%`;
         }
 
         emplacement.style.zIndex = set.position * 100;
@@ -857,7 +857,7 @@ export class Game {
         }
 
         if (player_id == args.card.location_arg) {
-            // Anime un clone temporaire (pas l'item du stock), puis retire la vraie carte.
+            // Clone animé vers la défausse ; la main se met à jour dès le départ (le clone porte le visuel).
             if (card) {
                 const anim = this.bga.gameui.slideTemporaryObject(
                     card.outerHTML,
@@ -867,14 +867,16 @@ export class Game {
                     500,
                     0
                 );
+                this.handStock.removeFromStockById(card_id);
                 await anim.promise;
             }
-            this.handStock.removeFromStockById(card_id);
         }
 
         const discard_type = args.card.type;
         const discard_div = document.getElementById("discard_card");
         this.applyCardFaceToElement(discard_div, discard_type);
+
+        await this.bga.gameui.wait(500);
     }
 
     async notif_drawCards(args) {
