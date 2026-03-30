@@ -552,6 +552,8 @@ export class Game {
       const gameBoardHTML = `
         <div id="board_id">
 
+        
+
         <div id="deck_discard_container" class="deck-discard-container">
           <div id="deck_container" class="deck-container">
             <div id="deck_cards" class="cards"></div>
@@ -564,15 +566,21 @@ export class Game {
 
         
         <div id="table_cards_container" class="cards-container hidden">
-          <!--<div class="titre">${_("Cards played")}</div>-->
+          <div class="title">${_("Set played")}</div>
           <div id="table_cards" class="cards"></div>
+        </div> 
+
+        <div id="challenge_cards_container" class="challenge_cards_container hidden">
+          <div class="title">${_("Challenge")}</div>
+          
         </div> 
                       
         <div id="hand_container" class="cards-container">
-          <!--<div class="titre" id="my_cards_title">${_("My hand")}</div>-->
+          <div class="title" id="my_cards_title">${_("My hand")}</div>
           <div id="my_cards" class="cards"></div>
         </div>
 
+        
         <div id="set_my_container" class="set-my-container">
           <div id="set_${player_id}" class="set">
             <div id="set_cards_impaire_${player_id}" class="set-cards-impaire"></div>
