@@ -168,6 +168,28 @@ class NormalTurn {
               { color: "primary", id: "discard_btn", disabled: true },
             );
             break;
+
+          case "challenge_btn":
+            this.bga.statusBar.addActionButton(
+              _("Challenge"),
+              () =>
+                this.bga.actions.performAction("actButton", {
+                  arg1: key,
+                }),
+              { color: "primary"},
+            );
+            break;
+
+           case "cancel_btn":
+            this.bga.statusBar.addActionButton(
+              _("Cancel"),
+              () =>
+                this.bga.actions.performAction("actButton", {
+                  arg1: key,
+                }),
+              { color: "alert"},
+            );
+            break;
           
           
         }
@@ -248,6 +270,7 @@ export class Game {
 
         this.players = gamedatas.players; // A RAJOUTER POUR MOTEUR (UTILITY METHODS)
         
+        this.all_cards = gamedatas.all_cards;
         this.my_hand = gamedatas.my_hand;
         this.table = gamedatas.table;
         this.discard = gamedatas.discard;
@@ -434,8 +457,8 @@ export class Game {
         { 
           const id1 = ids[0].split("_");
           const id2 = ids[1].split("_");
-          const type1 = this.my_hand[id1[3]].type;  
-          const type2 = this.my_hand[id2[3]].type;
+          const type1 = this.all_cards[id1[3]].type;  
+          const type2 = this.all_cards[id2[3]].type;
           if((type1 <= 10)&&(type2 <= 10)&&(type1 == type2))
           {
             btn.disabled = false;
@@ -539,8 +562,7 @@ export class Game {
           </div>
         </div>
 
-        <div id="set_opponent_container" class="set-opponent-container"></div>
-
+        
         <div id="table_cards_container" class="cards-container hidden">
           <!--<div class="titre">${_("Cards played")}</div>-->
           <div id="table_cards" class="cards"></div>
@@ -557,6 +579,8 @@ export class Game {
             <div id="set_cards_paire_${player_id}" class="set-cards-paire"></div>
           </div>
         </div>
+
+        <div id="set_opponent_container" class="set-opponent-container"></div>
         
         </div>
 

@@ -69,9 +69,17 @@
   
 }
 
-.selectable, .selectablemulti {
+.selectablemulti {
     cursor: pointer !important;
     pointer-events: auto !important;
+    border-radius: 4px;
+    z-index: 100;
+}
+
+.selectable {
+    cursor: pointer !important;
+    pointer-events: auto !important;
+    outline: 4px dashed red;
     border-radius: 4px;
     z-index: 100;
 }
@@ -229,7 +237,7 @@
   width: 128px;
   height: 179px;
   border-radius: 5%;
-  background-color: red;
+  background-color: rgba(255, 0, 0, 0.2);
   rotate: 90deg;
   bottom: -25px;
   left: 25px;
@@ -240,7 +248,7 @@
   width: 128px;
   height: 179px;
   border-radius: 5%;
-  background-color: blue;
+  background-color: rgba(0, 0, 255, 0.2);
   bottom: 0;
   right: 0;
 }

@@ -86,6 +86,62 @@ class Pending extends Game
         }
 
         $ret['buttons'][] = 'discard_btn';
+
+
+        $last_set = [];
+        $players = game::$instance->getObjectListFromDB( "SELECT `player_id` FROM `player`", true );
+
+        foreach ($players as $player)
+        {
+            
+            $sets = game::$instance->getObjectListFromDB( "SELECT `card_id` `id`, `card_type` `type`, `card_type_arg` `type_arg`, `card_location` `location`, `card_location_arg` `location_arg`, `position` `position` FROM `cards` WHERE `card_location` ='set' AND `card_location_arg`='{$player}' AND position >= 1 ORDER BY position DESC, card_type ASC");
+            
+            foreach ($sets as $card) {
+                // On garde la première carte rencontrée par position
+                if (!isset($last_set[$player])) {
+                    $last_set[$player] = $card;
+                }
+            }
+    
+        }
+
+       
+
+        $possible_challenge = 0;
+        $first_set = game::$instance->getUniqueValueFromDB("SELECT first_set FROM player WHERE player_id = '{$this->player_id}'");
+        if($first_set >= 1)
+        {
+
+            foreach ($players as $player)
+            {
+                if($player != $this->player_id)
+                {
+                    if (isset($last_set[$player])) {
+                        $type_last_set = $last_set[$player]['type'];
+
+                        foreach ($handCards as $card) {
+                            $type = (int) $card['type'];
+                            if ($type == $type_last_set || $type === 11 || $type === 12) {
+                                $possible_challenge = 1;
+                            } 
+                        }
+
+
+                    }
+                }
+            
+            }
+            
+            if($possible_challenge == 1)
+            {
+                $ret['buttons'][] = 'challenge_btn';
+            }
+
+           
+        }
+
+        
+
         
 
 
@@ -152,6 +208,12 @@ class Pending extends Game
                 );
             }
 
+
+            $g->DbQuery(
+                "UPDATE player SET `first_set` = 1 WHERE player_id = '{$this->player_id}'"
+            );
+
+            $g->addPendingFirst($this->player_id, "PlayerTurn");
         }
 
         if($varg1 == 'discard_btn') {
@@ -193,9 +255,217 @@ class Pending extends Game
                     ]
                 );
             }
+
+            $g->addPendingFirst($this->player_id, "PlayerTurn");
         }
 
-        $g->addPendingFirst($this->player_id, "PlayerTurn");
+        if($varg1 == 'challenge_btn') {
+
+            $g->addPending($this->player_id, "ChallengeStep1");
+        }
+
+        
+    }
+
+
+    /* choisir l'adversaire */
+    function argChallengeStep1($parg1, $parg2)
+    {
+        $ret = [];
+        $ret["selectable"] = [];
+        $ret["selectablemulti"] = [];
+        $ret["selected"] = [];
+        $ret["selectedmulti"] = [];
+        $ret['buttons'] = [];
+        $ret['title'] = clienttranslate('${actplayer} must ...');
+        $ret['titleyou'] = clienttranslate('${you} must ...');
+
+        $handCards = game::$instance->cards_DB->getCardsInLocation('hand', $this->player_id);
+        
+        $last_set = [];
+        $players = game::$instance->getObjectListFromDB( "SELECT `player_id` FROM `player`", true );
+
+        foreach ($players as $player)
+        {
+            
+            $sets = game::$instance->getObjectListFromDB( "SELECT `card_id` `id`, `card_type` `type`, `card_type_arg` `type_arg`, `card_location` `location`, `card_location_arg` `location_arg`, `position` `position` FROM `cards` WHERE `card_location` ='set' AND `card_location_arg`='{$player}' AND position >= 1 ORDER BY position DESC, card_type ASC");
+            
+            foreach ($sets as $card) {
+                // On garde la première carte rencontrée par position
+                if (!isset($last_set[$player])) {
+                    $last_set[$player] = $card;
+                }
+            }
+    
+        }
+
+        $players_challenge = [];
+       
+        foreach ($players as $player)
+        {
+            if($player != $this->player_id)
+            {
+                if (isset($last_set[$player])) {
+                    $type_last_set = $last_set[$player]['type'];
+
+                    foreach ($handCards as $card) {
+                        $type = (int) $card['type'];
+                        if ($type == $type_last_set || $type === 11 || $type === 12) {
+                            if (!in_array($player, $players_challenge))
+                            {
+                                $players_challenge[] = $player;
+                            }
+                        } 
+                    }
+
+
+                }
+            }
+        
+        }
+
+
+        foreach ($players_challenge as $p)
+        {
+
+            $ret["selectable"][] = 'set_'.$p;
+
+        }
+        
+        
+        $ret['buttons'][] = 'cancel_btn';
+        
+        
+
+
+        return $ret;
+    }
+
+
+    function ChallengeStep1($parg1, $parg2, $varg1, $varg2, $varg3, $varg4)
+    {
+        $g = game::$instance;
+
+        if($varg1 == 'cancel_btn')
+        {
+            $g->addPending($this->player_id, "PlayerTurn");
+        }
+
+        else {
+            $g->addPending($this->player_id, "ChallengeStep2", $varg1);
+        }
+
+        
+        
+        
+    }
+
+    /* la premere card pour défier */
+    function argChallengeStep2($parg1, $parg2)
+    {
+        $ret = [];
+        $ret["selectable"] = [];
+        $ret["selectablemulti"] = [];
+        $ret["selected"] = [];
+        $ret["selectedmulti"] = [];
+        $ret['buttons'] = [];
+        $ret['title'] = clienttranslate('${actplayer} must ...');
+        $ret['titleyou'] = clienttranslate('${you} must ...');
+
+        $handCards = game::$instance->cards_DB->getCardsInLocation('hand', $this->player_id);
+        $opponent = explode('_', $parg1)[1];
+
+                
+        $last_set = [];
+        $sets = game::$instance->getObjectListFromDB( "SELECT `card_id` `id`, `card_type` `type`, `card_type_arg` `type_arg`, `card_location` `location`, `card_location_arg` `location_arg`, `position` `position` FROM `cards` WHERE `card_location` ='set' AND `card_location_arg`='{$opponent}' AND position >= 1 ORDER BY position DESC, card_type ASC");
+               
+        foreach ($sets as $card) {
+                       
+            if ($last_set == null) {
+
+               $last_set[] = $card;
+            }
+        }
+        
+
+        foreach ($handCards as $handCard)
+        {
+            if($handCard['type'] == $last_set[0]['type'])
+            {
+                $ret["selectable"][] = 'my_cards_item_'.$handCard['id'];
+            }
+
+            if($handCard['type'] == 11 || $handCard['type'] == 12)
+            {
+                $ret["selectable"][] = 'my_cards_item_'.$handCard['id'];
+            }
+        }
+    
+        
+        
+        $ret['buttons'][] = 'cancel_btn';
+        
+        
+
+
+        return $ret;
+    }
+
+
+
+    function ChallengeStep2($parg1, $parg2, $varg1, $varg2, $varg3, $varg4)
+    {
+        $g = game::$instance;
+
+        if($varg1 == 'cancel_btn')
+        {
+            $g->addPending($this->player_id, "PlayerTurn");
+        }
+
+        else {
+            $opponent = explode('_', $parg1)[1];
+            $g->addPending($this->player_id, "ChallengeStep3", $opponent);
+        }
+
+        
+        
+        
+    }
+
+    /* defi */
+    function argChallengeStep3($parg1, $parg2)
+    {
+        $ret = [];
+        $ret["selectable"] = [];
+        $ret["selectablemulti"] = [];
+        $ret["selected"] = [];
+        $ret["selectedmulti"] = [];
+        $ret['buttons'] = [];
+        $ret['title'] = clienttranslate('${actplayer} must ...');
+        $ret['titleyou'] = clienttranslate('${you} must ...');
+
+        
+    
+        
+        
+        $ret['buttons'][] = 'cancel_btn';
+        
+        
+
+
+        return $ret;
+    }
+
+
+
+    function ChallengeStep3($parg1, $parg2, $varg1, $varg2, $varg3, $varg4)
+    {
+        $g = game::$instance;
+
+
+        
+        $g->addPending($this->player_id, "PlayerTurn");
+        
     }
 
    

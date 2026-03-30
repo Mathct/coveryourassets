@@ -54,3 +54,5 @@ CREATE TABLE IF NOT EXISTS `cards` (
   `value` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`card_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+
+ALTER TABLE `player` ADD `first_set` int(5) NOT NULL DEFAULT 0;

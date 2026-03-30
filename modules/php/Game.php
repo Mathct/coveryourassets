@@ -296,7 +296,7 @@ class Game extends \Bga\GameFramework\Table
         $ordered_list = $this->getObjectListFromDB($sql);
         $result['players_ordered'] = $ordered_list;
 
-                
+        $result['all_cards'] = self::getCollectionFromDB( "SELECT `card_id` `id`, `card_type` `type`, `card_type_arg` `type_arg`, `card_location` `location`, `card_location_arg` `location_arg`, `position` `position` FROM `cards`" );        
         $result['my_hand'] = self::getCollectionFromDB( "SELECT `card_id` `id`, `card_type` `type`, `card_type_arg` `type_arg`, `card_location` `location`, `card_location_arg` `location_arg`, `position` `position` FROM `cards` WHERE `card_location` ='hand' AND `card_location_arg`='{$current_player_id}'" );
         $result['table'] = self::getCollectionFromDB( "SELECT `card_id` `id`, `card_type` `type`, `card_type_arg` `type_arg`, `card_location` `location`, `card_location_arg` `location_arg`, `position` `position` FROM `cards` WHERE `card_location` ='table'" );
         $result['discard'] = self::getUniqueValueFromDB( "SELECT `card_type` `type` FROM `cards` WHERE `card_location` ='discard' ORDER BY `position` DESC LIMIT 1" );
