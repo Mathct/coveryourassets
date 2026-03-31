@@ -566,7 +566,7 @@ export class Game {
 
         
         <div id="table_cards_container" class="cards-container hidden">
-          <div class="title">${_("Set played")}</div>
+          <div class="title">${_("Set created")}</div>
           <div id="table_cards" class="cards"></div>
         </div> 
 

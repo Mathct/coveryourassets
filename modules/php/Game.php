@@ -62,7 +62,9 @@ class Game extends \Bga\GameFramework\Table
         $this->initGameStateLabels([
 
             // GSV
-            //"variable" => 10,
+            "challenge" => 10,
+            "attaquant" => 11,
+            "defenseur" => 12,
 
             // options
             //'game_mode'            => 100,
@@ -112,7 +114,9 @@ class Game extends \Bga\GameFramework\Table
     {
 
         //gsv
-        //$this->setGameStateInitialValue("variable", 0);
+        $this->setGameStateInitialValue("challenge", 0);
+        $this->setGameStateInitialValue("attaquant", 0);
+        $this->setGameStateInitialValue("defenseur", 0);
 
 
         
