@@ -309,18 +309,19 @@ class Game extends \Bga\GameFramework\Table
         foreach ($players as $player)
         {
             $sets = self::getObjectListFromDB( "SELECT `card_id` `id`, `card_type` `type`, `card_type_arg` `type_arg`, `card_location` `location`, `card_location_arg` `location_arg`, `position` `position` FROM `cards` WHERE `card_location` ='set' AND `card_location_arg`='{$player}' AND position >= 1 ORDER BY position ASC, card_type ASC");
-            
-            
-
             foreach ($sets as $card) {
                 // On garde la première carte rencontrée par position
                 if (!isset($result['set'][$player][$card['position']])) {
                     $result['set'][$player][$card['position']] = $card;
                 }
             }
-
-            
         }
+
+        $result['challenge'] = $this->getGameStateValue("challenge");
+        $result['attaquant'] = $this->getGameStateValue("attaquant");
+        $result['defenseur'] = $this->getGameStateValue("defenseur");
+        $result['challenge_attack'] = self::getCollectionFromDB( "SELECT `card_id` `id`, `card_type` `type`, `card_type_arg` `type_arg`, `card_location` `location`, `card_location_arg` `location_arg`, `position` `position` FROM `cards` WHERE `card_location` ='challenge_attack' ORDER BY `position` ASC" );
+        $result['challenge_defense'] = self::getCollectionFromDB( "SELECT `card_id` `id`, `card_type` `type`, `card_type_arg` `type_arg`, `card_location` `location`, `card_location_arg` `location_arg`, `position` `position` FROM `cards` WHERE `card_location` ='challenge_defense' ORDER BY `position` ASC" );
 
 
 

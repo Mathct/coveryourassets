@@ -190,6 +190,17 @@ class NormalTurn {
               { color: "alert"},
             );
             break;
+
+            case "abandon_btn":
+            this.bga.statusBar.addActionButton(
+              _("Abandon"),
+              () =>
+                this.bga.actions.performAction("actButton", {
+                  arg1: key,
+                }),
+              { color: "alert"},
+            );
+            break;
           
           
         }
@@ -275,6 +286,11 @@ export class Game {
         this.table = gamedatas.table;
         this.discard = gamedatas.discard;
         this.sets = gamedatas.set;
+        this.challenge = gamedatas.challenge;
+        this.attaquant = gamedatas.attaquant;
+        this.defenseur = gamedatas.defenseur;
+        this.challenge_attack = gamedatas.challenge_attack;
+        this.challenge_defense = gamedatas.challenge_defense;
 
         this.players_order = gamedatas.players_ordered;
 
@@ -572,7 +588,10 @@ export class Game {
 
         <div id="challenge_cards_container" class="challenge_cards_container hidden">
           <div class="title">${_("Challenge")}</div>
-          
+          <div class="challenge_cards_detail">
+          <div id="challenge_cards_attack" class="challenge_cards"></div>
+          <div id="challenge_cards_defense" class="challenge_cards"></div>
+          </div>
         </div> 
                       
         <div id="hand_container" class="cards-container">
@@ -614,6 +633,10 @@ export class Game {
       this.setupStocks();
       this.setupDiscard();
       this.setupSet();
+
+      if(this.challenge == 1) {
+        this.setupChallenge();
+      }
 
     }
 
@@ -772,9 +795,61 @@ export class Game {
 
       }
 
-      
-      // if(sets[1] != null)
-      // console.warn(sets[1])
+    }
+
+    setupChallenge() {
+
+      const challenge_container = document.getElementById('challenge_cards_container');
+      challenge_container.classList.remove('hidden');
+
+      const challenge_attack = this.challenge_attack;
+      const challenge_defense = this.challenge_defense;
+
+      const challenge_attack_div = document.getElementById('challenge_cards_attack');
+      const challenge_defense_div = document.getElementById('challenge_cards_defense');
+
+      if(challenge_attack != null) {
+        challenge_attack_div.innerHTML = '';
+        const attackCards = Object.values(challenge_attack).sort(
+          (a, b) => Number(a.position) - Number(b.position),
+        );
+        attackCards.forEach(card => {
+          challenge_attack_div.innerHTML += `<div id="card_attack_${card.id}" class="challenge_card"></div>`;
+          const card_type = this.getStockCardType(card);
+          const card_div = document.getElementById(`card_attack_${card.id}`);
+          if(card_type <= 10) {
+            card_div.style.backgroundPosition = `-${(card_type-1) * 100}% 0%`;
+          }
+          else if(card_type == 11) {
+            card_div.style.backgroundPosition = `0% -100%`;
+          }
+          else if(card_type == 12) {
+            card_div.style.backgroundPosition = `-100% -100%`;
+          }
+        });
+
+      }
+
+      if(challenge_defense != null) {
+        challenge_defense_div.innerHTML = '';
+        const defenseCards = Object.values(challenge_defense).sort(
+          (a, b) => Number(a.position) - Number(b.position),
+        );
+        defenseCards.forEach(card => {
+          challenge_defense_div.innerHTML += `<div id="card_defense_${card.id}" class="challenge_card"></div>`;
+          const card_type = this.getStockCardType(card);
+          const card_div = document.getElementById(`card_defense_${card.id}`);
+          if(card_type <= 10) {
+            card_div.style.backgroundPosition = `-${(card_type-1) * 100}% 0%`;
+          }
+          else if(card_type == 11) {
+            card_div.style.backgroundPosition = `0% -100%`;
+          }
+          else if(card_type == 12) {
+            card_div.style.backgroundPosition = `-100% -100%`;
+          }
+        });
+      }
     }
 
     /*************************************************
@@ -923,4 +998,80 @@ export class Game {
           this.handStock.updateDisplay();
         }
     }
+
+    async notif_cardMoveChallengeAttack(args) {
+
+      const challenge_container = document.getElementById('challenge_cards_container');
+      challenge_container.classList.remove('hidden');
+
+      const card = args.card;
+      const targetDiv = document.getElementById('challenge_cards_attack');
+      const cardId = String(card.id);
+      const sourceId = `my_cards_item_${cardId}`;
+      const sourceEl = document.getElementById(sourceId);
+      const currentPlayerId = Number(this.bga.players.getCurrentPlayer().id);
+
+      if (sourceEl) {
+          const anim = this.bga.gameui.slideTemporaryObject(
+              sourceEl.outerHTML,
+              'game_play_area',
+              sourceId,
+              'challenge_cards_attack',
+              500,
+              0,
+          );
+          if (Number(card.location_arg) === currentPlayerId) {
+              this.handStock.removeFromStockById(cardId);
+          }
+          await anim.promise;
+      }
+
+      if (targetDiv) {
+          const attackCardId = `card_attack_${cardId}`;
+          let face = document.getElementById(attackCardId);
+          if (!face) {
+              face = document.createElement('div');
+              face.id = attackCardId;
+              targetDiv.appendChild(face);
+          }
+          this.applyCardFaceToElement(face, this.getStockCardType(card));
+      }
+    }
+
+    async notif_cardMoveChallengeDefense(args) {
+        const card = args.card;
+        const targetDiv = document.getElementById('challenge_cards_defense');
+        const cardId = String(card.id);
+        const sourceId = `my_cards_item_${cardId}`;
+        const sourceEl = document.getElementById(sourceId);
+        const currentPlayerId = Number(this.bga.players.getCurrentPlayer().id);
+
+        if (sourceEl) {
+            const anim = this.bga.gameui.slideTemporaryObject(
+                sourceEl.outerHTML,
+                'game_play_area',
+                sourceId,
+                'challenge_cards_defense',
+                500,
+                0,
+            );
+            if (Number(card.location_arg) === currentPlayerId) {
+                this.handStock.removeFromStockById(cardId);
+            }
+            await anim.promise;
+        }
+
+        if (targetDiv) {
+            const defenseCardId = `card_defense_${cardId}`;
+            let face = document.getElementById(defenseCardId);
+            if (!face) {
+                face = document.createElement('div');
+                face.id = defenseCardId;
+                targetDiv.appendChild(face);
+            }
+            this.applyCardFaceToElement(face, this.getStockCardType(card));
+        }
+    }
+
+    
 }

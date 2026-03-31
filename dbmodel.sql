@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS `cards` (
   `card_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `card_type` int(11) NOT NULL,
   `card_type_arg` int(11) NOT NULL,
-  `card_location` varchar(16) NOT NULL,
+  `card_location` varchar(25) NOT NULL,
   `card_location_arg` int(11) NOT NULL,
   `position` int(11) NOT NULL DEFAULT 0,
   `value` int(11) NOT NULL DEFAULT 0,

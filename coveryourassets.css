@@ -282,5 +282,52 @@
 
   margin-top: 20px;
   width: 100%;
-  height: 179px;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
+
+.challenge_cards_detail {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  width: 100%;
+  height: auto;
+}
+
+.challenge_cards {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  width: 40%;
+  height: 179px;
+  overflow: visible;
+}
+
+.challenge_cards > div {
+  width: 128px;
+  height: 179px;
+  background-image: url('img/Cards.png');
+  background-size: 1000% 200%;
+  box-shadow: 1px 2px 1px 1px rgba(0, 0, 0, 0.44);
+  border-radius: 5%;
+}
+
+.challenge_cards > div + div {
+  margin-left: -64px; /* chevauchement 50% */
+}
+
+.challenge_card{
+  width: 128px;
+  height: 179px;
+  background-image: url('img/Cards.png');
+  background-size: 1000% 200%;
+  box-shadow: 1px 2px 1px 1px rgba(0, 0, 0, 0.44);
+  border-radius: 5%;
+}
+
