@@ -366,6 +366,32 @@ export class Game {
         });
     }
 
+    attachToNewParentNoDestroy(mobile_in, new_parent_in, relation, place_position) 
+        {
+    
+            const mobile = $(mobile_in);
+            const new_parent = $(new_parent_in);
+
+            var src = dojo.position(mobile);
+            if (place_position)
+                mobile.style.position = place_position;
+            dojo.place(mobile, new_parent, relation);
+            mobile.offsetTop;//force re-flow
+            var tgt = dojo.position(mobile);
+            var box = dojo.marginBox(mobile);
+            var cbox = dojo.contentBox(mobile);
+            var left = box.l + src.x - tgt.x;
+            var top = box.t + src.y - tgt.y;
+
+            mobile.style.position = "absolute";
+            mobile.style.left = left + "px";
+            mobile.style.top = top + "px";
+            box.l += box.w - cbox.w;
+            box.t += box.h - cbox.h;
+            mobile.offsetTop;//force re-flow
+            return box;
+        }
+
 
     /*************************************************
    *
@@ -587,7 +613,7 @@ export class Game {
         </div> 
 
         <div id="challenge_cards_container" class="challenge_cards_container hidden">
-          <div class="title">${_("Challenge")}</div>
+          <div id="title_challenge" class="title"></div>
           <div class="challenge_cards_detail">
           <div id="challenge_cards_attack" class="challenge_cards"></div>
           <div id="challenge_cards_defense" class="challenge_cards"></div>
@@ -799,6 +825,14 @@ export class Game {
 
     setupChallenge() {
 
+      const title_challenge = document.getElementById('title_challenge');
+      const attaquant = this.attaquant;
+      const defenseur = this.defenseur;
+      const color_attaquant = this.players[attaquant].color;
+      const color_defenseur = this.players[defenseur].color;
+      const text = `<span style="color: #${color_attaquant};">${this.players[attaquant].name}</span> ${_("challenges")} <span style="color: #${color_defenseur};">${this.players[defenseur].name}</span>`;
+      title_challenge.innerHTML = `<div class="title">${text}</div>`;
+
       const challenge_container = document.getElementById('challenge_cards_container');
       challenge_container.classList.remove('hidden');
 
@@ -999,10 +1033,28 @@ export class Game {
         }
     }
 
-    async notif_cardMoveChallengeAttack(args) {
+    async notif_challengeShow(args) {
+
+      const title_challenge = document.getElementById('title_challenge');
+      const attaquant = args.attaquant;
+      const defenseur = args.defenseur;
+      const color_attaquant = this.players[attaquant].color;
+      const color_defenseur = this.players[defenseur].color;
+      const text = `<span style="color: #${color_attaquant};">${this.players[attaquant].name}</span> ${_("challenges")} <span style="color: #${color_defenseur};">${this.players[defenseur].name}</span>`; 
+      title_challenge.innerHTML = `<div class="title">${text}</div>`;
 
       const challenge_container = document.getElementById('challenge_cards_container');
       challenge_container.classList.remove('hidden');
+    }
+
+    async notif_challengeHide(args) {
+      const title_challenge = document.getElementById('title_challenge');
+      title_challenge.innerHTML = '';
+      const challenge_container = document.getElementById('challenge_cards_container');
+      challenge_container.classList.add('hidden');
+    }
+
+    async notif_cardMoveChallengeAttack(args) {
 
       const card = args.card;
       const targetDiv = document.getElementById('challenge_cards_attack');
@@ -1071,6 +1123,31 @@ export class Game {
             }
             this.applyCardFaceToElement(face, this.getStockCardType(card));
         }
+    }
+
+    async notif_challengeWinByDefense(args) {
+
+      const cards = args.cards;
+      const targetId = document.getElementById('set_'+args.winner).id;
+      for(const card of cards) {
+        if(card.location == 'challenge_attack') {
+          const enfant = document.getElementById('card_attack_'+card.id);
+          this.attachToNewParentNoDestroy( enfant.id, targetId);
+          this.bga.gameui.slideToObjectAndDestroy( enfant.id, targetId, 500, 0 );
+        }
+        else if(card.location == 'challenge_defense') {
+          const enfant = document.getElementById('card_defense_'+card.id);
+          this.attachToNewParentNoDestroy( enfant.id, targetId);
+          this.bga.gameui.slideToObjectAndDestroy( enfant.id, targetId, 500, 0 );
+        }
+      }
+
+      setTimeout(() => 
+      {
+        const challenge_container = document.getElementById('challenge_cards_container');
+        challenge_container.classList.add('hidden');
+               
+      }, "500");
     }
 
     
