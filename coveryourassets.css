@@ -325,3 +325,23 @@
   border-radius: 5%;
 }
 
+.deck-counter{
+  margin-top: 158px;
+  margin-left: 47px;
+  text-align: center;
+  font-weight: bold;
+  font-family: 'Garamond', 'Montserrat', 'Raleway', 'Segoe UI', Arial, sans-serif;
+  font-size: 20px;
+  border-radius: 50%;
+  background-color: white;
+  border: 1px solid black;
+  padding: 5px;
+  width: 25px;
+  height: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  
+}
+

@@ -31,7 +31,7 @@ class Game extends \Bga\GameFramework\Table
     public array $_BUILDING_CARD;
 
     // counters table
-    // public tableCounter $countertable;
+    public TableCounter $deck;
     
 
     // counters players
@@ -75,7 +75,7 @@ class Game extends \Bga\GameFramework\Table
 
 
         // counters
-        //$this->countertable = $this->counterFactory->createTableCounter('countertable');
+        $this->deck = $this->counterFactory->createTableCounter('deck');
        
         //$this->counterplayer = $this->counterFactory->createPlayerCounter('counterplayer');
        
@@ -118,11 +118,6 @@ class Game extends \Bga\GameFramework\Table
         $this->setGameStateInitialValue("attaquant", 0);
         $this->setGameStateInitialValue("defenseur", 0);
 
-
-        
-        //counters
-        //$this->countertable->initDb(1);
-        //$this->counterplayer->initDb(array_keys($players));
         
         // Set the colors of the players with HTML color code. The default below is red/green/blue/orange/brown. The
         // number of colors defined here must correspond to the maximum number of players allowed for the gams.
@@ -200,7 +195,15 @@ class Game extends \Bga\GameFramework\Table
         //mise en defausse de la premier carte du deck
         $this->cards_DB->pickCardForLocation('deck', 'discard', 0);
 
-        
+        $count_deck = count($this->getObjectListFromDB( "SELECT `card_id` `id` FROM cards WHERE card_location = 'deck'", true ));
+
+        //counters
+        $this->deck->initDb($count_deck);
+        //$this->counterplayer->initDb(array_keys($players));
+
+
+
+
         
         // Init global values with their initial values.
 
@@ -326,7 +329,7 @@ class Game extends \Bga\GameFramework\Table
 
 
         //counters
-        //$this->deck_1->fillResult($result);
+        $this->deck->fillResult($result);
         //$this->player_ghosts->fillResult($result);
         
 

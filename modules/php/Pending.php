@@ -195,9 +195,11 @@ class Pending extends Game
             if($count_deck > 0) {
                 if($count_deck >= 2) {
                     $newcards = $g->cards_DB->pickCards(2, 'deck', $this->player_id);
+                    $g->deck->inc(-2);
                 }
                 if($count_deck == 1) {
-                    $newcards = $g->cards_DB->pickCard('deck', $this->player_id);
+                    $newcards = $g->cards_DB->pickCards(1, 'deck', $this->player_id);
+                    $g->deck->inc(-1);
                 }
 
                 $g->notify->player(
@@ -257,6 +259,8 @@ class Pending extends Game
                         'cards' => $newcards,
                     ]
                 );
+
+                $g->deck->inc(-1);
             }
 
             $g->addPendingFirst($this->player_id, "PlayerTurn");
@@ -664,9 +668,69 @@ class Pending extends Game
                 ]
             );
 
-            
-
         }
+
+        $count_hand_attaquant = count($g->getObjectListFromDB( "SELECT `card_id` `id` FROM cards WHERE card_location = 'hand' AND card_location_arg = '{$attaquant}'", true ));
+        $count_hand_defenseur = count($g->getObjectListFromDB( "SELECT `card_id` `id` FROM cards WHERE card_location = 'hand' AND card_location_arg = '{$defenseur}'", true ));
+        $draw_attaquant = 5 - $count_hand_attaquant;
+        $draw_defenseur = 5 - $count_hand_defenseur;
+
+        $count_deck = count($g->getObjectListFromDB( "SELECT `card_id` `id` FROM cards WHERE card_location = 'deck'", true ));
+        $draw = 0;
+
+        if(($draw_attaquant < 5)&&($count_deck >= 1))
+        {
+            if($count_deck >= $draw_attaquant)
+            {
+                $draw = $draw_attaquant;
+            }
+            else
+            {
+                $draw = $count_deck;
+            }
+
+            $newcards = $g->cards_DB->pickCards($draw,'deck', $attaquant);
+            $g->notify->player(
+                $attaquant,
+                "drawCards",
+                '',
+                [
+                    'player_id' => $attaquant,
+                    'cards' => $newcards,
+                ]
+            );
+
+            $g->deck->inc(-$draw);
+        }
+
+        $count_deck = count($g->getObjectListFromDB( "SELECT `card_id` `id` FROM cards WHERE card_location = 'deck'", true ));
+        $draw = 0;
+
+        if(($draw_defenseur < 5)&&($count_deck >= 1))
+        {
+            if($count_deck >= $draw_defenseur)
+            {
+                $draw = $draw_defenseur;
+            }
+            else
+            {
+                $draw = $count_deck;
+            }
+
+            $newcards = $g->cards_DB->pickCards($draw,'deck', $defenseur);
+            $g->notify->player(
+                $defenseur,
+                "drawCards",
+                '',
+                [
+                    'player_id' => $defenseur,
+                    'cards' => $newcards,
+                ]
+            );
+
+            $g->deck->inc(-$draw);
+        }
+
 
         $g->setGameStateValue("attaquant", 0);
         $g->setGameStateValue("defenseur", 0);

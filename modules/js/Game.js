@@ -297,6 +297,8 @@ export class Game {
         this.setupPlayersPannel();
         this.setupBoard();
 
+        this.setupCounters();
+
         this.connections = [];
         this.connectionsMulti = [];
         
@@ -587,73 +589,132 @@ export class Game {
 
     }
 
-    setupBoard() {  
-      const player_id = this.bga.players.getCurrentPlayer().id;
+    setupBoard() {
+      
+      /* MODE PLAYER*/
+      if(!this.bga.players.isCurrentPlayerSpectator())
+      {
+        const player_id = this.bga.players.getCurrentPlayer().id;
+              
+        const gameBoardHTML = `
+          <div id="board_id">
 
-            
-      const gameBoardHTML = `
-        <div id="board_id">
+          
 
-        
+          <div id="deck_discard_container" class="deck-discard-container">
+            <div id="deck_container" class="deck-container">
+            <div id="deck-counter" class="deck-counter"></div>
+            </div>
 
-        <div id="deck_discard_container" class="deck-discard-container">
-          <div id="deck_container" class="deck-container">
-            <div id="deck_cards" class="cards"></div>
+            <div id="discard_container" class="discard-container">
+              <div id="discard_card" class="discard_card"></div>
+            </div>
+          </div>
+          
+
+          
+          <div id="table_cards_container" class="cards-container hidden">
+            <div class="title">${_("Set created")}</div>
+            <div id="table_cards" class="cards"></div>
+          </div> 
+
+          <div id="challenge_cards_container" class="challenge_cards_container hidden">
+            <div id="title_challenge" class="title"></div>
+            <div class="challenge_cards_detail">
+            <div id="challenge_cards_attack" class="challenge_cards"></div>
+            <div id="challenge_cards_defense" class="challenge_cards"></div>
+            </div>
+          </div> 
+                        
+          <div id="hand_container" class="cards-container">
+            <div class="title" id="my_cards_title">${_("My hand")}</div>
+            <div id="my_cards" class="cards"></div>
           </div>
 
-          <div id="discard_container" class="discard-container">
-            <div id="discard_card" class="discard_card"></div>
+          
+          <div id="set_my_container" class="set-my-container">
+            <div id="set_${player_id}" class="set">
+              <div id="set_cards_impaire_${player_id}" class="set-cards-impaire"></div>
+              <div id="set_cards_paire_${player_id}" class="set-cards-paire"></div>
+            </div>
           </div>
-        </div>
 
-        
-        <div id="table_cards_container" class="cards-container hidden">
-          <div class="title">${_("Set created")}</div>
-          <div id="table_cards" class="cards"></div>
-        </div> 
-
-        <div id="challenge_cards_container" class="challenge_cards_container hidden">
-          <div id="title_challenge" class="title"></div>
-          <div class="challenge_cards_detail">
-          <div id="challenge_cards_attack" class="challenge_cards"></div>
-          <div id="challenge_cards_defense" class="challenge_cards"></div>
+          <div id="set_opponent_container" class="set-opponent-container"></div>
+          
           </div>
-        </div> 
-                      
-        <div id="hand_container" class="cards-container">
-          <div class="title" id="my_cards_title">${_("My hand")}</div>
-          <div id="my_cards" class="cards"></div>
-        </div>
 
-        
-        <div id="set_my_container" class="set-my-container">
-          <div id="set_${player_id}" class="set">
-            <div id="set_cards_impaire_${player_id}" class="set-cards-impaire"></div>
-            <div id="set_cards_paire_${player_id}" class="set-cards-paire"></div>
-          </div>
-        </div>
+          
+        `;
 
-        <div id="set_opponent_container" class="set-opponent-container"></div>
-        
-        </div>
+        // Injecte le board
+        document.getElementById("game_play_area").insertAdjacentHTML("beforeend", gameBoardHTML);
 
-        
-      `;
-
-      // Injecte le board
-      document.getElementById("game_play_area").insertAdjacentHTML("beforeend", gameBoardHTML);
-
-      for(const player of this.players_order) {
-        const set_container = document.getElementById(`set_opponent_container`);
-        if(player.id != player_id) {
-          set_container.insertAdjacentHTML("beforeend", `
-            <div id="set_${player.id}" class="set">
-            <div id="set_cards_impaire_${player.id}" class="set-cards-impaire"></div>
-            <div id="set_cards_paire_${player.id}" class="set-cards-paire"></div>
-          </div>
-        `);
+        for(const player of this.players_order) {
+          const set_container = document.getElementById(`set_opponent_container`);
+          if(player.id != player_id) {
+            set_container.insertAdjacentHTML("beforeend", `
+              <div id="set_${player.id}" class="set">
+              <div id="set_cards_impaire_${player.id}" class="set-cards-impaire"></div>
+              <div id="set_cards_paire_${player.id}" class="set-cards-paire"></div>
+            </div>
+          `);
+          }
         }
+
       }
+
+      /* MODE SPECTATOR*/
+      else {
+
+        const gameBoardHTML = `
+          <div id="board_id">
+ 
+          <div id="deck_discard_container" class="deck-discard-container">
+            <div id="deck_container" class="deck-container">
+            <div id="deck-counter" class="deck-counter"></div>
+            </div>
+
+            <div id="discard_container" class="discard-container">
+              <div id="discard_card" class="discard_card"></div>
+            </div>
+          </div>
+          
+          <div id="table_cards_container" class="cards-container hidden">
+            <div class="title">${_("Set created")}</div>
+            <div id="table_cards" class="cards"></div>
+          </div> 
+
+          <div id="challenge_cards_container" class="challenge_cards_container hidden">
+            <div id="title_challenge" class="title"></div>
+            <div class="challenge_cards_detail">
+            <div id="challenge_cards_attack" class="challenge_cards"></div>
+            <div id="challenge_cards_defense" class="challenge_cards"></div>
+            </div>
+          </div> 
+                        
+          <div id="set_opponent_container" class="set-opponent-container"></div>
+          
+          </div>
+
+        `;
+
+        // Injecte le board
+        document.getElementById("game_play_area").insertAdjacentHTML("beforeend", gameBoardHTML);
+
+        for(const player of this.players_order) {
+          const set_container = document.getElementById(`set_opponent_container`);
+          
+            set_container.insertAdjacentHTML("beforeend", `
+              <div id="set_${player.id}" class="set">
+              <div id="set_cards_impaire_${player.id}" class="set-cards-impaire"></div>
+              <div id="set_cards_paire_${player.id}" class="set-cards-paire"></div>
+            </div>
+          `);
+          
+        }
+
+      }
+    
 
 
       this.setupStocks();
@@ -665,6 +726,18 @@ export class Game {
       }
 
     }
+
+    setupCounters() {
+
+      const counter = new ebg.counter();
+      counter.create(
+          `deck-counter`, 
+          { value: this.gamedatas.deck, tableCounter: 'deck' }
+      );
+
+    }
+
+    
 
 
 
@@ -711,17 +784,20 @@ export class Game {
     
     setupStocks() {
 
-    // Stock pour la main du joueur
-    this.handStock = this.createStockForCards($('my_cards'));
-    this.handStock.setSelectionMode(0);
-    this.handStock.centerItems = false;
-    this.handStock.autowidth = true;
-    this.handStock.setOverlap(0, 0);
-    this.handStock.item_margin = 12;
-    this.handStock.use_vertical_overlap_as_offset = false;
-    this.handStock.vertical_overlap = -5;
-    for( var card_id = 1; card_id <= 15; card_id++) {
-        this.handStock.addItemType(card_id, card_id, g_gamethemeurl + 'img/Cards.png', card_id-1);
+    if(!this.bga.players.isCurrentPlayerSpectator())
+    {
+      // Stock pour la main du joueur
+      this.handStock = this.createStockForCards($('my_cards'));
+      this.handStock.setSelectionMode(0);
+      this.handStock.centerItems = false;
+      this.handStock.autowidth = true;
+      this.handStock.setOverlap(0, 0);
+      this.handStock.item_margin = 12;
+      this.handStock.use_vertical_overlap_as_offset = false;
+      this.handStock.vertical_overlap = -5;
+      for( var card_id = 1; card_id <= 15; card_id++) {
+          this.handStock.addItemType(card_id, card_id, g_gamethemeurl + 'img/Cards.png', card_id-1);
+      }
     }
 
 
@@ -739,14 +815,16 @@ export class Game {
     }
 
 
-    
-    // Cards in player's hand
-    Object.values(this.my_hand).forEach( card =>
+    if(!this.bga.players.isCurrentPlayerSpectator())
     {
-        const card_type = this.getStockCardType(card);
-        this.handStock.addToStockWithId(card_type, card.id);
-    } );
-    this.handStock.updateDisplay();
+      // Cards in player's hand
+      Object.values(this.my_hand).forEach( card =>
+      {
+          const card_type = this.getStockCardType(card);
+          this.handStock.addToStockWithId(card_type, card.id);
+      } );
+      this.handStock.updateDisplay();
+    }
 
 
     //Cards in table
@@ -912,9 +990,12 @@ export class Game {
 
         const container = document.getElementById('table_cards_container');
         container.classList.remove('hidden');
-        
+        let player_id = 0;
         const cards = args.cards;
-        const player_id = this.bga.players.getCurrentPlayer().id;
+
+        if(!this.bga.players.isCurrentPlayerSpectator()) {
+          player_id = this.bga.players.getCurrentPlayer().id;
+        }
         
         for (const card of cards) {
             
@@ -923,7 +1004,7 @@ export class Game {
             const card_type = this.getStockCardType(card);
             this.tableStock.addToStockWithId(card_type, card.id, div_id);
 
-            if (player_id == card.location_arg) {
+            if ((player_id == card.location_arg)&&(!this.bga.players.isCurrentPlayerSpectator())) {
                 this.handStock.removeFromStockById(card.id);
             }
         }
@@ -949,7 +1030,10 @@ export class Game {
     }
 
     async notif_cardsMovedToDiscard(args) {
-        const player_id = this.bga.players.getCurrentPlayer().id;
+        let player_id = 0;
+        if(!this.bga.players.isCurrentPlayerSpectator()) {
+          player_id = this.bga.players.getCurrentPlayer().id;
+        }
         const card_id = String(args.card.id);
         const cardDivId = 'my_cards_item_' + card_id;
         const card = document.getElementById(cardDivId);
@@ -958,7 +1042,7 @@ export class Game {
             card.style.outline = 'none';
         }
 
-        if (player_id == args.card.location_arg) {
+        if ((player_id == args.card.location_arg)&&(!this.bga.players.isCurrentPlayerSpectator())) {
             // Clone animé vers la défausse ; la main se met à jour dès le départ (le clone porte le visuel).
             if (card) {
                 const anim = this.bga.gameui.slideTemporaryObject(
@@ -1019,9 +1103,12 @@ export class Game {
 
       const card = args.card;
       const targetDiv = document.getElementById('challenge_cards_attack');
-      const currentPlayerId = Number(this.bga.players.getCurrentPlayer().id);
+      let currentPlayerId;
+      if(!this.bga.players.isCurrentPlayerSpectator()) {
+        currentPlayerId = Number(this.bga.players.getCurrentPlayer().id);
+      }
 
-      if (Number(card.location_arg) == currentPlayerId) {
+      if ((Number(card.location_arg) == currentPlayerId)&&(!this.bga.players.isCurrentPlayerSpectator())) {
 
         const sourceId = `my_cards_item_${card.id}`;
         const sourceEl = document.getElementById(sourceId);
@@ -1054,9 +1141,12 @@ export class Game {
     async notif_cardMoveChallengeDefense(args) {
       const card = args.card;
       const targetDiv = document.getElementById('challenge_cards_defense');
-      const currentPlayerId = Number(this.bga.players.getCurrentPlayer().id);
+      let currentPlayerId;
+      if(!this.bga.players.isCurrentPlayerSpectator()) {
+        currentPlayerId = Number(this.bga.players.getCurrentPlayer().id);
+      }
 
-      if (Number(card.location_arg) == currentPlayerId) {
+      if ((Number(card.location_arg) == currentPlayerId)&&(!this.bga.players.isCurrentPlayerSpectator())) {
 
         const sourceId = `my_cards_item_${card.id}`;
         const sourceEl = document.getElementById(sourceId);
