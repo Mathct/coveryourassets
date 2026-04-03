@@ -95,14 +95,6 @@
   cursor: pointer !important;
 }
 
-.card {
-    width: 128px;
-    height: 179px;
-    background-image: url('img/Cards.png');
-    background-size: 1000% 200%;
-    box-shadow: 1px 2px 1px 1px rgba(0, 0, 0, 0.44);
-    border-radius: 5%;
-}
 
 .cards-container {
   margin: 0px auto;
@@ -160,7 +152,7 @@
     position: absolute;
     background-image: url('img/Cards.png');
     background-size: 1000% 200%;
-    box-shadow: 1px 2px 1px 1px rgba(0, 0, 0, 0.44);
+    /* box-shadow: 1px 2px 1px 1px rgba(0, 0, 0, 0.44); */
     border-radius: 5%;
 }
 
@@ -191,7 +183,7 @@
   background-image: url('img/Cards.png');
   background-size: 1000% 200%;
   background-position: -500% -100%;
-  box-shadow: 1px 2px 1px 1px rgba(0, 0, 0, 0.44);
+  /* box-shadow: 1px 2px 1px 1px rgba(0, 0, 0, 0.44); */
   border-radius: 5%;
   
 }
@@ -208,7 +200,7 @@
   height: 179px;
   background-image: url('img/Cards.png');
   background-size: 1000% 200%;
-  box-shadow: 1px 2px 1px 1px rgba(0, 0, 0, 0.44);
+  /* box-shadow: 1px 2px 1px 1px rgba(0, 0, 0, 0.44); */
   border-radius: 5%;
 
 }
@@ -222,8 +214,18 @@
   
 }
 
+.set-opponent-container{
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  align-items: center;
+  width: 100%;
+  gap: 0 20px;
+  margin-top: 20px;
+}
+
 .set{
-  width: 210px;
+  width: 179px;
   height: 179px;
   position: relative;
 }
@@ -234,9 +236,22 @@
   height: 179px;
   border-radius: 5%;
   background-color: rgba(255, 0, 0, 0.2);
-  rotate: 90deg;
-  bottom: -25px;
-  left: 25px;
+  bottom: 0;
+  left: 0;
+  transform: rotate(-90deg) translateY(100%);
+  transform-origin: bottom left;
+}
+
+.card_paire{
+  bottom: 0;
+  right: 0;
+}
+
+.card_impaire{
+  bottom: 0;
+  left: 0;
+  transform: rotate(-90deg) translateY(100%);
+  transform-origin: bottom left;
 }
 
 .set-cards-paire{
@@ -249,33 +264,13 @@
   right: 0;
 }
 
-.set-opponent-container{
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  align-items: center;
-  width: 100%;
-  gap: 0 20px;
-  margin-top: 20px;
-}
-
-.card-paire {
-    width: 128px;
-    height: 179px;
-    background-image: url('img/Cards.png');
-    background-size: 1000% 200%;
-    box-shadow: 1px 2px 1px 1px rgba(0, 0, 0, 0.44);
-    border-radius: 5%;
-}
-
-.card-impaire {
-    width: 128px;
-    height: 179px;
-    background-image: url('img/Cards.png');
-    background-size: 1000% 200%;
-    box-shadow: -2px 1px 1px 1px rgba(0, 0, 0, 0.44);
-    border-radius: 5%;
-    rotate: -90deg;
+.card {
+  width: 128px;
+  height: 179px;
+  background-image: url('img/Cards.png');
+  background-size: 1000% 200%;
+  border-radius: 5%;
+  position: absolute;
 }
 
 .challenge_cards_container {
@@ -313,7 +308,7 @@
   height: 179px;
   background-image: url('img/Cards.png');
   background-size: 1000% 200%;
-  box-shadow: 1px 2px 1px 1px rgba(0, 0, 0, 0.44);
+  /* box-shadow: 1px 2px 1px 1px rgba(0, 0, 0, 0.44); */
   border-radius: 5%;
 }
 
@@ -326,7 +321,7 @@
   height: 179px;
   background-image: url('img/Cards.png');
   background-size: 1000% 200%;
-  box-shadow: 1px 2px 1px 1px rgba(0, 0, 0, 0.44);
+  /* box-shadow: 1px 2px 1px 1px rgba(0, 0, 0, 0.44); */
   border-radius: 5%;
 }
 

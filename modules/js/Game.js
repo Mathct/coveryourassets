@@ -781,46 +781,50 @@ export class Game {
 
     setupSet() {
       const sets = this.sets;
-      let emplacement = '';
-
+      
       if(sets != null)
         {
 
       Object.values(sets).forEach(set_players => {
       Object.values(set_players).forEach(set => {
 
-        
-
-        if (Number(set.position) % 2 === 0)
-        {
-          emplacement = document.getElementById('set_cards_paire_'+set.location_arg);
-          emplacement.classList.add('card-paire');
-        }
-        else
-        {
-          emplacement = document.getElementById('set_cards_impaire_'+set.location_arg);
-          emplacement.classList.add('card-impaire');
-        }
-        
-        
-        if(set.type <= 10) {
-        emplacement.style.backgroundPosition = `-${(set.type-1) * 100}% 0%`;
-        }
-        else if(set.type == 11) {
-          emplacement.style.backgroundPosition = `0% -100%`;
-        }
-        else if(set.type == 12) {
-          emplacement.style.backgroundPosition = `-100% -100%`;
-        }
-
-        emplacement.style.zIndex = set.position * 100;
-      
-        
+        this.addCardSet(set);
+ 
       })       
       });
 
       }
 
+    }
+
+    addCardSet(set) {
+
+      var zIndex = set.position * 100;
+      var position = '';
+
+      if(set.type <= 10) {
+        position = `-${(set.type-1) * 100}% 0%`;
+      }
+      else if(set.type == 11) {
+        position = `0% -100%`;
+      }
+      else if(set.type == 12) {
+        position = `-100% -100%`;
+      }
+
+      const emplacement = document.getElementById('set_'+set.location_arg).id;
+
+      if (Number(set.position) % 2 === 0)
+        {
+          const card = `<div id="set_card_${set.location_arg}_${set.position}" class="card card_paire" style="z-index: ${zIndex}; background-position: ${position};"></div>`;
+          dojo.place(card, emplacement);
+        }
+        else
+        {
+          const card = `<div id="set_card_${set.location_arg}_${set.position}" class="card card_impaire" style="z-index: ${zIndex}; background-position: ${position};"></div>`;
+          dojo.place(card, emplacement);
+        }
+      
     }
 
     setupChallenge() {
@@ -911,11 +915,9 @@ export class Game {
         
         const cards = args.cards;
         const player_id = this.bga.players.getCurrentPlayer().id;
-        let position = 0;
-
+        
         for (const card of cards) {
-            position = Number(card.position);
-
+            
             this.table[card.id] = card;
             const div_id = player_id == card.location_arg ? `my_cards_item_${card.id}` : undefined;
             const card_type = this.getStockCardType(card);
@@ -926,65 +928,24 @@ export class Game {
             }
         }
 
-        const actorId = Number(args.player_id);
-        // card.position vient du SELECT *avant* UPDATE PHP : faux pour le slot. Utiliser set_position (nouvel indice de set).
-        const setSlotPosition = Number(
-            args.set_position !== undefined && args.set_position !== null ? args.set_position : position,
-        );
-        const targetSetDivId =
-            setSlotPosition % 2 === 0
-                ? `set_cards_paire_${actorId}`
-                : `set_cards_impaire_${actorId}`;
-        const targetFallbackId = `set_${actorId}`;
-        const targetId =
-            document.getElementById(targetSetDivId) != null ? targetSetDivId : targetFallbackId;
-
-        await this.bga.gameui.wait(2500);
-
-        await Promise.all(
-            cards.map((card, i) => {
-                const tableItemId = `table_cards_item_${card.id}`;
-                const el = document.getElementById(tableItemId);
-                if (!el) {
-                    return Promise.resolve();
-                }
-                const html = el.outerHTML;
-                const anim = this.bga.gameui.slideTemporaryObject(
-                    html,
-                    "game_play_area",
-                    tableItemId,
-                    targetId,
-                    500,
-                    i * 150,
-                );
-                // Éviter double affichage : seul le clone animé reste visible.
-                el.style.opacity = "0";
-                el.style.visibility = "hidden";
-                el.style.pointerEvents = "none";
-                return anim.promise;
-            }),
-        );
-
-        const types = cards
-            .map((c) => this.getStockCardType(c))
-            .filter((t) => Number.isFinite(t) && t > 0);
-        const faceType = types.length ? Math.min(...types) : 0;
-        const emplacement =
-            document.getElementById(targetSetDivId) || document.getElementById(targetFallbackId);
-        this.applyCardFaceToElement(emplacement, faceType);
-        if (emplacement) {
-            emplacement.classList.add(setSlotPosition % 2 === 0 ? "card-paire" : "card-impaire");
-            emplacement.style.zIndex = String(setSlotPosition * 100);
-        }
+        await this.bga.gameui.wait(2000);
 
         for (const card of cards) {
-            this.tableStock.removeFromStockById(String(card.id));
-            delete this.table[card.id];
-        }
-        this.tableStock.updateDisplay();
+           const enfant = document.getElementById('table_cards_item_'+card.id);
+           const targetId = document.getElementById('set_'+card.location_arg).id;
+          this.attachToNewParentNoDestroy( enfant.id, targetId);
+          this.bga.gameui.slideToObjectAndDestroy( enfant.id, targetId, 500, 0 );
 
-        await this.bga.gameui.wait(250);
+          
+        }
+
+        await this.bga.gameui.wait(500);
+        this.tableStock.removeAll();
+        this.addCardSet(args.card_for_set)
         container.classList.add("hidden");
+       
+        await this.bga.gameui.wait(1000);
+
     }
 
     async notif_cardsMovedToDiscard(args) {
@@ -1058,71 +1019,68 @@ export class Game {
 
       const card = args.card;
       const targetDiv = document.getElementById('challenge_cards_attack');
-      const cardId = String(card.id);
-      const sourceId = `my_cards_item_${cardId}`;
-      const sourceEl = document.getElementById(sourceId);
       const currentPlayerId = Number(this.bga.players.getCurrentPlayer().id);
 
-      if (sourceEl) {
-          const anim = this.bga.gameui.slideTemporaryObject(
-              sourceEl.outerHTML,
-              'game_play_area',
-              sourceId,
-              'challenge_cards_attack',
-              500,
-              0,
-          );
-          if (Number(card.location_arg) === currentPlayerId) {
-              this.handStock.removeFromStockById(cardId);
-          }
-          await anim.promise;
+      if (Number(card.location_arg) == currentPlayerId) {
+
+        const sourceId = `my_cards_item_${card.id}`;
+        const sourceEl = document.getElementById(sourceId);
+        sourceEl.classList.remove('selectable');
+        this.handStock.removeFromStockById(card.id, targetDiv.id);
+    
       }
 
-      if (targetDiv) {
-          const attackCardId = `card_attack_${cardId}`;
-          let face = document.getElementById(attackCardId);
-          if (!face) {
-              face = document.createElement('div');
-              face.id = attackCardId;
-              targetDiv.appendChild(face);
-          }
-          this.applyCardFaceToElement(face, this.getStockCardType(card));
-      }
+      setTimeout(() => 
+      {
+        targetDiv.innerHTML += `<div id="card_attack_${card.id}" class="challenge_card"></div>`;
+        const card_type = this.getStockCardType(card);
+        const card_div = document.getElementById(`card_attack_${card.id}`);
+        if(card_type <= 10) {
+          card_div.style.backgroundPosition = `-${(card_type-1) * 100}% 0%`;
+        }
+        else if(card_type == 11) {
+          card_div.style.backgroundPosition = `0% -100%`;
+        }
+        else if(card_type == 12) {
+          card_div.style.backgroundPosition = `-100% -100%`;
+        }
+                    
+      }, "500");
+
+
+      
     }
 
     async notif_cardMoveChallengeDefense(args) {
-        const card = args.card;
-        const targetDiv = document.getElementById('challenge_cards_defense');
-        const cardId = String(card.id);
-        const sourceId = `my_cards_item_${cardId}`;
+      const card = args.card;
+      const targetDiv = document.getElementById('challenge_cards_defense');
+      const currentPlayerId = Number(this.bga.players.getCurrentPlayer().id);
+
+      if (Number(card.location_arg) == currentPlayerId) {
+
+        const sourceId = `my_cards_item_${card.id}`;
         const sourceEl = document.getElementById(sourceId);
-        const currentPlayerId = Number(this.bga.players.getCurrentPlayer().id);
+        sourceEl.classList.remove('selectable');
+        this.handStock.removeFromStockById(card.id, targetDiv.id);
+    
+      }
 
-        if (sourceEl) {
-            const anim = this.bga.gameui.slideTemporaryObject(
-                sourceEl.outerHTML,
-                'game_play_area',
-                sourceId,
-                'challenge_cards_defense',
-                500,
-                0,
-            );
-            if (Number(card.location_arg) === currentPlayerId) {
-                this.handStock.removeFromStockById(cardId);
-            }
-            await anim.promise;
+      setTimeout(() => 
+      {
+        targetDiv.innerHTML += `<div id="card_defense_${card.id}" class="challenge_card"></div>`;
+        const card_type = this.getStockCardType(card);
+        const card_div = document.getElementById(`card_defense_${card.id}`);
+        if(card_type <= 10) {
+          card_div.style.backgroundPosition = `-${(card_type-1) * 100}% 0%`;
         }
-
-        if (targetDiv) {
-            const defenseCardId = `card_defense_${cardId}`;
-            let face = document.getElementById(defenseCardId);
-            if (!face) {
-                face = document.createElement('div');
-                face.id = defenseCardId;
-                targetDiv.appendChild(face);
-            }
-            this.applyCardFaceToElement(face, this.getStockCardType(card));
+        else if(card_type == 11) {
+          card_div.style.backgroundPosition = `0% -100%`;
         }
+        else if(card_type == 12) {
+          card_div.style.backgroundPosition = `-100% -100%`;
+        }
+                    
+      }, "500");
     }
 
     async notif_challengeWinByDefense(args) {
@@ -1144,6 +1102,37 @@ export class Game {
 
       setTimeout(() => 
       {
+        const challenge_container = document.getElementById('challenge_cards_container');
+        challenge_container.classList.add('hidden');
+               
+      }, "500");
+    }
+
+    async notif_challengeWinByAttack(args) {
+
+      const cards = args.cards;
+      const targetId = document.getElementById('set_'+args.winner).id;
+      for(const card of cards) {
+        if(card.location == 'challenge_attack') {
+          const enfant = document.getElementById('card_attack_'+card.id);
+          this.attachToNewParentNoDestroy( enfant.id, targetId);
+          this.bga.gameui.slideToObjectAndDestroy( enfant.id, targetId, 500, 0 );
+        }
+        else if(card.location == 'challenge_defense') {
+          const enfant = document.getElementById('card_defense_'+card.id);
+          this.attachToNewParentNoDestroy( enfant.id, targetId);
+          this.bga.gameui.slideToObjectAndDestroy( enfant.id, targetId, 500, 0 );
+        }
+      }
+
+      const set_steal = document.getElementById('set_card_'+args.player_id+'_'+args.position_def);
+      this.attachToNewParentNoDestroy( set_steal.id, targetId);
+      this.bga.gameui.slideToObjectAndDestroy( set_steal.id, targetId, 500, 0 );
+
+
+      setTimeout(() => 
+      {
+        this.addCardSet(args.card_for_set);
         const challenge_container = document.getElementById('challenge_cards_container');
         challenge_container.classList.add('hidden');
                
