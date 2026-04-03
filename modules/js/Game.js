@@ -740,7 +740,7 @@ export class Game {
       Object.values(this.gamedatas.players).forEach((player) => {
         const hand_counter = new ebg.counter();
         hand_counter.create(`counter_hand_${player.id}`, {
-        value: this.gamedatas.nb_hand[player.id],
+        value: player.hand,
         playerCounter: "hand",
         playerId: player.id,
       });

@@ -326,13 +326,7 @@ class Game extends \Bga\GameFramework\Table
         $result['challenge_attack'] = self::getCollectionFromDB( "SELECT `card_id` `id`, `card_type` `type`, `card_type_arg` `type_arg`, `card_location` `location`, `card_location_arg` `location_arg`, `position` `position` FROM `cards` WHERE `card_location` ='challenge_attack' ORDER BY `position` ASC" );
         $result['challenge_defense'] = self::getCollectionFromDB( "SELECT `card_id` `id`, `card_type` `type`, `card_type_arg` `type_arg`, `card_location` `location`, `card_location_arg` `location_arg`, `position` `position` FROM `cards` WHERE `card_location` ='challenge_defense' ORDER BY `position` ASC" );
 
-        foreach ($players as $player)
-        {
-            $count_hand = count(self::getObjectListFromDB( "SELECT card_id FROM cards WHERE card_location ='hand' AND card_location_arg = '{$player}'", true ));
-            $result['nb_hand'][$player] = $count_hand;
-        }
-
-
+        
         //counters
         $this->deck->fillResult($result);
         $this->hand->fillResult($result);
