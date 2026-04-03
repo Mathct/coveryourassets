@@ -35,7 +35,7 @@ class Game extends \Bga\GameFramework\Table
     
 
     // counters players
-    //public playerCounter $counterplayer;
+    public playerCounter $hand;
     
     //databases decks
     public $cards_DB;
@@ -77,7 +77,7 @@ class Game extends \Bga\GameFramework\Table
         // counters
         $this->deck = $this->counterFactory->createTableCounter('deck');
        
-        //$this->counterplayer = $this->counterFactory->createPlayerCounter('counterplayer');
+        $this->hand = $this->counterFactory->createPlayerCounter('hand');
        
 
         // Deck db_card created with table card 
@@ -199,7 +199,7 @@ class Game extends \Bga\GameFramework\Table
 
         //counters
         $this->deck->initDb($count_deck);
-        //$this->counterplayer->initDb(array_keys($players));
+        $this->hand->initDb(array_keys($players), 5);
 
 
 
@@ -326,11 +326,16 @@ class Game extends \Bga\GameFramework\Table
         $result['challenge_attack'] = self::getCollectionFromDB( "SELECT `card_id` `id`, `card_type` `type`, `card_type_arg` `type_arg`, `card_location` `location`, `card_location_arg` `location_arg`, `position` `position` FROM `cards` WHERE `card_location` ='challenge_attack' ORDER BY `position` ASC" );
         $result['challenge_defense'] = self::getCollectionFromDB( "SELECT `card_id` `id`, `card_type` `type`, `card_type_arg` `type_arg`, `card_location` `location`, `card_location_arg` `location_arg`, `position` `position` FROM `cards` WHERE `card_location` ='challenge_defense' ORDER BY `position` ASC" );
 
+        foreach ($players as $player)
+        {
+            $count_hand = count(self::getObjectListFromDB( "SELECT card_id FROM cards WHERE card_location ='hand' AND card_location_arg = '{$player}'", true ));
+            $result['nb_hand'][$player] = $count_hand;
+        }
 
 
         //counters
         $this->deck->fillResult($result);
-        //$this->player_ghosts->fillResult($result);
+        $this->hand->fillResult($result);
         
 
         // TODO: Gather all information about current game situation (visible by player $current_player_id).

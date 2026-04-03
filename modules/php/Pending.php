@@ -51,8 +51,8 @@ class Pending extends Game
         $ret["selected"] = [];
         $ret["selectedmulti"] = [];
         $ret['buttons'] = [];
-        $ret['title'] = clienttranslate('${actplayer} must ...');
-        $ret['titleyou'] = clienttranslate('${you} must ...');
+        $ret['title'] = clienttranslate('${actplayer} must choose an action');
+        $ret['titleyou'] = clienttranslate('${you} must choose an action');
 
         $handCards = game::$instance->cards_DB->getCardsInLocation('hand', $this->player_id);
         $assetCounts = [];
@@ -200,6 +200,11 @@ class Pending extends Game
                 if($count_deck == 1) {
                     $newcards = $g->cards_DB->pickCards(1, 'deck', $this->player_id);
                     $g->deck->inc(-1);
+                    $g->hand->inc($this->player_id, -1);
+                }
+                if($count_deck == 0) {
+                  
+                    $g->hand->inc($this->player_id, -2);
                 }
 
                 $g->notify->player(
@@ -263,6 +268,10 @@ class Pending extends Game
                 $g->deck->inc(-1);
             }
 
+            else {
+                $g->hand->inc($this->player_id, -1);
+            }
+
             $g->addPendingFirst($this->player_id, "PlayerTurn");
         }
 
@@ -284,8 +293,8 @@ class Pending extends Game
         $ret["selected"] = [];
         $ret["selectedmulti"] = [];
         $ret['buttons'] = [];
-        $ret['title'] = clienttranslate('${actplayer} must ...');
-        $ret['titleyou'] = clienttranslate('${you} must ...');
+        $ret['title'] = clienttranslate('${actplayer} must choose an action');
+        $ret['titleyou'] = clienttranslate('Challenge: ${you} must choose an opponent');
 
         $handCards = game::$instance->cards_DB->getCardsInLocation('hand', $this->player_id);
         
@@ -376,8 +385,8 @@ class Pending extends Game
         $ret["selected"] = [];
         $ret["selectedmulti"] = [];
         $ret['buttons'] = [];
-        $ret['title'] = clienttranslate('${actplayer} must ...');
-        $ret['titleyou'] = clienttranslate('${you} must ...');
+        $ret['title'] = clienttranslate('${actplayer} must choose an action');
+        $ret['titleyou'] = clienttranslate('Challenge: ${you} must choose a card');
 
         $handCards = game::$instance->cards_DB->getCardsInLocation('hand', $this->player_id);
         $opponent = explode('_', $parg1)[1];
@@ -464,7 +473,7 @@ class Pending extends Game
                 ]
             );
 
-
+            $g->hand->inc($this->player_id, -1);
             $g->addPending($opponent, "ChallengeStep3");
         }
 
@@ -482,8 +491,8 @@ class Pending extends Game
         $ret["selected"] = [];
         $ret["selectedmulti"] = [];
         $ret['buttons'] = [];
-        $ret['title'] = clienttranslate('${actplayer} must ...');
-        $ret['titleyou'] = clienttranslate('${you} must ...');
+        $ret['title'] = clienttranslate('${actplayer} must respond to the Challenge');
+        
 
         $attaquant = game::$instance->getGameStateValue("attaquant");
         $defenseur = game::$instance->getGameStateValue("defenseur");
@@ -513,6 +522,15 @@ class Pending extends Game
             {
                 $ret["selectable"][] = 'my_cards_item_'.$handCard['id'];
             }
+        }
+
+        if(count($ret["selectable"]) != null)
+        {
+            $ret['titleyou'] = clienttranslate('Challenge: ${you} must choose a card OR');
+        }
+
+        else {
+            $ret['titleyou'] = clienttranslate('Challenge: ${you} must');
         }
      
         $ret['buttons'][] = 'abandon_btn';
@@ -554,6 +572,7 @@ class Pending extends Game
                     'card' => $card,
                 ]
             );
+            $g->hand->inc($this->player_id, -1);
             $g->addPending($defenseur, "ChallengeStep3");
         }
 
@@ -572,6 +591,7 @@ class Pending extends Game
                     'card' => $card,
                 ]
             );
+            $g->hand->inc($this->player_id, -1);
             $g->addPending($attaquant, "ChallengeStep3");
         }
 
@@ -590,13 +610,10 @@ class Pending extends Game
         $ret["selected"] = [];
         $ret["selectedmulti"] = [];
         $ret['buttons'] = [];
-        $ret['title'] = clienttranslate('${actplayer} must ...');
-        $ret['titleyou'] = clienttranslate('${you} must ...');
+        $ret['title'] = clienttranslate('');
+        $ret['titleyou'] = clienttranslate('');
 
-           
-        
-     
-        $ret['buttons'][] = 'yes_btn';
+    
     
         return $ret;
     }
@@ -700,6 +717,7 @@ class Pending extends Game
                 ]
             );
 
+            $g->hand->inc($attaquant, $draw);
             $g->deck->inc(-$draw);
         }
 
@@ -728,6 +746,7 @@ class Pending extends Game
                 ]
             );
 
+            $g->hand->inc($defenseur, $draw);
             $g->deck->inc(-$draw);
         }
 

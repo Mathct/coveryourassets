@@ -193,7 +193,7 @@ class NormalTurn {
 
             case "abandon_btn":
             this.bga.statusBar.addActionButton(
-              _("Abandon"),
+              _("Abandon the challenge"),
               () =>
                 this.bga.actions.performAction("actButton", {
                   arg1: key,
@@ -580,8 +580,9 @@ export class Game {
         this.bga.playerPanels.getElement(player.id).insertAdjacentHTML(
             "beforeend",
             `
-            <div>
-
+            <div class="hand_card_pannel">
+              <div class="hand_card_pannel_image"></div>
+              <div id="counter_hand_${player.id}" class="counter_hand"></div>
             </div>
             `,
         );
@@ -734,6 +735,17 @@ export class Game {
           `deck-counter`, 
           { value: this.gamedatas.deck, tableCounter: 'deck' }
       );
+
+
+      Object.values(this.gamedatas.players).forEach((player) => {
+        const hand_counter = new ebg.counter();
+        hand_counter.create(`counter_hand_${player.id}`, {
+        value: this.gamedatas.nb_hand[player.id],
+        playerCounter: "hand",
+        playerId: player.id,
+      });
+      });
+
 
     }
 
