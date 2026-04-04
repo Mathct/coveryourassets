@@ -1,1 +1,58 @@
-{}
+{
+
+    "100": {
+        "name": "Game Mode",
+        "values": {
+            "1": {
+                "name": "Normal", 
+                "tmdisplay": "Normal", 
+                "description": "Play with the normal rules"
+            },
+
+            "2": {
+                "name": "Advanced", 
+                "tmdisplay": "Advanced", 
+                "description": "Play with advanced rules"
+            }   
+                
+        },
+        
+        
+        "default": 1
+              
+    },
+
+    "101": {
+        "name": "Winning Conditions",
+        "values": {
+            "1": {
+                "name": "Classic Game", 
+                "tmdisplay": "Classic Game", 
+                "description": "Play as many rounds as required for a player to pass $1,000,000 total. That player wins."
+            },
+
+            "2": {
+                "name": "Quick Game", 
+                "tmdisplay": "Quick Game", 
+                "description": " The player with the highest score at the end of one round wins."
+            },
+    
+            "3": {
+                "name": "Highest score after 3 rounds", 
+                "tmdisplay": "Highest score after 3 rounds", 
+                "description": "After 3 rounds, the highest score wins."
+            },
+
+            "4": {
+                "name": "First to win 2 rounds", 
+                "tmdisplay": "First to win 2 rounds", 
+                "description": "The first player to win 2 rounds wins."
+            }
+
+        },
+        
+        
+        "default": 1
+              
+    }
+}

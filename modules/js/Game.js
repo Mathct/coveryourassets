@@ -651,6 +651,7 @@ export class Game {
           </div> 
 
           <div id="challenge_cards_container" class="challenge_cards_container hidden">
+            <div class="title">- ${_("CHALLENGE")} -</div>
             <div id="title_challenge" class="title"></div>
             <div class="challenge_cards_detail">
             <div id="challenge_cards_attack" class="challenge_cards"></div>
@@ -954,7 +955,7 @@ export class Game {
       const defenseur = this.defenseur;
       const color_attaquant = this.players[attaquant].color;
       const color_defenseur = this.players[defenseur].color;
-      const text = `<span style="color: #${color_attaquant};">${this.players[attaquant].name}</span> ${_("challenges")} <span style="color: #${color_defenseur};">${this.players[defenseur].name}</span>`;
+      const text = `<span style="color: #${color_attaquant};">${this.players[attaquant].name}</span> ${_("vs")} <span style="color: #${color_defenseur};">${this.players[defenseur].name}</span>`;
       title_challenge.innerHTML = `<div class="title">${text}</div>`;
 
       const challenge_container = document.getElementById('challenge_cards_container');
@@ -1127,7 +1128,7 @@ export class Game {
       const defenseur = args.defenseur;
       const color_attaquant = this.players[attaquant].color;
       const color_defenseur = this.players[defenseur].color;
-      const text = `<span style="color: #${color_attaquant};">${this.players[attaquant].name}</span> ${_("challenges")} <span style="color: #${color_defenseur};">${this.players[defenseur].name}</span>`; 
+      const text = `<span style="color: #${color_attaquant};">${this.players[attaquant].name}</span> ${_("vs")} <span style="color: #${color_defenseur};">${this.players[defenseur].name}</span>`; 
       title_challenge.innerHTML = `<div class="title">${text}</div>`;
 
       const challenge_container = document.getElementById('challenge_cards_container');

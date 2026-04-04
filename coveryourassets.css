@@ -122,6 +122,9 @@
   margin-left: 0;
   margin-right: 0;
   width: 100%;
+  background-color: rgba(255, 255, 255, 0.486);
+  border-radius: 20px;
+  border: 2px solid black;
 }
 
 .title {
@@ -295,13 +298,17 @@
 
 .challenge_cards_container {
 
-  margin-top: 40px;
+  margin-top: 20px;
   width: 100%;
   height: auto;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  background-color: rgba(255, 255, 255, 0.486);
+  border-radius: 20px;
+  border: 2px solid black;
+  padding-bottom: 20px;
 }
 
 .challenge_cards_detail {

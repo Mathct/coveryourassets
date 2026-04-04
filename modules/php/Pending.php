@@ -30,6 +30,38 @@ class Pending extends Game
 
         /// PREFERENCE DE CONFIRMATION
         //$this->player_pref_confirm = game::$instance->userPreferences->get($this->player_id, 100);
+
+        /// GAME MODE (Normal / Advanced)
+        if(game::$instance->getGameStateValue('game_mode') == 1)
+        {
+            $this->game_mode = 1;
+        }
+
+        if(game::$instance->getGameStateValue('game_mode') == 2)
+        {
+            $this->game_mode = 2;
+        }
+
+        /// WINNING CONDITION
+        if(game::$instance->getGameStateValue('winning_condition') == 1)
+        {
+            $this->winning_condition = 1;
+        }
+
+        if(game::$instance->getGameStateValue('winning_condition') == 2)
+        {
+            $this->winning_condition = 2;
+        }
+
+        if(game::$instance->getGameStateValue('winning_condition') == 3)
+        {
+            $this->winning_condition = 3;
+        }
+
+        if(game::$instance->getGameStateValue('winning_condition') == 4)
+        {
+            $this->winning_condition = 4;
+        }
     }
 
     /*

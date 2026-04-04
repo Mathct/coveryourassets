@@ -67,7 +67,8 @@ class Game extends \Bga\GameFramework\Table
             "defenseur" => 12,
 
             // options
-            //'game_mode'            => 100,
+            'game_mode'            => 100,
+            'winning_condition'            => 101,
 
         ]); // mandatory, even if the array is empty
 
