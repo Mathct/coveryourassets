@@ -736,6 +736,7 @@ export class Game {
           
             set_container.insertAdjacentHTML("beforeend", `
               <div id="set_${player.id}" class="set">
+              <div class="title title_name_set" style="color: #${player.color};">${player.name}</div>
               <div id="set_cards_impaire_${player.id}" class="set-cards-impaire"></div>
               <div id="set_cards_paire_${player.id}" class="set-cards-paire"></div>
             </div>
