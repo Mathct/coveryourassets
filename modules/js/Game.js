@@ -43,12 +43,19 @@ class NormalTurn {
 
       this.possibles = [];
       this.possiblesMulti = [];
+
+      console.log(this.game.players)
                       
       // selectable
       if (Array.isArray(args.selectable) && args.selectable.length > 0) {
         args.selectable.forEach((sid) => {
           this.game.safeClass(sid, "add", "selectable");
           this.possibles.push(sid);
+          let split = sid.split('_');
+          if(split[0] == 'set')
+          {
+            this.game.safeClass(sid, "add", "selectable_"+this.game.players[split[1]].color);
+          }
         });
       }
 
@@ -56,6 +63,11 @@ class NormalTurn {
       if (Array.isArray(args.selected) && args.selected.length > 0) {
         args.selected.forEach((sid) => {
           this.game.safeClass(sid, "add", "selected");
+          let split = sid.split('_');
+          if(split[0] == 'set')
+          {
+            this.game.safeClass(sid, "add", "selected_"+this.game.players[split[1]].color);
+          }
         });
       }
 
@@ -221,6 +233,18 @@ class NormalTurn {
         this.game.safeClass(".selectablemulti", "remove", "selectablemulti");
         this.game.safeClass(".selected", "remove", "selected");
         this.game.safeClass(".selectedmulti", "remove", "selectedmulti");
+        this.game.safeClass(".selectable_ff0000", "remove", "selectable_ff0000");
+        this.game.safeClass(".selectable_008000", "remove", "selectable_008000");
+        this.game.safeClass(".selectable_0000ff", "remove", "selectable_0000ff");
+        this.game.safeClass(".selectable_ffa500", "remove", "selectable_ffa500");
+        this.game.safeClass(".selectable_e94190", "remove", "selectable_e94190");
+        this.game.safeClass(".selectable_982fff", "remove", "selectable_982fff");
+        this.game.safeClass(".selected_ff0000", "remove", "selected_ff0000");
+        this.game.safeClass(".selected_008000", "remove", "selected_008000");
+        this.game.safeClass(".selected_0000ff", "remove", "selected_0000ff");
+        this.game.safeClass(".selected_ffa500", "remove", "selected_ffa500");
+        this.game.safeClass(".selected_e94190", "remove", "selected_e94190");
+        this.game.safeClass(".selected_982fff", "remove", "selected_982fff");
         this.game.removeConnections();
     }
 
@@ -596,9 +620,10 @@ export class Game {
       if(!this.bga.players.isCurrentPlayerSpectator())
       {
         const player_id = this.bga.players.getCurrentPlayer().id;
+        const color = this.bga.players.getCurrentPlayer().color;
               
         const gameBoardHTML = `
-          <div id="board_id">
+        <div id="board_id">
 
           
 
@@ -612,8 +637,14 @@ export class Game {
             </div>
           </div>
           
-
+       
           
+                        
+          <div id="hand_container" class="cards-container" style="border: 2px solid #${color};">
+            <div class="title" id="my_cards_title" style="color: #${color};">${_("My hand")}</div>
+            <div id="my_cards" class="cards"></div>
+          </div>
+
           <div id="table_cards_container" class="cards-container hidden">
             <div class="title">${_("Set created")}</div>
             <div id="table_cards" class="cards"></div>
@@ -626,23 +657,20 @@ export class Game {
             <div id="challenge_cards_defense" class="challenge_cards"></div>
             </div>
           </div> 
-                        
-          <div id="hand_container" class="cards-container">
-            <div class="title" id="my_cards_title">${_("My hand")}</div>
-            <div id="my_cards" class="cards"></div>
-          </div>
 
-          
-          <div id="set_my_container" class="set-my-container">
-            <div id="set_${player_id}" class="set">
-              <div id="set_cards_impaire_${player_id}" class="set-cards-impaire"></div>
-              <div id="set_cards_paire_${player_id}" class="set-cards-paire"></div>
+          <div id="sets_container" class="sets-container" style="border: 2px solid #${color};">
+            <div id="set_my_container" class="set-my-container">
+            <div class="title" id="my_sets_title" style="color: #${color};">${_("My sets")}</div>
+              <div id="set_${player_id}" class="set">
+                <div id="set_cards_impaire_${player_id}" class="set-cards-impaire"></div>
+                <div id="set_cards_paire_${player_id}" class="set-cards-paire"></div>
+              </div>
             </div>
-          </div>
 
-          <div id="set_opponent_container" class="set-opponent-container"></div>
-          
+            <div id="set_opponent_container" class="set-opponent-container"></div>
           </div>
+          
+        </div>
 
           
         `;
@@ -655,6 +683,7 @@ export class Game {
           if(player.id != player_id) {
             set_container.insertAdjacentHTML("beforeend", `
               <div id="set_${player.id}" class="set">
+              <div class="title title_name_set" style="color: #${player.color};">${player.name}</div>
               <div id="set_cards_impaire_${player.id}" class="set-cards-impaire"></div>
               <div id="set_cards_paire_${player.id}" class="set-cards-paire"></div>
             </div>
@@ -889,7 +918,7 @@ export class Game {
 
     addCardSet(set) {
 
-      var zIndex = set.position * 100;
+      var zIndex = set.position + 10;
       var position = '';
 
       if(set.type <= 10) {

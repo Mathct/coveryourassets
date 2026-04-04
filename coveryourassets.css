@@ -73,7 +73,7 @@
     cursor: pointer !important;
     pointer-events: auto !important;
     border-radius: 4px;
-    z-index: 100;
+    
 }
 
 .selectable {
@@ -81,14 +81,14 @@
     pointer-events: auto !important;
     outline: 4px dashed red;
     border-radius: 4px;
-    z-index: 100;
+    
 }
 
    
 .selected, .selectedmulti {
     outline: 4px solid red; 
     border-radius: 4px;
-    z-index: 100;
+    
 }
 
 .selectedmulti{
@@ -112,6 +112,7 @@
   margin-left: 0;
   margin-right: 0;
   width: 100%;
+  background-color: rgba(255, 255, 255, 0.486);
 }
 
 #table_cards_container {
@@ -154,11 +155,12 @@
     background-size: 1000% 200%;
     /* box-shadow: 1px 2px 1px 1px rgba(0, 0, 0, 0.44); */
     border-radius: 5%;
+    z-index: 100;
 }
 
 #hand_container .stockitem:hover{
   transform: scale(1.1) !important;
-  z-index: 100 !important;
+  z-index: 110 !important;
 }
 
 
@@ -210,7 +212,7 @@
   justify-content: center;
   align-items: center;
   width: 100%;
-  height: 179px;
+  flex-direction: column;
   
 }
 
@@ -221,7 +223,7 @@
   align-items: center;
   width: 100%;
   gap: 0 20px;
-  margin-top: 20px;
+  margin-top: 45px;
 }
 
 .set{
@@ -242,6 +244,16 @@
   transform-origin: bottom left;
 }
 
+.set-cards-paire{
+  position: absolute;
+  width: 128px;
+  height: 179px;
+  border-radius: 5%;
+  background-color: rgba(0, 0, 255, 0.2);
+  bottom: 0;
+  right: 0;
+}
+
 .card_paire{
   bottom: 0;
   right: 0;
@@ -254,16 +266,6 @@
   transform-origin: bottom left;
 }
 
-.set-cards-paire{
-  position: absolute;
-  width: 128px;
-  height: 179px;
-  border-radius: 5%;
-  background-color: rgba(0, 0, 255, 0.2);
-  bottom: 0;
-  right: 0;
-}
-
 .card {
   width: 128px;
   height: 179px;
@@ -271,6 +273,24 @@
   background-size: 1000% 200%;
   border-radius: 5%;
   position: absolute;
+}
+
+.sets-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  background-color: rgba(255, 255, 255, 0.486);
+  margin-top: 20px;
+  border-radius: 20px;
+  padding-bottom: 20px;
+  margin-bottom: 10px;
+}
+
+.title_name_set{
+  position: absolute;
+  top: -38px;
+  
 }
 
 .challenge_cards_container {
@@ -323,6 +343,7 @@
   background-size: 1000% 200%;
   /* box-shadow: 1px 2px 1px 1px rgba(0, 0, 0, 0.44); */
   border-radius: 5%;
+  z-index: 100;
 }
 
 .deck-counter{
@@ -367,3 +388,50 @@
   font-size: 20px;
 }
 
+.selectable_ff0000{
+  outline: 4px dashed #ff0000 !important;
+}
+
+.selectable_008000{
+  outline: 4px dashed #008000 !important;
+}
+
+.selectable_0000ff{
+  outline: 4px dashed #0000ff !important;
+}
+
+.selectable_ffa500{
+  outline: 4px dashed #ffa500 !important;
+}
+
+.selectable_e94190{
+  outline: 4px dashed #e94190 !important;
+}
+
+.selectable_982fff{
+  outline: 4px dashed #982fff !important;
+}
+
+.selected_ff0000{
+  outline: 4px solid #ff0000 !important;
+}
+
+.selected_008000{
+  outline: 4px solid #008000 !important;
+}
+
+.selected_0000ff{
+  outline: 4px solid #0000ff !important;
+}
+
+.selected_ffa500{
+  outline: 4px solid #ffa500 !important;
+}
+
+.selected_e94190{
+  outline: 4px solid #e94190 !important;
+}
+
+.selected_982fff{
+  outline: 4px solid #982fff !important;
+}

@@ -388,6 +388,8 @@ class Pending extends Game
         $ret['title'] = clienttranslate('${actplayer} must choose an action');
         $ret['titleyou'] = clienttranslate('Challenge: ${you} must choose a card');
 
+        $ret["selected"][] = $parg1;
+
         $handCards = game::$instance->cards_DB->getCardsInLocation('hand', $this->player_id);
         $opponent = explode('_', $parg1)[1];
 
