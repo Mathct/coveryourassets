@@ -213,7 +213,7 @@ class Pending extends Game
                 "SELECT `card_id` `id`, `card_type` `type`, `card_type_arg` `type_arg`, `card_location` `location`, `card_location_arg` `location_arg`, `position` `position` FROM cards WHERE card_location ='set' AND card_location_arg = '{$this->player_id}' AND position = '{$newSetPosition}' ORDER BY `card_type` ASC"
             )[0];
             
-            $txt = clienttranslate('${player_name} set ....');
+            $txt = clienttranslate('${player_name} creates a set: ${log}');
             $g->notify->all(
                 "cardsMovedToTable",
                 $txt,
@@ -221,6 +221,7 @@ class Pending extends Game
                     'player_id' => $this->player_id,
                     'cards' => $cards,
                     'card_for_set' => $card_for_set,
+                    'log' => $this->getSetLog($cards[0]['type'],$cards[1]['type']),
                 ]
             );
 
@@ -275,13 +276,14 @@ class Pending extends Game
 
             $g->cards_DB->moveCard($id1, 'discard', 0);
 
-            $txt = clienttranslate('${player_name} discarded ....');
+            $txt = clienttranslate('${player_name} discards: ${log}');
             $g->notify->all(
                 "cardsMovedToDiscard",
                 $txt,
                 [
                     'player_id' => $this->player_id,
                     'card' => $card,
+                    'log' => $this->getCardLog($card['type']),
                 ]
             );
 
@@ -808,8 +810,60 @@ class Pending extends Game
 
     */
 
-    function getLogs($type)
+    function getSetLog($type1, $type2)
     {
+        if($type1 <= $type2)
+        {
+            $typeA = $type1;
+            $typeB = $type2;
+        }
+
+        else
+        {
+            $typeA = $type2;
+            $typeB = $type1;
+        }
+
+
+        if($typeA <= 10){
+            $positionX1 = ($type1-1)*100;
+            $positionY1 = 0;
+        }
+        else
+        {
+            $positionX1 = ($type1-11)*100;
+            $positionY1 = 100;
+        }
+
+        if($typeB <= 10){
+            $positionX2 = ($type2-1)*100;
+            $positionY2 = 0;
+        }
+        else
+        {
+            $positionX2 = ($type2-11)*100;
+            $positionY2 = 100;
+        }
+
+        return "<div class='cards_log_container'><div class='card_log' title='' style='background-position-x : -{$positionX1}%; background-position-y : -{$positionY1}%;'></div><div class='card_log' title='' style='background-position-x : -{$positionX2}%; background-position-y : -{$positionY2}%;'></div></div>";
+
+        
+    }
+
+    function getCardLog($type)
+    {
+        $position = ($type-1)*100;
+        $position2 = ($type-11)*100;
+
+        if($type <= 10)
+        {
+            return "<div class='cards_log_container'><div class='card_log' title='' style='background-position-x : -{$position}%; background-position-y : 0%;'></div></div>";
+        }
+        else
+        {
+            return "<div class='cards_log_container'><div class='card_log' title='' style='background-position-x : -{$position2}%; background-position-y : -100%;'></div></div>";
+        }
+
         
     }
 

@@ -442,3 +442,21 @@
 .selected_982fff{
   outline: 4px solid #982fff !important;
 }
+
+.cards_log_container{
+  position: relative;
+  display: flex;
+  gap: 5px;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: auto;
+}
+
+.card_log {
+  width: 64px;
+  height: 90px;
+  background-image: url('img/Cards.png');
+  background-size: 1000% 200%;
+  border-radius: 5%;
+}
