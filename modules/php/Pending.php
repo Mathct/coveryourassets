@@ -498,14 +498,21 @@ class Pending extends Game
             );
 
 
+            $opponent_name = $g->getUniqueValueFromDB("SELECT player_name FROM player WHERE player_id='{$opponent}'");
+            $opponent_color = $g->getUniqueValueFromDB("SELECT player_color FROM player WHERE player_id='{$opponent}'");
 
-            $txt = clienttranslate('${player_name} attaque with ....');
+            $txt = clienttranslate('${player_name} challenges ${opponent} with: ${log}');
             $g->notify->all(
                 "cardMoveChallengeAttack",
                 $txt,
                 [
+                    'opponent' =>    [
+                        'log' => '<b style="color: #${color};">${opponent_name}</b>',
+                        'args' => ['opponent_name' => $opponent_name, 'color' => $opponent_color]
+                    ],
                     'player_id' => $this->player_id,
                     'card' => $card,
+                    'log' => $this->getCardLog($card['type']),
                 ]
             );
 
@@ -599,13 +606,14 @@ class Pending extends Game
             $new_position = $position + 1;
             $g->cards_DB->moveCard($card_id, 'challenge_attack', $this->player_id);
             $g->DbQuery("UPDATE cards SET position = {$new_position} WHERE card_id = {$card_id}");
-            $txt = clienttranslate('${player_name} attaque with ....');
+            $txt = clienttranslate('${player_name} responds to the challenge with: ${log}');
             $g->notify->all(
                 "cardMoveChallengeAttack",
                 $txt,
                 [
                     'player_id' => $this->player_id,
                     'card' => $card,
+                    'log' => $this->getCardLog($card['type']),
                 ]
             );
             $g->hand->inc($this->player_id, -1);
@@ -618,13 +626,14 @@ class Pending extends Game
             $new_position = $position + 1;
             $g->cards_DB->moveCard($card_id, 'challenge_defense', $this->player_id);
             $g->DbQuery("UPDATE cards SET position = {$new_position} WHERE card_id = {$card_id}");
-            $txt = clienttranslate('${player_name} defense with ....');
+            $txt = clienttranslate('${player_name} responds to the challenge with: ${log}');
             $g->notify->all(
                 "cardMoveChallengeDefense",
                 $txt,
                 [
                     'player_id' => $this->player_id,
                     'card' => $card,
+                    'log' => $this->getCardLog($card['type']),
                 ]
             );
             $g->hand->inc($this->player_id, -1);
@@ -671,7 +680,7 @@ class Pending extends Game
         if($attaquant == $this->player_id)
         {
 
-            $txt = clienttranslate('${player_name} perds le defi ....');
+            $txt = clienttranslate('${player_name} abandons the challenge');
             $g->notify->all(
                 "challengeWinByDefense",
                 $txt,
@@ -708,7 +717,7 @@ class Pending extends Game
                 "SELECT `card_id` `id`, `card_type` `type`, `card_type_arg` `type_arg`, `card_location` `location`, `card_location_arg` `location_arg`, `position` `position` FROM cards WHERE card_location ='set' AND card_location_arg = '{$attaquant}' AND position = '{$new_position}' ORDER BY `card_type` ASC"
             )[0];
 
-            $txt = clienttranslate('${player_name} perds le defi ....');
+            $txt = clienttranslate('${player_name} abandons the challenge');
             $g->notify->all(
                 "challengeWinByAttack",
                 $txt,
