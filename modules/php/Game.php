@@ -162,18 +162,18 @@ class Game extends \Bga\GameFramework\Table
 
         //creation du deck
         $cards = [];
-        $cards[] = ['type' => 1, 'type_arg' => 0, 'nbr' => 10]; //10
-        $cards[] = ['type' => 2, 'type_arg' => 0, 'nbr' => 10]; //10
-        $cards[] = ['type' => 3, 'type_arg' => 0, 'nbr' => 10]; //10
-        $cards[] = ['type' => 4, 'type_arg' => 0, 'nbr' => 9]; //9
-        $cards[] = ['type' => 5, 'type_arg' => 0, 'nbr' => 9]; //9
-        $cards[] = ['type' => 6, 'type_arg' => 0, 'nbr' => 9]; //9
-        $cards[] = ['type' => 7, 'type_arg' => 0, 'nbr' => 9]; //9
-        $cards[] = ['type' => 8, 'type_arg' => 0, 'nbr' => 9]; //9
-        $cards[] = ['type' => 9, 'type_arg' => 0, 'nbr' => 9]; //9
-        $cards[] = ['type' => 10, 'type_arg' => 0, 'nbr' => 8]; //8
-        $cards[] = ['type' => 11, 'type_arg' => 0, 'nbr' => 8]; //8
-        $cards[] = ['type' => 12, 'type_arg' => 0, 'nbr' => 4]; //4
+        $cards[] = ['type' => 1, 'type_arg' => 0, 'nbr' => 2]; //10
+        $cards[] = ['type' => 2, 'type_arg' => 0, 'nbr' => 2]; //10
+        $cards[] = ['type' => 3, 'type_arg' => 0, 'nbr' => 2]; //10
+        $cards[] = ['type' => 4, 'type_arg' => 0, 'nbr' => 2]; //9
+        $cards[] = ['type' => 5, 'type_arg' => 0, 'nbr' => 2]; //9
+        $cards[] = ['type' => 6, 'type_arg' => 0, 'nbr' => 2]; //9
+        $cards[] = ['type' => 7, 'type_arg' => 0, 'nbr' => 2]; //9
+        $cards[] = ['type' => 8, 'type_arg' => 0, 'nbr' => 2]; //9
+        $cards[] = ['type' => 9, 'type_arg' => 0, 'nbr' =>2]; //9
+        $cards[] = ['type' => 10, 'type_arg' => 0, 'nbr' => 2]; //8
+        $cards[] = ['type' => 11, 'type_arg' => 0, 'nbr' => 2]; //8
+        $cards[] = ['type' => 12, 'type_arg' => 0, 'nbr' => 2]; //4
 
         $this->cards_DB->createCards($cards, 'deck');
         $this->cards_DB->shuffle('deck');

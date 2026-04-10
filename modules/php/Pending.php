@@ -187,7 +187,7 @@ class Pending extends Game
     {
         $g = game::$instance;
         $count_deck = count($g->getObjectListFromDB( "SELECT `card_id` `id` FROM cards WHERE card_location = 'deck'", true ));
-
+       
         if($varg1 == null)
         {
             $count_all_cards = count($g->getObjectListFromDB( "SELECT card_id FROM cards WHERE card_location = 'hand'", true ));
@@ -240,7 +240,7 @@ class Pending extends Game
                 ]
             );
 
-            if($count_deck > 0) {
+            if($count_deck >= 1) {
                 if($count_deck >= 2) {
                     $newcards = $g->cards_DB->pickCards(2, 'deck', $this->player_id);
                     $g->deck->inc(-2);
@@ -250,11 +250,7 @@ class Pending extends Game
                     $g->deck->inc(-1);
                     $g->hand->inc($this->player_id, -1);
                 }
-                if($count_deck == 0) {
-                  
-                    $g->hand->inc($this->player_id, -2);
-                }
-
+                
                 $g->notify->player(
                     $this->player_id,
                     "drawCards",
@@ -264,6 +260,11 @@ class Pending extends Game
                         'cards' => $newcards,
                     ]
                 );
+            }
+
+            if($count_deck == 0) 
+            {
+                $g->hand->inc($this->player_id, -2);
             }
 
 
