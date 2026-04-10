@@ -727,8 +727,10 @@ export class Game {
             <div id="challenge_cards_defense" class="challenge_cards"></div>
             </div>
           </div> 
-                        
+          
+          <div id="sets_container" class="sets-container" style="border: 2px solid black;">
           <div id="set_opponent_container" class="set-opponent-container"></div>
+          </div>
           
           </div>
 
@@ -742,6 +744,8 @@ export class Game {
           
             set_container.insertAdjacentHTML("beforeend", `
               <div id="set_${player.id}" class="set">
+              <div id="counter_second_to_last_set_${player.id}" class="counter_second_to_last_set"></div>
+              <div id="counter_last_set_${player.id}" class="counter_last_set"></div>
               <div class="title title_name_set" style="color: #${player.color};">${player.name}</div>
               <div id="set_cards_impaire_${player.id}" class="set-cards-impaire"></div>
               <div id="set_cards_paire_${player.id}" class="set-cards-paire"></div>
