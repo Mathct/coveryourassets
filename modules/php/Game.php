@@ -36,6 +36,8 @@ class Game extends \Bga\GameFramework\Table
 
     // counters players
     public playerCounter $hand;
+    public playerCounter $last_set;
+    public playerCounter $second_to_last_set;
     
     //databases decks
     public $cards_DB;
@@ -79,6 +81,8 @@ class Game extends \Bga\GameFramework\Table
         $this->deck = $this->counterFactory->createTableCounter('deck');
        
         $this->hand = $this->counterFactory->createPlayerCounter('hand');
+        $this->last_set = $this->counterFactory->createPlayerCounter('last_set');
+        $this->second_to_last_set = $this->counterFactory->createPlayerCounter('second_to_last_set');
        
 
         // Deck db_card created with table card 
@@ -201,6 +205,8 @@ class Game extends \Bga\GameFramework\Table
         //counters
         $this->deck->initDb($count_deck);
         $this->hand->initDb(array_keys($players), 5);
+        $this->last_set->initDb(array_keys($players), 0);
+        $this->second_to_last_set->initDb(array_keys($players), 0);
 
 
 
@@ -331,6 +337,8 @@ class Game extends \Bga\GameFramework\Table
         //counters
         $this->deck->fillResult($result);
         $this->hand->fillResult($result);
+        $this->last_set->fillResult($result);
+        $this->second_to_last_set->fillResult($result);
         
 
         // TODO: Gather all information about current game situation (visible by player $current_player_id).

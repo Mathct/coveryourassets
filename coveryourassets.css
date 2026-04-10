@@ -225,7 +225,7 @@
   flex-wrap: wrap;
   align-items: center;
   width: 100%;
-  gap: 0 20px;
+  gap: 0 50px;
   margin-top: 45px;
 }
 
@@ -376,6 +376,7 @@
 .hand_card_pannel {
   display: flex;
   justify-content: center;
+  align-items: center;
   
 }
 
@@ -388,11 +389,33 @@
   background-size: 100% 100%;
 }
 
-.counter_hand{
-  display: flex;
-  align-items: center;
+.counter_hand, .counter_last_set, .counter_second_to_last_set{
   font-family: 'Garamond', 'Montserrat', 'Raleway', 'Segoe UI', Arial, sans-serif;
   font-size: 20px;
+  border-radius: 50%;
+  background-color: white;
+  border: 1px solid black;
+  width: 25px;
+  height: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px;
+  font-weight: bold;
+  
+  
+}
+
+.counter_second_to_last_set{
+  bottom: 0;
+  left: -35px;
+  position: absolute;
+}
+
+.counter_last_set{
+  top: 0;
+  right: -35px;
+  position: absolute;
 }
 
 .selectable_ff0000{
@@ -459,4 +482,13 @@
   background-image: url('img/Cards.png');
   background-size: 1000% 200%;
   border-radius: 5%;
+}
+
+.set_pannel_image{
+
+  position: relative;
+  width: 50px;
+  height: 50px;
+  background-image: url('img/set_image.png');
+  background-size: 100% 100%;
 }

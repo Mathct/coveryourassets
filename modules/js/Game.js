@@ -105,7 +105,7 @@ class NormalTurn {
     if (isCurrentPlayerActive && args.titleyou) {
       this.bga.statusBar.setTitle(
         this.bga.gameui.format_string_recursive(
-          args.titleyou
+          _(args.titleyou)
             .replace("${you}", this.game.divYou())
             .replace(/#opponent#/g, args.opponent ?? "")
             .replace("#nb#", args.nb ?? "")
@@ -608,6 +608,7 @@ export class Game {
               <div class="hand_card_pannel_image"></div>
               <div id="counter_hand_${player.id}" class="counter_hand"></div>
             </div>
+            
             `,
         );
         });
@@ -663,6 +664,8 @@ export class Game {
             <div id="set_my_container" class="set-my-container">
             <div class="title" id="my_sets_title" style="color: #${color};">${_("My sets")}</div>
               <div id="set_${player_id}" class="set">
+                <div id="counter_second_to_last_set_${player_id}" class="counter_second_to_last_set"></div>
+                <div id="counter_last_set_${player_id}" class="counter_last_set"></div>
                 <div id="set_cards_impaire_${player_id}" class="set-cards-impaire"></div>
                 <div id="set_cards_paire_${player_id}" class="set-cards-paire"></div>
               </div>
@@ -684,6 +687,8 @@ export class Game {
           if(player.id != player_id) {
             set_container.insertAdjacentHTML("beforeend", `
               <div id="set_${player.id}" class="set">
+              <div id="counter_second_to_last_set_${player.id}" class="counter_second_to_last_set"></div>
+              <div id="counter_last_set_${player.id}" class="counter_last_set"></div>
               <div class="title title_name_set" style="color: #${player.color};">${player.name}</div>
               <div id="set_cards_impaire_${player.id}" class="set-cards-impaire"></div>
               <div id="set_cards_paire_${player.id}" class="set-cards-paire"></div>
@@ -773,6 +778,24 @@ export class Game {
         hand_counter.create(`counter_hand_${player.id}`, {
         value: player.hand,
         playerCounter: "hand",
+        playerId: player.id,
+      });
+      });
+
+      Object.values(this.gamedatas.players).forEach((player) => {
+        const last_set_counter = new ebg.counter();
+        last_set_counter.create(`counter_last_set_${player.id}`, {
+        value: player.last_set,
+        playerCounter: "last_set",
+        playerId: player.id,
+      });
+      });
+
+      Object.values(this.gamedatas.players).forEach((player) => {
+        const hand_counter = new ebg.counter();
+        hand_counter.create(`counter_second_to_last_set_${player.id}`, {
+        value: player.second_to_last_set,
+        playerCounter: "second_to_last_set",
         playerId: player.id,
       });
       });

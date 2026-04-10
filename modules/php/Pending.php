@@ -256,6 +256,8 @@ class Pending extends Game
                 "UPDATE player SET `first_set` = 1 WHERE player_id = '{$this->player_id}'"
             );
 
+            $this->majSetCounters($this->player_id);
+
             $g->addPendingFirst($this->player_id, "PlayerTurn");
         }
 
@@ -795,6 +797,9 @@ class Pending extends Game
             $g->deck->inc(-$draw);
         }
 
+        $this->majSetCounters($attaquant);
+        $this->majSetCounters($defenseur);
+
 
         $g->setGameStateValue("attaquant", 0);
         $g->setGameStateValue("defenseur", 0);
@@ -874,6 +879,16 @@ class Pending extends Game
         }
 
         
+    }
+
+    function majSetCounters ($player_id)
+    {
+        $g = game::$instance;
+
+        $impaire = $g->getUniqueValueFromDB("SELECT COUNT(*) FROM cards WHERE card_location = 'set' AND card_location_arg = '{$player_id}' AND position = (SELECT MAX(position) FROM cards WHERE position % 2 = 1)");
+        $paire = $g->getUniqueValueFromDB("SELECT COUNT(*) FROM cards WHERE card_location = 'set' AND card_location_arg = '{$player_id}' AND position = (SELECT MAX(position) FROM cards WHERE position % 2 = 0)");
+        $g->second_to_last_set->set($player_id, $impaire);
+        $g->last_set->set($player_id, $paire);
     }
 
     
