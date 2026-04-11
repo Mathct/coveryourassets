@@ -44,8 +44,7 @@ class NormalTurn {
       this.possibles = [];
       this.possiblesMulti = [];
 
-      console.log(this.game.players)
-                      
+                            
       // selectable
       if (Array.isArray(args.selectable) && args.selectable.length > 0) {
         args.selectable.forEach((sid) => {
@@ -608,6 +607,12 @@ export class Game {
               <div class="hand_card_pannel_image"></div>
               <div id="counter_hand_${player.id}" class="counter_hand"></div>
             </div>
+
+            <div class="cumul_score_pannel">
+              <div class="billet"></div>
+              <div>$</div>
+              <div id="counter_cumul_score_${player.id}" class="counter_cumul_score"></div>
+            </div>
             
             `,
         );
@@ -800,6 +805,15 @@ export class Game {
         hand_counter.create(`counter_second_to_last_set_${player.id}`, {
         value: player.second_to_last_set,
         playerCounter: "second_to_last_set",
+        playerId: player.id,
+      });
+      });
+
+      Object.values(this.gamedatas.players).forEach((player) => {
+        const cumul_score = new ebg.counter();
+        cumul_score.create(`counter_cumul_score_${player.id}`, {
+        value: player.cumul_score,
+        playerCounter: "cumul_score",
         playerId: player.id,
       });
       });
@@ -1297,6 +1311,34 @@ export class Game {
         challenge_container.classList.add('hidden');
                
       }, "500");
+    }
+
+    async notif_initRound(args) {
+
+      // place la card en discard
+      this.discard = args.discard;
+      this.setupDiscard();
+      
+      //donne les cartes dans les mains des joueurs
+      if(!this.bga.players.isCurrentPlayerSpectator())
+      {
+        if(this.bga.players.getCurrentPlayer())
+        {
+            let player_id = this.bga.players.getCurrentPlayer().id;
+            Object.values(args.players_hand[player_id]).forEach( card =>
+            {
+                const card_type = this.getStockCardType(card);
+                this.handStock.addToStockWithId(card_type, card.id);
+            } );
+            this.handStock.updateDisplay();
+        }
+   
+      }
+
+      // suppression des sets
+      document.querySelectorAll('.card_impaire').forEach(el => el.remove());
+      document.querySelectorAll('.card_paire').forEach(el => el.remove());
+      
     }
 
     

@@ -38,6 +38,7 @@ class Game extends \Bga\GameFramework\Table
     public playerCounter $hand;
     public playerCounter $last_set;
     public playerCounter $second_to_last_set;
+    public playerCounter $cumul_score;
     
     //databases decks
     public $cards_DB;
@@ -67,6 +68,7 @@ class Game extends \Bga\GameFramework\Table
             "challenge" => 10,
             "attaquant" => 11,
             "defenseur" => 12,
+            "round" => 13,
 
             // options
             'game_mode'            => 100,
@@ -83,6 +85,7 @@ class Game extends \Bga\GameFramework\Table
         $this->hand = $this->counterFactory->createPlayerCounter('hand');
         $this->last_set = $this->counterFactory->createPlayerCounter('last_set');
         $this->second_to_last_set = $this->counterFactory->createPlayerCounter('second_to_last_set');
+        $this->cumul_score = $this->counterFactory->createPlayerCounter('cumul_score');
        
 
         // Deck db_card created with table card 
@@ -122,6 +125,7 @@ class Game extends \Bga\GameFramework\Table
         $this->setGameStateInitialValue("challenge", 0);
         $this->setGameStateInitialValue("attaquant", 0);
         $this->setGameStateInitialValue("defenseur", 0);
+        $this->setGameStateInitialValue("round", 1);
 
         
         // Set the colors of the players with HTML color code. The default below is red/green/blue/orange/brown. The
@@ -207,6 +211,7 @@ class Game extends \Bga\GameFramework\Table
         $this->hand->initDb(array_keys($players), 5);
         $this->last_set->initDb(array_keys($players), 0);
         $this->second_to_last_set->initDb(array_keys($players), 0);
+        $this->cumul_score->initDb(array_keys($players), 0);
 
 
 
@@ -234,6 +239,9 @@ class Game extends \Bga\GameFramework\Table
         foreach (array_keys($players) as $player_id) {
             $this->addPendingFirst($player_id, "PlayerTurn");
         }
+
+        $first = (int)$this->getUniqueValueFromDB("SELECT player_id FROM player WHERE player_no = 1");
+        $this->addPending($first, "Round1");
     }
 
     /////////////////////////////////////////////////////////////////////////////////  
@@ -339,6 +347,7 @@ class Game extends \Bga\GameFramework\Table
         $this->hand->fillResult($result);
         $this->last_set->fillResult($result);
         $this->second_to_last_set->fillResult($result);
+        $this->cumul_score->fillResult($result);
         
 
         // TODO: Gather all information about current game situation (visible by player $current_player_id).

@@ -493,3 +493,49 @@
   background-image: url('img/set_image.png');
   background-size: 100% 100%;
 }
+
+.cumul_score_pannel{
+  font-size: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 5px;
+  gap: 2px;
+}
+
+.billet{
+  position: relative;
+  width: 42px;
+  height: 30px;
+  background-image: url('img/billet.jpg');
+  background-size: 100% 100%;
+}
+
+.log_newRound {
+  background: #60371d;
+  text-align: center;
+  color: #efd5ab;
+  border: 1px solid black;
+  font-weight: bold;
+  padding: 5px 2px 2px;
+  font-size: 24px;
+  font-family: 'Garamond', 'Montserrat', 'Raleway', 'Segoe UI', Arial, sans-serif;
+  display: block;
+  position: relative; 
+  
+}
+
+.log_endofRound {
+  background: #5c917a;
+  text-align: center;
+  color: #efd5ab;
+  border: 1px solid black;
+  font-weight: bold;
+  padding: 5px 2px 2px;
+  font-size: 24px;
+  font-family: 'Garamond', 'Montserrat', 'Raleway', 'Segoe UI', Arial, sans-serif;
+  display: block;
+  position: relative; 
+  
+}
+

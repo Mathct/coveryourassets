@@ -28,6 +28,8 @@ class Pending extends Game
         $this->player_score = $p['player_score'];
         $this->player_color = $p['player_color'];
 
+        $this->round_nb = game::$instance->getGameStateValue('round');
+
         /// PREFERENCE DE CONFIRMATION
         $this->player_pref_confirm = game::$instance->userPreferences->get($this->player_id, 100);
 
@@ -62,6 +64,37 @@ class Pending extends Game
         {
             $this->winning_condition = 4;
         }
+    }
+
+    function argRound1($parg1, $parg2)
+    {
+        $ret = [];
+        $ret["selectable"] = [];
+        $ret["selectablemulti"] = [];
+        $ret["selected"] = [];
+        $ret["selectedmulti"] = [];
+        $ret['buttons'] = [];
+        $ret['title'] = clienttranslate('');
+        $ret['titleyou'] = clienttranslate('');
+
+       return $ret;
+    }
+
+    function Round1($parg1, $parg2, $varg1, $varg2, $varg3, $varg4)
+    {
+        $g = game::$instance;
+
+        $g->notify->all('message', clienttranslate('${message}'), [
+                'message' => [
+                    'log' => '<div class="log_newRound">${round} ${nb}</div>',
+                    'args' => [
+                        'round' => clienttranslate('Round'),
+                        'nb' => $this->round_nb,
+                        'i18n' => ['round']
+                    ],
+                ]
+            ]);
+
     }
 
     /*
@@ -836,8 +869,8 @@ class Pending extends Game
         $ret["selected"] = [];
         $ret["selectedmulti"] = [];
         $ret['buttons'] = [];
-        $ret['title'] = clienttranslate('EndOfRound');
-        $ret['titleyou'] = clienttranslate('EndOfRound');
+        $ret['title'] = clienttranslate('');
+        $ret['titleyou'] = clienttranslate('');
 
     
         $ret['buttons'][] = 'cancel_btn';
@@ -850,8 +883,95 @@ class Pending extends Game
     function EndOfRound($parg1, $parg2, $varg1, $varg2, $varg3, $varg4)
     {
         $g = game::$instance;
+        $mode = $this->winning_condition;
 
-        $g->addPending($this->player_id, "EndOfRound");
+        $g->notify->all('message', clienttranslate('${message}'), [
+                'message' => [
+                    'log' => '<div class="log_endofRound">${round} ${nb}</div>',
+                    'args' => [
+                        'round' => clienttranslate('End of Round'),
+                        'nb' => $this->round_nb,
+                        'i18n' => ['round']
+                    ],
+                ]
+            ]);
+
+
+ 
+    // addition du cumul des values en BDD
+        $players = $g->getObjectListFromDB( "SELECT player_id FROM player", true );
+
+        foreach ($players as $player)
+        {
+            $somme_value = $g->getUniqueValueFromDB("SELECT SUM(value) AS total FROM cards WHERE card_location = 'set' AND card_location_arg = '{$player}'");
+            if($somme_value != null)
+            {
+                $g->DbQuery("UPDATE player SET cumul_value = cumul_value + {$somme_value} WHERE player_id = '{$player}'");
+
+                $cumul = $g->getUniqueValueFromDB("SELECT cumul_value FROM player WHERE player_id={$player}");
+
+                $g->cumul_score->set($player, $cumul);
+
+                $txt = clienttranslate('${player_name} gains $${log}');
+                $g->notify->all(
+                    "message",
+                    $txt,
+                    [                       
+                        'player_id' => $player,
+                        'log' => $somme_value,
+                        
+                    ]
+                );
+            }
+            
+            else{
+
+                $txt = clienttranslate('${player_name} gains $0');
+                $g->notify->all(
+                    "message",
+                    $txt,
+                    [                       
+                        'player_id' => $player,
+                        
+                        
+                    ]
+                );
+            }
+
+
+           
+        }
+     
+    //////////////////////
+    // Suite en fontion du mode de jeu
+    //////////////////////
+
+    // Mode 1 : Jouez jusqu’à ce qu’un joueur atteigne un total de 1 000 000 $
+    if($mode == 1)
+    {
+
+    }
+
+    // Mode 2 : Le joueur ayant le score le plus élevé à la fin de la manche gagne
+    if($mode == 2)
+    {
+
+    }
+
+    // Mode 3 : Après 3 manches, le plus haut score cumulé l’emporte
+    if($mode == 3)
+    {
+
+    }
+
+    // Mode 4 : Le premier joueur à remporter 2 manches gagne la partie
+    if($mode == 4)
+    {
+
+    }
+
+    $this->newRound();
+    $g->addPendingFirst($this->player_id, "PlayerTurn");
         
     }
 
@@ -935,6 +1055,65 @@ class Pending extends Game
         $paire = $g->getUniqueValueFromDB("SELECT COUNT(*) FROM cards WHERE card_location = 'set' AND card_location_arg = '{$player_id}' AND position = (SELECT MAX(position) FROM cards WHERE position % 2 = 0)");
         $g->second_to_last_set->set($player_id, $impaire);
         $g->last_set->set($player_id, $paire);
+    }
+
+    function newRound()
+    {
+        $g = game::$instance;
+
+        $players = $g->getObjectListFromDB( "SELECT player_id FROM player", true );
+
+        $g->DbQuery("UPDATE cards SET `card_location` = 'deck'");
+        $g->DbQuery("UPDATE cards SET `card_location_arg` = 0");
+        $g->DbQuery("UPDATE cards SET `position` = 0");
+        $g->cards_DB->shuffle('deck');
+
+        $players_hand = [];
+
+        foreach ($players as $player) {
+            $g->cards_DB->pickCards(5, 'deck', (int) $player);
+            $g->hand->set($player, 5);
+            $this->majSetCounters($player);
+
+            $players_hand[$player] = $g->getCollectionFromDB( "SELECT `card_id` `id`, `card_type` `type`, `card_type_arg` `type_arg`, `card_location` `location`, `card_location_arg` `location_arg`, `position` `position` FROM `cards` WHERE `card_location` ='hand' AND `card_location_arg`='{$player}'" );
+        }
+
+        $g->cards_DB->pickCardForLocation('deck', 'discard', 0);
+        $discard = $g->getUniqueValueFromDB( "SELECT `card_type` `type` FROM `cards` WHERE `card_location` ='discard' ORDER BY `position` DESC LIMIT 1" );
+
+        $g->DbQuery("UPDATE player SET `first_set` = 0");
+
+        $count_deck = count($g->getObjectListFromDB( "SELECT `card_id` `id` FROM cards WHERE card_location = 'deck'", true ));
+        $g->deck->set($count_deck);
+
+        $g->notify->all(
+            "initRound",
+            '',
+            [
+                'player_id' => $this->player_id,
+                'discard' => $discard,
+                'players_hand' => $players_hand,
+               
+            ]
+        );
+
+        $round = $g->getGameStateValue("round");
+        $new_round = $round + 1;
+        $g->setGameStateValue("round", $new_round);
+
+
+        $g->notify->all('message', clienttranslate('${message}'), [
+                'message' => [
+                    'log' => '<div class="log_newRound">${round} ${nb}</div>',
+                    'args' => [
+                        'round' => clienttranslate('Round'),
+                        'nb' => $new_round,
+                        'i18n' => ['round']
+                    ],
+                ]
+            ]);
+
+
     }
 
     

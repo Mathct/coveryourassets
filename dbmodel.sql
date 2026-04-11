@@ -56,3 +56,5 @@ CREATE TABLE IF NOT EXISTS `cards` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 ALTER TABLE `player` ADD `first_set` int(5) NOT NULL DEFAULT 0;
+ALTER TABLE `player` ADD `round_win` int(5) NOT NULL DEFAULT 0;
+ALTER TABLE `player` ADD `cumul_value` int(15) NOT NULL DEFAULT 0;
