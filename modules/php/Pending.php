@@ -906,7 +906,14 @@ class Pending extends Game
             $somme_value = $g->getUniqueValueFromDB("SELECT SUM(value) AS total FROM cards WHERE card_location = 'set' AND card_location_arg = '{$player}'");
             if($somme_value != null)
             {
-                $g->DbQuery("UPDATE player SET cumul_value = cumul_value + {$somme_value} WHERE player_id = '{$player}'");
+                if($mode != 4)
+                {
+                    $g->DbQuery("UPDATE player SET cumul_value = cumul_value + {$somme_value} WHERE player_id = '{$player}'");
+                }
+
+                else{
+                    $g->DbQuery("UPDATE player SET cumul_value = {$somme_value} WHERE player_id = '{$player}'");
+                }
 
                 $cumul = $g->getUniqueValueFromDB("SELECT cumul_value FROM player WHERE player_id={$player}");
 
@@ -949,18 +956,64 @@ class Pending extends Game
     // Mode 1 : Jouez jusqu’à ce qu’un joueur atteigne un total de 1 000 000 $
     if($mode == 1)
     {
+        $wins = $g->getObjectListFromDB( "SELECT player_id FROM player WHERE cumul_value = (SELECT MAX(cumul_value) FROM player) AND cumul_value >= 1000000", true );
+        if($wins != null)
+        {
+            foreach ($wins as $win)
+            {
+                game::$instance->bga->playerScore->set($win, 1);
+            }
 
+        // on vide la table pending pour mettre fin à la partie
+        game::$instance->DbQuery("DELETE FROM `pending`;");
+
+        }
+
+        else{
+
+            $this->newRound();
+            $g->addPendingFirst($this->player_id, "PlayerTurn");
+
+        }
+        
     }
 
     // Mode 2 : Le joueur ayant le score le plus élevé à la fin de la manche gagne
     if($mode == 2)
     {
+        $wins = $g->getObjectListFromDB( "SELECT player_id FROM player WHERE cumul_value = (SELECT MAX(cumul_value) FROM player)", true );
+        foreach ($wins as $win)
+        {
+            game::$instance->bga->playerScore->set($win, 1);
+        }
 
+        // on vide la table pending pour mettre fin à la partie
+        game::$instance->DbQuery("DELETE FROM `pending`;");
     }
 
     // Mode 3 : Après 3 manches, le plus haut score cumulé l’emporte
     if($mode == 3)
     {
+        $round = $g->getGameStateValue("round");
+
+        if($round == 3)
+        {
+            $wins = $g->getObjectListFromDB( "SELECT player_id FROM player WHERE cumul_value = (SELECT MAX(cumul_value) FROM player)", true );
+            foreach ($wins as $win)
+            {
+                game::$instance->bga->playerScore->set($win, 1);
+            }
+
+            // on vide la table pending pour mettre fin à la partie
+            game::$instance->DbQuery("DELETE FROM `pending`;");
+        }
+
+        else{
+
+            $this->newRound();
+            $g->addPendingFirst($this->player_id, "PlayerTurn");
+
+        }
 
     }
 
@@ -968,10 +1021,28 @@ class Pending extends Game
     if($mode == 4)
     {
 
+        $wins = $g->getObjectListFromDB( "SELECT player_id FROM player WHERE cumul_value = (SELECT MAX(cumul_value) FROM player)", true );
+        foreach ($wins as $win)
+        {
+            game::$instance->bga->playerScore->inc($win, 1);
+        }
+
+        $end = $g->getObjectListFromDB( "SELECT player_id FROM player WHERE player_score = (SELECT MAX(player_score) FROM player) AND player_score >= 2", true );
+        if($end != null)
+        {
+            // on vide la table pending pour mettre fin à la partie
+            game::$instance->DbQuery("DELETE FROM `pending`;");
+        }
+
+        else {
+            $this->newRound();
+            $g->addPendingFirst($this->player_id, "PlayerTurn");
+        }
+
+
     }
 
-    $this->newRound();
-    $g->addPendingFirst($this->player_id, "PlayerTurn");
+    
         
     }
 
