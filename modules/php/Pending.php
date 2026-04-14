@@ -84,16 +84,19 @@ class Pending extends Game
     {
         $g = game::$instance;
 
-        $g->notify->all('message', clienttranslate('${message}'), [
-                'message' => [
-                    'log' => '<div class="log_newRound">${round} ${nb}</div>',
-                    'args' => [
-                        'round' => clienttranslate('Round'),
-                        'nb' => $this->round_nb,
-                        'i18n' => ['round']
-                    ],
-                ]
-            ]);
+        if($this->winning_condition != 2)
+        {
+            $g->notify->all('message', clienttranslate('${message}'), [
+                    'message' => [
+                        'log' => '<div class="log_newRound">${round} ${nb}</div>',
+                        'args' => [
+                            'round' => clienttranslate('Round'),
+                            'nb' => $this->round_nb,
+                            'i18n' => ['round']
+                        ],
+                    ]
+                ]);
+        }
 
     }
 
@@ -873,7 +876,7 @@ class Pending extends Game
         $ret['titleyou'] = clienttranslate('');
 
     
-        $ret['buttons'][] = 'cancel_btn';
+        //$ret['buttons'][] = 'yes_btn';
     
         return $ret;
     }
@@ -909,16 +912,16 @@ class Pending extends Game
                 if($mode != 4)
                 {
                     $g->DbQuery("UPDATE player SET cumul_value = cumul_value + {$somme_value} WHERE player_id = '{$player}'");
+                    $cumul = $g->getUniqueValueFromDB("SELECT cumul_value FROM player WHERE player_id={$player}");
+                    $g->cumul_score->set($player, $cumul);
                 }
 
-                else{
+                else
+                {
                     $g->DbQuery("UPDATE player SET cumul_value = {$somme_value} WHERE player_id = '{$player}'");
                 }
 
-                $cumul = $g->getUniqueValueFromDB("SELECT cumul_value FROM player WHERE player_id={$player}");
-
-                $g->cumul_score->set($player, $cumul);
-
+                               
                 $txt = clienttranslate('${player_name} gains $${log}');
                 $g->notify->all(
                     "message",
@@ -1025,6 +1028,16 @@ class Pending extends Game
         foreach ($wins as $win)
         {
             game::$instance->bga->playerScore->inc($win, 1);
+
+            $txt = clienttranslate('${player_name} wins the round');
+                $g->notify->all(
+                    "message",
+                    $txt,
+                    [                       
+                        'player_id' => $win,
+                                               
+                    ]
+            );
         }
 
         $end = $g->getObjectListFromDB( "SELECT player_id FROM player WHERE player_score = (SELECT MAX(player_score) FROM player) AND player_score >= 2", true );

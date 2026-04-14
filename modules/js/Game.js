@@ -600,22 +600,43 @@ export class Game {
 
         Object.values(this.gamedatas.players).forEach((player) => {
 
-        this.bga.playerPanels.getElement(player.id).insertAdjacentHTML(
-            "beforeend",
-            `
-            <div class="hand_card_pannel">
-              <div class="hand_card_pannel_image"></div>
-              <div id="counter_hand_${player.id}" class="counter_hand"></div>
-            </div>
+        if(this.gamedatas.mode_end != 4)
+        {
 
-            <div class="cumul_score_pannel">
-              <div class="billet"></div>
-              <div>$</div>
-              <div id="counter_cumul_score_${player.id}" class="counter_cumul_score"></div>
-            </div>
-            
-            `,
-        );
+          this.bga.playerPanels.getElement(player.id).insertAdjacentHTML(
+              "beforeend",
+              `
+              <div class="hand_card_pannel">
+                <div class="hand_card_pannel_image"></div>
+                <div id="counter_hand_${player.id}" class="counter_hand"></div>
+              </div>
+
+              <div class="cumul_score_pannel">
+                <div class="billet"></div>
+                <div>$</div>
+                <div id="counter_cumul_score_${player.id}" class="counter_cumul_score"></div>
+              </div>
+                          
+              `,
+          );
+        }
+
+        else {
+
+          this.bga.playerPanels.getElement(player.id).insertAdjacentHTML(
+              "beforeend",
+              `
+              <div class="hand_card_pannel">
+                <div class="hand_card_pannel_image"></div>
+                <div id="counter_hand_${player.id}" class="counter_hand"></div>
+              </div>
+              
+              `,
+          );
+        }
+
+       
+
         });
 
     }
@@ -666,17 +687,15 @@ export class Game {
           </div> 
 
           <div id="sets_container" class="sets-container" style="border: 2px solid #${color};">
-            <div id="set_my_container" class="set-my-container">
-            <div class="title" id="my_sets_title" style="color: #${color};">${_("My sets")}</div>
+            <div id="set_opponent_container" class="set-opponent-container">
               <div id="set_${player_id}" class="set">
                 <div id="counter_second_to_last_set_${player_id}" class="counter_second_to_last_set"></div>
                 <div id="counter_last_set_${player_id}" class="counter_last_set"></div>
+                <div class="title title_name_set" style="color: #${color};">${_("My sets")}</div>
                 <div id="set_cards_impaire_${player_id}" class="set-cards-impaire"></div>
                 <div id="set_cards_paire_${player_id}" class="set-cards-paire"></div>
               </div>
             </div>
-
-            <div id="set_opponent_container" class="set-opponent-container"></div>
           </div>
           
         </div>
@@ -809,14 +828,17 @@ export class Game {
       });
       });
 
-      Object.values(this.gamedatas.players).forEach((player) => {
-        const cumul_score = new ebg.counter();
-        cumul_score.create(`counter_cumul_score_${player.id}`, {
-        value: player.cumul_score,
-        playerCounter: "cumul_score",
-        playerId: player.id,
-      });
-      });
+      if(this.gamedatas.mode_end != 4)
+      {
+        Object.values(this.gamedatas.players).forEach((player) => {
+          const cumul_score = new ebg.counter();
+          cumul_score.create(`counter_cumul_score_${player.id}`, {
+          value: player.cumul_score,
+          playerCounter: "cumul_score",
+          playerId: player.id,
+        });
+        });
+      }
 
 
     }
