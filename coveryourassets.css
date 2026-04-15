@@ -539,3 +539,14 @@
   
 }
 
+.lock_set{
+  width: 18px;
+  height: 20px;
+  position: absolute;
+  background-image: url('img/cadena.png');
+  background-size: 100% 100%;
+  bottom: -14px;
+  left: -14px;
+  opacity: 0.9;
+}
+

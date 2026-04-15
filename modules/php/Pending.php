@@ -166,10 +166,10 @@ class Pending extends Game
             foreach ($players as $player)
             {
                 
-                $sets = game::$instance->getObjectListFromDB( "SELECT `card_id` `id`, `card_type` `type`, `card_type_arg` `type_arg`, `card_location` `location`, `card_location_arg` `location_arg`, `position` `position` FROM `cards` WHERE `card_location` ='set' AND `card_location_arg`='{$player}' AND position >= 1 ORDER BY position DESC, card_type ASC");
+                $sets = game::$instance->getObjectListFromDB( "SELECT `card_id` `id`, `card_type` `type`, `card_type_arg` `type_arg`, `card_location` `location`, `card_location_arg` `location_arg`, `position` `position` FROM `cards` WHERE `card_location` ='set' AND `card_location_arg`='{$player}' AND position >= 2 ORDER BY position DESC, card_type ASC");
                 
                 foreach ($sets as $card) {
-                    // On garde la première carte rencontrée par position
+                    // On garde la première carte rencontrée à la position la plus haute à partir de la position 2 (la position 1 est intouchable)
                     if (!isset($last_set[$player])) {
                         $last_set[$player] = $card;
                     }
@@ -276,6 +276,9 @@ class Pending extends Game
                 ]
             );
 
+            $this->majSetCounters($this->player_id);
+            $this->Lock();
+
             if($count_deck >= 1) {
                 if($count_deck >= 2) {
                     $newcards = $g->cards_DB->pickCards(2, 'deck', $this->player_id);
@@ -307,8 +310,7 @@ class Pending extends Game
             $g->DbQuery(
                 "UPDATE player SET `first_set` = 1 WHERE player_id = '{$this->player_id}'"
             );
-
-            $this->majSetCounters($this->player_id);
+          
 
             $g->addPendingFirst($this->player_id, "PlayerTurn");
         }
@@ -392,10 +394,10 @@ class Pending extends Game
         foreach ($players as $player)
         {
             
-            $sets = game::$instance->getObjectListFromDB( "SELECT `card_id` `id`, `card_type` `type`, `card_type_arg` `type_arg`, `card_location` `location`, `card_location_arg` `location_arg`, `position` `position` FROM `cards` WHERE `card_location` ='set' AND `card_location_arg`='{$player}' AND position >= 1 ORDER BY position DESC, card_type ASC");
+            $sets = game::$instance->getObjectListFromDB( "SELECT `card_id` `id`, `card_type` `type`, `card_type_arg` `type_arg`, `card_location` `location`, `card_location_arg` `location_arg`, `position` `position` FROM `cards` WHERE `card_location` ='set' AND `card_location_arg`='{$player}' AND position >= 2 ORDER BY position DESC, card_type ASC");
             
             foreach ($sets as $card) {
-                // On garde la première carte rencontrée par position
+                // On garde la première carte rencontrée à la position la plus haute à partir de la position 2 (la position 1 est intouchable)
                 if (!isset($last_set[$player])) {
                     $last_set[$player] = $card;
                 }
@@ -786,6 +788,10 @@ class Pending extends Game
 
         }
 
+        $this->majSetCounters($attaquant);
+        $this->majSetCounters($defenseur);
+        $this->Lock();
+
         $count_hand_attaquant = count($g->getObjectListFromDB( "SELECT `card_id` `id` FROM cards WHERE card_location = 'hand' AND card_location_arg = '{$attaquant}'", true ));
         $count_hand_defenseur = count($g->getObjectListFromDB( "SELECT `card_id` `id` FROM cards WHERE card_location = 'hand' AND card_location_arg = '{$defenseur}'", true ));
         $draw_attaquant = 5 - $count_hand_attaquant;
@@ -849,10 +855,7 @@ class Pending extends Game
             $g->deck->inc(-$draw);
         }
 
-        $this->majSetCounters($attaquant);
-        $this->majSetCounters($defenseur);
-
-
+        
         $g->setGameStateValue("attaquant", 0);
         $g->setGameStateValue("defenseur", 0);
         $g->setGameStateValue("challenge", 0);
@@ -1135,8 +1138,8 @@ class Pending extends Game
     {
         $g = game::$instance;
 
-        $impaire = $g->getUniqueValueFromDB("SELECT COUNT(*) FROM cards WHERE card_location = 'set' AND card_location_arg = '{$player_id}' AND position = (SELECT MAX(position) FROM cards WHERE position % 2 = 1)");
-        $paire = $g->getUniqueValueFromDB("SELECT COUNT(*) FROM cards WHERE card_location = 'set' AND card_location_arg = '{$player_id}' AND position = (SELECT MAX(position) FROM cards WHERE position % 2 = 0)");
+        $impaire = $g->getUniqueValueFromDB("SELECT COUNT(*) FROM cards WHERE card_location = 'set'AND card_location_arg = '{$player_id}' AND position = (SELECT MAX(position) FROM cards WHERE card_location = 'set' AND card_location_arg = '{$player_id}' AND position % 2 = 1)");
+        $paire = $g->getUniqueValueFromDB("SELECT COUNT(*) FROM cards WHERE card_location = 'set'AND card_location_arg = '{$player_id}' AND position = (SELECT MAX(position) FROM cards WHERE card_location = 'set' AND card_location_arg = '{$player_id}' AND position % 2 = 0)");
         $g->second_to_last_set->set($player_id, $impaire);
         $g->last_set->set($player_id, $paire);
     }
@@ -1196,6 +1199,48 @@ class Pending extends Game
                     ],
                 ]
             ]);
+
+
+    }
+
+    function Lock()
+    {
+        $g = game::$instance;
+
+        $players = $g->getObjectListFromDB( "SELECT player_id FROM player", true );
+
+        foreach ($players as $player) {
+
+            $position_max = self::getUniqueValueFromDB( "SELECT `position` FROM `cards` WHERE `card_location` ='set' AND `card_location_arg`='{$player}' ORDER BY `position` DESC LIMIT 1" );
+            if($position_max != null)
+            {
+                if(($position_max == 1)||($position_max == 2))
+                {
+                    $g->notify->all(
+                    "addLock",
+                    '',
+                        [
+                            'player' => $player,
+                        
+                        ]
+                    );
+                    
+                }
+
+                else
+                {
+                    $g->notify->all(
+                    "removeLock",
+                    '',
+                        [
+                            'player' => $player,
+                        
+                        ]
+                    );
+                    
+                }
+            }
+        }
 
 
     }

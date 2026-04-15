@@ -691,6 +691,7 @@ export class Game {
               <div id="set_${player_id}" class="set">
                 <div id="counter_second_to_last_set_${player_id}" class="counter_second_to_last_set"></div>
                 <div id="counter_last_set_${player_id}" class="counter_last_set"></div>
+                <div id="lock_set_${player_id}" class="lock_set hidden"></div>
                 <div class="title title_name_set" style="color: #${color};">${_("My sets")}</div>
                 <div id="set_cards_impaire_${player_id}" class="set-cards-impaire"></div>
                 <div id="set_cards_paire_${player_id}" class="set-cards-paire"></div>
@@ -713,6 +714,7 @@ export class Game {
               <div id="set_${player.id}" class="set">
               <div id="counter_second_to_last_set_${player.id}" class="counter_second_to_last_set"></div>
               <div id="counter_last_set_${player.id}" class="counter_last_set"></div>
+              <div id="lock_set_${player.id}" class="lock_set hidden"></div>
               <div class="title title_name_set" style="color: #${player.color};">${player.name}</div>
               <div id="set_cards_impaire_${player.id}" class="set-cards-impaire"></div>
               <div id="set_cards_paire_${player.id}" class="set-cards-paire"></div>
@@ -770,6 +772,7 @@ export class Game {
               <div id="set_${player.id}" class="set">
               <div id="counter_second_to_last_set_${player.id}" class="counter_second_to_last_set"></div>
               <div id="counter_last_set_${player.id}" class="counter_last_set"></div>
+              <div id="lock_set_${player.id}" class="lock_set hidden"></div>
               <div class="title title_name_set" style="color: #${player.color};">${player.name}</div>
               <div id="set_cards_impaire_${player.id}" class="set-cards-impaire"></div>
               <div id="set_cards_paire_${player.id}" class="set-cards-paire"></div>
@@ -785,6 +788,7 @@ export class Game {
       this.setupStocks();
       this.setupDiscard();
       this.setupSet();
+      this.setupLock();
 
       if(this.challenge == 1) {
         this.setupChallenge();
@@ -840,6 +844,23 @@ export class Game {
         });
       }
 
+
+    }
+
+    setupLock() {
+
+      Object.values(this.gamedatas.players).forEach((player) => {
+
+        if(this.gamedatas.max_position_set[player.id] != null)
+        {
+          if((this.gamedatas.max_position_set[player.id] == 1)||(this.gamedatas.max_position_set[player.id] == 2))
+          {
+              const lock = document.getElementById('lock_set_'+player.id);
+              lock.classList.remove('hidden');
+          }
+        }
+      
+      });
 
     }
 
@@ -983,7 +1004,7 @@ export class Game {
 
     addCardSet(set) {
 
-      var zIndex = set.position + 10;
+      var zIndex = Number(set.position) + 10;
       var position = '';
 
       if(set.type <= 10) {
@@ -1360,6 +1381,20 @@ export class Game {
       // suppression des sets
       document.querySelectorAll('.card_impaire').forEach(el => el.remove());
       document.querySelectorAll('.card_paire').forEach(el => el.remove());
+      
+    }
+
+    async notif_addLock(args) {
+
+      const lock = document.getElementById('lock_set_'+args.player);
+      lock.classList.remove('hidden');
+      
+    }
+
+    async notif_removeLock(args) {
+
+      const lock = document.getElementById('lock_set_'+args.player);
+      lock.classList.add('hidden');
       
     }
 
