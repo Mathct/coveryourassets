@@ -344,10 +344,8 @@ class Game extends \Bga\GameFramework\Table
         foreach ($players as $player)
         {
             $position_max = self::getUniqueValueFromDB( "SELECT `position` FROM `cards` WHERE `card_location` ='set' AND `card_location_arg`='{$player}' ORDER BY `position` DESC LIMIT 1" );
-            if($position_max != null)
-            {
-                $result['max_position_set'][$player] = (int)$position_max;
-            }
+            $result['max_position_set'][$player] = (int)$position_max;
+            
         }
 
         

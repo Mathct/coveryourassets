@@ -73,13 +73,14 @@
     cursor: pointer !important;
     pointer-events: auto !important;
     border-radius: 4px;
+    outline: 3px dashed red;
     
 }
 
 .selectable {
     cursor: pointer !important;
     pointer-events: auto !important;
-    outline: 4px dashed red;
+    outline: 3px dashed red;
     border-radius: 4px;
     
 }
@@ -226,7 +227,7 @@
   flex-wrap: wrap;
   align-items: center;
   width: 100%;
-  gap: 50px 50px;
+  gap: 95px 50px;
   margin-top: 45px;
 }
 
@@ -287,7 +288,7 @@
   background-color: rgba(255, 255, 255, 0.5);
   margin-top: 20px;
   border-radius: 20px;
-  padding-bottom: 20px;
+  padding-bottom: 45px;
   margin-bottom: 10px;
 }
 
@@ -363,7 +364,7 @@
   font-size: 20px;
   border-radius: 50%;
   background-color: white;
-  border: 1px solid black;
+  border: 2px solid black;
   padding: 5px;
   width: 25px;
   height: 25px;
@@ -390,12 +391,12 @@
   background-size: 100% 100%;
 }
 
-.counter_hand, .counter_last_set, .counter_second_to_last_set{
+.counter_hand{
   font-family: 'Garamond', 'Montserrat', 'Raleway', 'Segoe UI', Arial, sans-serif;
   font-size: 20px;
   border-radius: 50%;
   background-color: white;
-  border: 1px solid black;
+  border: 2px solid black;
   width: 25px;
   height: 25px;
   display: flex;
@@ -403,20 +404,38 @@
   justify-content: center;
   padding: 3px;
   font-weight: bold;
-  
-  
+ 
+}
+
+.counter_last_set, .counter_second_to_last_set{
+  font-family: 'Garamond', 'Montserrat', 'Raleway', 'Segoe UI', Arial, sans-serif;
+  font-size: 16px;
+  width: 25px;
+  height: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px;
+  font-weight: bold;
+  color: white;
+ 
 }
 
 .counter_second_to_last_set{
-  bottom: 0;
-  left: -35px;
+  bottom: -34px;
+  left: 7px;
   position: absolute;
+  z-index: 600;
+  font-size: 14px !important;
 }
 
 .counter_last_set{
-  top: 0;
-  right: -35px;
+  top: -2px;
+  right: -44px;;
   position: absolute;
+  z-index: 600;
+  font-size: 14px !important;
+  
 }
 
 .selectable_ff0000{
@@ -545,8 +564,28 @@
   position: absolute;
   background-image: url('img/cadena.png');
   background-size: 100% 100%;
-  bottom: -14px;
-  left: -14px;
-  opacity: 0.9;
+  bottom: -42px;
+  left: 46px;
 }
 
+.pile_set_impaire{
+  width: 45px;
+  height: 45px;
+  position: absolute;
+  background-image: url('img/pile.png');
+  background-size: 100% 100%;
+  bottom: -44px;
+  left: 1px;
+  z-index: 230;
+}
+
+.pile_set_paire{
+    width: 45px;
+    height: 45px;
+    position: absolute;
+    background-image: url('img/pile2.png');
+    background-size: 100% 100%;
+    bottom: 138px;
+    left: 185px;
+    z-index: 230;
+}

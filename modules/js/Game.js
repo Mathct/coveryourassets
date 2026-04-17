@@ -692,6 +692,8 @@ export class Game {
                 <div id="counter_second_to_last_set_${player_id}" class="counter_second_to_last_set"></div>
                 <div id="counter_last_set_${player_id}" class="counter_last_set"></div>
                 <div id="lock_set_${player_id}" class="lock_set hidden"></div>
+                <div class="pile_set_impaire"></div>
+                <div class="pile_set_paire"></div>
                 <div class="title title_name_set" style="color: #${color};">${_("My sets")}</div>
                 <div id="set_cards_impaire_${player_id}" class="set-cards-impaire"></div>
                 <div id="set_cards_paire_${player_id}" class="set-cards-paire"></div>
@@ -715,6 +717,8 @@ export class Game {
               <div id="counter_second_to_last_set_${player.id}" class="counter_second_to_last_set"></div>
               <div id="counter_last_set_${player.id}" class="counter_last_set"></div>
               <div id="lock_set_${player.id}" class="lock_set hidden"></div>
+              <div class="pile_set_impaire"></div>
+              <div class="pile_set_paire"></div>
               <div class="title title_name_set" style="color: #${player.color};">${player.name}</div>
               <div id="set_cards_impaire_${player.id}" class="set-cards-impaire"></div>
               <div id="set_cards_paire_${player.id}" class="set-cards-paire"></div>
@@ -773,6 +777,8 @@ export class Game {
               <div id="counter_second_to_last_set_${player.id}" class="counter_second_to_last_set"></div>
               <div id="counter_last_set_${player.id}" class="counter_last_set"></div>
               <div id="lock_set_${player.id}" class="lock_set hidden"></div>
+              <div class="pile_set_impaire"></div>
+              <div class="pile_set_paire"></div>
               <div class="title title_name_set" style="color: #${player.color};">${player.name}</div>
               <div id="set_cards_impaire_${player.id}" class="set-cards-impaire"></div>
               <div id="set_cards_paire_${player.id}" class="set-cards-paire"></div>
@@ -919,7 +925,7 @@ export class Game {
       this.handStock.centerItems = false;
       this.handStock.autowidth = true;
       this.handStock.setOverlap(0, 0);
-      this.handStock.item_margin = 12;
+      this.handStock.item_margin = 16;
       this.handStock.use_vertical_overlap_as_offset = false;
       this.handStock.vertical_overlap = -5;
       for( var card_id = 1; card_id <= 15; card_id++) {
@@ -934,7 +940,7 @@ export class Game {
     this.tableStock.centerItems = false;
     this.tableStock.autowidth = true;
     this.tableStock.setOverlap(0, 0);
-    this.tableStock.item_margin = 12;
+    this.tableStock.item_margin = 16;
     this.tableStock.use_vertical_overlap_as_offset = false;
     this.tableStock.vertical_overlap = -5;
     for( var card_id = 1; card_id <= 15; card_id++) {
@@ -1115,44 +1121,80 @@ export class Game {
     
     async notif_cardsMovedToTable(args) {
 
-        const container = document.getElementById('table_cards_container');
-        container.classList.remove('hidden');
-        let player_id = 0;
-        const cards = args.cards;
+        // const container = document.getElementById('table_cards_container');
+        // container.classList.remove('hidden');
+        // let player_id = 0;
+        // const cards = args.cards;
 
+        // if(!this.bga.players.isCurrentPlayerSpectator()) {
+        //   player_id = this.bga.players.getCurrentPlayer().id;
+        // }
+        
+        // for (const card of cards) {
+            
+        //     this.table[card.id] = card;
+        //     const div_id = player_id == card.location_arg ? `my_cards_item_${card.id}` : undefined;
+        //     const card_type = this.getStockCardType(card);
+        //     this.tableStock.addToStockWithId(card_type, card.id, div_id);
+
+        //     if ((player_id == card.location_arg)&&(!this.bga.players.isCurrentPlayerSpectator())) {
+        //         this.handStock.removeFromStockById(card.id);
+        //     }
+        // }
+
+        // await this.bga.gameui.wait(2000);
+
+        // for (const card of cards) {
+        //    const enfant = document.getElementById('table_cards_item_'+card.id);
+        //    const targetId = document.getElementById('set_'+card.location_arg).id;
+        //   this.attachToNewParentNoDestroy( enfant.id, targetId);
+        //   this.bga.gameui.slideToObjectAndDestroy( enfant.id, targetId, 500, 0 );
+
+          
+        // }
+
+        // await this.bga.gameui.wait(500);
+        // this.tableStock.removeAll();
+        // this.addCardSet(args.card_for_set)
+        // container.classList.add("hidden");
+       
+        // await this.bga.gameui.wait(1000);
+
+
+
+
+
+        
+        
+        const cards = args.cards;
+        let player_id = 0;
+        
         if(!this.bga.players.isCurrentPlayerSpectator()) {
           player_id = this.bga.players.getCurrentPlayer().id;
         }
-        
-        for (const card of cards) {
+                
+
+        if((player_id == args.player_id)&&(!this.bga.players.isCurrentPlayerSpectator()))
+        {
+          for (const card of cards) {
+            const enfant = document.getElementById('my_cards_item_'+card.id);
+            const targetId = document.getElementById('set_'+card.location_arg).id;
+            this.attachToNewParentNoDestroy( enfant.id, targetId);
+            this.bga.gameui.slideToObjectAndDestroy( enfant.id, targetId, 500, 0 );
             
-            this.table[card.id] = card;
-            const div_id = player_id == card.location_arg ? `my_cards_item_${card.id}` : undefined;
-            const card_type = this.getStockCardType(card);
-            this.tableStock.addToStockWithId(card_type, card.id, div_id);
+          }
 
-            if ((player_id == card.location_arg)&&(!this.bga.players.isCurrentPlayerSpectator())) {
-                this.handStock.removeFromStockById(card.id);
-            }
-        }
+          await this.bga.gameui.wait(490);
 
-        await this.bga.gameui.wait(2000);
-
-        for (const card of cards) {
-           const enfant = document.getElementById('table_cards_item_'+card.id);
-           const targetId = document.getElementById('set_'+card.location_arg).id;
-          this.attachToNewParentNoDestroy( enfant.id, targetId);
-          this.bga.gameui.slideToObjectAndDestroy( enfant.id, targetId, 500, 0 );
-
+          for (const card of cards) {
+            this.handStock.removeFromStockById( card.id);
+          }
           
         }
 
-        await this.bga.gameui.wait(500);
-        this.tableStock.removeAll();
         this.addCardSet(args.card_for_set)
-        container.classList.add("hidden");
-       
-        await this.bga.gameui.wait(1000);
+               
+        
 
     }
 
