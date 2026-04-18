@@ -537,12 +537,12 @@ export class Game {
           const id2 = ids[1].split("_");
           const type1 = this.all_cards[id1[3]].type;  
           const type2 = this.all_cards[id2[3]].type;
-          if((type1 <= 10)&&(type2 <= 10)&&(type1 == type2))
+          if((type1 <= 11)&&(type2 <= 11)&&(type1 == type2))
           {
             btn.disabled = false;
           }
 
-          else if ((type1 <= 10 && type2 == 11)||(type1 <= 10 && type2 == 12)||(type2 <= 10 && type1 == 11)||(type2 <= 10 && type1 == 12))
+          else if ((type1 <= 11 && type2 == 12)||(type1 <= 11 && type2 == 13)||(type2 <= 11 && type1 == 12)||(type2 <= 11 && type1 == 13))
           {
             btn.disabled = false;
           }

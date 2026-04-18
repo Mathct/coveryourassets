@@ -184,8 +184,15 @@ class Game extends \Bga\GameFramework\Table
         $cards[] = ['type' => 8, 'type_arg' => 0, 'nbr' => 9]; //9
         $cards[] = ['type' => 9, 'type_arg' => 0, 'nbr' => 9]; //9
         $cards[] = ['type' => 10, 'type_arg' => 0, 'nbr' => 8]; //8
-        $cards[] = ['type' => 11, 'type_arg' => 0, 'nbr' => 8]; //8
-        $cards[] = ['type' => 12, 'type_arg' => 0, 'nbr' => 4]; //4
+        $cards[] = ['type' => 12, 'type_arg' => 0, 'nbr' => 8]; //8
+        $cards[] = ['type' => 13, 'type_arg' => 0, 'nbr' => 4]; //4
+
+        if($this->getGameStateValue('game_mode') == 2)
+        {
+            $cards[] = ['type' => 11, 'type_arg' => 0, 'nbr' => 2]; //2
+            $cards[] = ['type' => 14, 'type_arg' => 0, 'nbr' => 2]; //2
+            $cards[] = ['type' => 15, 'type_arg' => 0, 'nbr' => 2]; //2
+        }
 
         $this->cards_DB->createCards($cards, 'deck');
         $this->cards_DB->shuffle('deck');
@@ -201,8 +208,13 @@ class Game extends \Bga\GameFramework\Table
         $this->DbQuery("UPDATE cards SET `value` = 15000 WHERE `card_type` = 8");
         $this->DbQuery("UPDATE cards SET `value` = 15000 WHERE `card_type` = 9");
         $this->DbQuery("UPDATE cards SET `value` = 20000 WHERE `card_type` = 10");
-        $this->DbQuery("UPDATE cards SET `value` = 25000 WHERE `card_type` = 11");
-        $this->DbQuery("UPDATE cards SET `value` = 50000 WHERE `card_type` = 12");
+        $this->DbQuery("UPDATE cards SET `value` = 25000 WHERE `card_type` = 12");
+        $this->DbQuery("UPDATE cards SET `value` = 50000 WHERE `card_type` = 13");
+
+        if($this->getGameStateValue('game_mode') == 2)
+        {
+            $this->DbQuery("UPDATE cards SET `value` = 1000 WHERE `card_type` = 11");
+        }
         
         //distribution des cartes
         if($this->getGameStateValue('game_mode') == 1)

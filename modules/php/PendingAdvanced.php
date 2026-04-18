@@ -42,12 +42,12 @@ trait PendingAdvancedTrait  // ATTENTION
             foreach ($handCards as $card) {
                 $ret["selectablemulti"][] = 'my_cards_item_' . $card['id'];
                 $type = (int) $card['type'];
-                if ($type >= 1 && $type <= 10) {
+                if ($type >= 1 && $type <= 11) {
                     if (!isset($assetCounts[$type])) {
                         $assetCounts[$type] = 0;
                     }
                     $assetCounts[$type]++;
-                } else if ($type === 11 || $type === 12) {
+                } else if ($type === 12 || $type === 13) {
                     $jokerCount++;
                 }
             }
@@ -105,7 +105,7 @@ trait PendingAdvancedTrait  // ATTENTION
 
                                 foreach ($handCards as $card) {
                                     $type = (int) $card['type'];
-                                    if ($type == $type_last_set || $type === 11 || $type === 12) {
+                                    if ($type == $type_last_set || $type == 12 || $type == 13) {
                                         $possible_challenge = 1;
                                     } 
                                 }
@@ -501,7 +501,7 @@ trait PendingAdvancedTrait  // ATTENTION
                     }
 
                 }
-                
+
                 $g->setGameStateValue("attaquant", 0);
                 $g->setGameStateValue("defenseur", 0);
                 $g->setGameStateValue("challenge", 0);
@@ -732,7 +732,7 @@ trait PendingAdvancedTrait  // ATTENTION
 
                         foreach ($handCards as $card) {
                             $type = (int) $card['type'];
-                            if ($type == $type_last_set || $type === 11 || $type === 12) {
+                            if ($type == $type_last_set || $type == 12 || $type == 13) {
                                 if (!in_array($player, $players_challenge))
                                 {
                                     $players_challenge[] = $player;
@@ -820,7 +820,7 @@ trait PendingAdvancedTrait  // ATTENTION
                 $ret["selectable"][] = 'my_cards_item_'.$handCard['id'];
             }
 
-            if($handCard['type'] == 11 || $handCard['type'] == 12)
+            if($handCard['type'] == 12 || $handCard['type'] == 13)
             {
                 $ret["selectable"][] = 'my_cards_item_'.$handCard['id'];
             }
@@ -939,7 +939,7 @@ trait PendingAdvancedTrait  // ATTENTION
                 $ret["selectable"][] = 'my_cards_item_'.$handCard['id'];
             }
 
-            if($handCard['type'] == 11 || $handCard['type'] == 12)
+            if($handCard['type'] == 12 || $handCard['type'] == 13)
             {
                 $ret["selectable"][] = 'my_cards_item_'.$handCard['id'];
             }
