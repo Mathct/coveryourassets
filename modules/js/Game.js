@@ -191,6 +191,30 @@ class NormalTurn {
             );
             break;
 
+          case "swap_btn":
+            this.bga.statusBar.addActionButton(
+              _("Swap"),
+              () =>
+                this.bga.actions.performAction("actButton", {
+                  arg1: key,
+                  arg2: this.game.SelectSwap(),
+                }),
+              { color: "primary", id: "swap_btn", disabled: true },
+            );
+            break;
+          
+          case "move_btn":
+            this.bga.statusBar.addActionButton(
+              _("Move"),
+              () =>
+                this.bga.actions.performAction("actButton", {
+                  arg1: key,
+                  arg2: this.game.SelectMove(),
+                }),
+              { color: "primary", id: "move_btn", disabled: true },
+            );
+            break;
+
           case "challenge_btn":
             this.bga.statusBar.addActionButton(
               _("Challenge"),
@@ -522,6 +546,8 @@ export class Game {
 
         this.TestSetButton();
         this.TestDiscardButton();
+        this.TestSwapButton();
+        this.TestMoveButton();
         
     }
 
@@ -569,7 +595,75 @@ export class Game {
       if(btn) {
         if(count == 1)
         { 
-          btn.disabled = false;
+          const id1 = ids[0].split("_");
+          const type1 = this.all_cards[id1[3]].type;
+          if((type1 != 14)&&(type1 != 15))
+          {
+            btn.disabled = false;
+          }
+          else
+          {
+            btn.disabled = true;
+          }
+          
+        }
+
+        else
+        {        
+          btn.disabled = true;
+        }
+      }        
+        
+    }
+
+    TestSwapButton() {
+      const ids = Array.from(document.querySelectorAll('.selectedmulti')).map(el => el.id);
+      const count = ids.length;
+      const btn = document.getElementById('swap_btn');
+
+      if(btn) {
+        if(count == 1)
+        { 
+          const id1 = ids[0].split("_");
+          const type1 = this.all_cards[id1[3]].type;
+          if(type1 == 14)
+          {
+            btn.disabled = false;
+          }
+          else
+          {
+            btn.disabled = true;
+          }
+          
+        }
+
+        else
+        {        
+          btn.disabled = true;
+        }
+      }        
+        
+    }
+
+    TestMoveButton() {
+      const ids = Array.from(document.querySelectorAll('.selectedmulti')).map(el => el.id);
+      const count = ids.length;
+      const btn = document.getElementById('move_btn');
+
+      if(btn) {
+        if(count == 1)
+        { 
+          const id1 = ids[0].split("_");
+          const type1 = this.all_cards[id1[3]].type;
+          if(type1 == 15)
+          {
+            btn.disabled = false;
+          }
+          else
+          {
+            btn.disabled = true;
+          }
+          
         }
 
         else
@@ -592,6 +686,20 @@ export class Game {
     }
 
     SelectDiscard() {
+
+      const ids = Array.from(document.querySelectorAll('.selectedmulti')).map(el => el.id);
+      const id1 = ids[0].split("_")[3];
+      return id1;
+    }
+
+    SelectSwap() {
+
+      const ids = Array.from(document.querySelectorAll('.selectedmulti')).map(el => el.id);
+      const id1 = ids[0].split("_")[3];
+      return id1;
+    }
+
+    SelectMove() {
 
       const ids = Array.from(document.querySelectorAll('.selectedmulti')).map(el => el.id);
       const id1 = ids[0].split("_")[3];

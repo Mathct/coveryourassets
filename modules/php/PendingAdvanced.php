@@ -39,6 +39,9 @@ trait PendingAdvancedTrait  // ATTENTION
         {
             $assetCounts = [];
             $jokerCount = 0;
+            $swap = 0;
+            $move = 0;
+
             foreach ($handCards as $card) {
                 $ret["selectablemulti"][] = 'my_cards_item_' . $card['id'];
                 $type = (int) $card['type'];
@@ -47,10 +50,25 @@ trait PendingAdvancedTrait  // ATTENTION
                         $assetCounts[$type] = 0;
                     }
                     $assetCounts[$type]++;
-                } else if ($type === 12 || $type === 13) {
+                } 
+
+                if ($type === 12 || $type === 13) {
                     $jokerCount++;
                 }
+
+                if($type === 14)
+                {
+                    $swap = 1;
+                }
+
+                if($type === 15)
+                {
+                    $move = 1;
+                }
             }
+
+
+
 
             $canCreateSet = false;
             foreach ($assetCounts as $count) {
@@ -62,12 +80,29 @@ trait PendingAdvancedTrait  // ATTENTION
             if (!$canCreateSet && $jokerCount > 0 && count($assetCounts) > 0) {
                 $canCreateSet = true;
             }
-
             if ($canCreateSet) {
                 $ret['buttons'][] = 'create_set_btn';
             }
 
+
+
+
+            if($swap == 1)
+            {
+                $ret['buttons'][] = 'swap_btn';
+            }
+
+            if($move == 1)
+            {
+                $ret['buttons'][] = 'move_btn';
+            }
+
+
+
+
             $ret['buttons'][] = 'discard_btn';
+
+
 
 
             $last_set = [];
@@ -86,8 +121,6 @@ trait PendingAdvancedTrait  // ATTENTION
                 }
         
             }
-
-        
 
             $possible_challenge = 0;
             $first_set = game::$instance->getUniqueValueFromDB("SELECT first_set FROM player WHERE player_id = '{$this->player_id}'");
@@ -121,9 +154,9 @@ trait PendingAdvancedTrait  // ATTENTION
                 {
                     $ret['buttons'][] = 'challenge_btn';
                 }
-
-            
+           
             }
+
 
             if($this->player_turn == 2)
             {
@@ -677,6 +710,16 @@ trait PendingAdvancedTrait  // ATTENTION
         if($varg1 == 'challenge_btn') {
 
             $g->addPending($this->player_id, "Challenge2Step1");
+        }
+
+        if($varg1 == 'swap_btn')
+        {
+            $g->addPending($this->player_id, "PlayerTurn2");
+        }
+
+        if($varg1 == 'move_btn')
+        {
+            $g->addPending($this->player_id, "PlayerTurn2");
         }
 
         
