@@ -71,10 +71,12 @@ class Game extends \Bga\GameFramework\Table
             "defenseur" => 12,
             "round" => 13,
             "player_turn" => 14,
+            "defenseur_first_turn" => 15,
+            "win_first_turn" => 16,
 
             // options
-            'game_mode'            => 100,
-            'winning_condition'            => 101,
+            'game_mode' => 100,
+            'winning_condition' => 101,
 
         ]); // mandatory, even if the array is empty
 
@@ -128,6 +130,8 @@ class Game extends \Bga\GameFramework\Table
         $this->setGameStateInitialValue("challenge", 0);
         $this->setGameStateInitialValue("attaquant", 0);
         $this->setGameStateInitialValue("defenseur", 0);
+        $this->setGameStateInitialValue("defenseur_first_turn", 0);
+        $this->setGameStateInitialValue("win_first_turn", 0);
         $this->setGameStateInitialValue("round", 1);
         $this->setGameStateInitialValue("player_turn", 1);
 

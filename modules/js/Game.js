@@ -1214,7 +1214,7 @@ export class Game {
             
           }
 
-          await this.bga.gameui.wait(490);
+          await this.bga.gameui.wait(400);
 
           for (const card of cards) {
             this.handStock.removeFromStockById( card.id);
