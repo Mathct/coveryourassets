@@ -748,6 +748,16 @@ class Pending extends Game
                 ]
             );
 
+            $txt = clienttranslate('${player_name} wins the challenge');
+            $g->notify->all(
+                "message",
+                $txt,
+                [
+                    'player_id' => $defenseur,
+                    
+                ]
+            );
+
             foreach ($cards_defi as $card_defi)
             {
                 $g->cards_DB->moveCard($card_defi['id'], 'set', $defenseur);
@@ -784,6 +794,16 @@ class Pending extends Game
                     'winner' => $attaquant,
                     'cards' => $cards_defi,
                     'card_for_set' => $card_for_set,
+                ]
+            );
+
+            $txt = clienttranslate('${player_name} wins the challenge');
+            $g->notify->all(
+                "message",
+                $txt,
+                [
+                    'player_id' => $attaquant,
+                    
                 ]
             );
 
