@@ -36,6 +36,7 @@ class Game extends \Bga\GameFramework\Table
 
     // counters players
     public playerCounter $hand;
+    public playerCounter $set;
     public playerCounter $last_set;
     public playerCounter $second_to_last_set;
     public playerCounter $cumul_score;
@@ -83,6 +84,7 @@ class Game extends \Bga\GameFramework\Table
         $this->deck = $this->counterFactory->createTableCounter('deck');
        
         $this->hand = $this->counterFactory->createPlayerCounter('hand');
+        $this->set = $this->counterFactory->createPlayerCounter('set');
         $this->last_set = $this->counterFactory->createPlayerCounter('last_set');
         $this->second_to_last_set = $this->counterFactory->createPlayerCounter('second_to_last_set');
         $this->cumul_score = $this->counterFactory->createPlayerCounter('cumul_score');
@@ -209,6 +211,7 @@ class Game extends \Bga\GameFramework\Table
         //counters
         $this->deck->initDb($count_deck);
         $this->hand->initDb(array_keys($players), 5);
+        $this->set->initDb(array_keys($players), 0);
         $this->last_set->initDb(array_keys($players), 0);
         $this->second_to_last_set->initDb(array_keys($players), 0);
         $this->cumul_score->initDb(array_keys($players), 0);
@@ -352,6 +355,7 @@ class Game extends \Bga\GameFramework\Table
         //counters
         $this->deck->fillResult($result);
         $this->hand->fillResult($result);
+        $this->set->fillResult($result);
         $this->last_set->fillResult($result);
         $this->second_to_last_set->fillResult($result);
         $this->cumul_score->fillResult($result);

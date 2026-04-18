@@ -611,6 +611,11 @@ export class Game {
                 <div id="counter_hand_${player.id}" class="counter_hand"></div>
               </div>
 
+              <div class="set_card_pannel">
+                <div class="set_card_pannel_image"></div>
+                <div id="counter_set_${player.id}" class="counter_hand"></div>
+              </div>
+
               <div class="cumul_score_pannel">
                 <div class="billet"></div>
                 <div>$</div>
@@ -629,6 +634,11 @@ export class Game {
               <div class="hand_card_pannel">
                 <div class="hand_card_pannel_image"></div>
                 <div id="counter_hand_${player.id}" class="counter_hand"></div>
+              </div>
+
+              <div class="set_card_pannel">
+                <div class="set_card_pannel_image"></div>
+                <div id="counter_set_${player.id}" class="counter_hand"></div>
               </div>
               
               `,
@@ -816,6 +826,15 @@ export class Game {
         hand_counter.create(`counter_hand_${player.id}`, {
         value: player.hand,
         playerCounter: "hand",
+        playerId: player.id,
+      });
+      });
+
+      Object.values(this.gamedatas.players).forEach((player) => {
+        const set_counter = new ebg.counter();
+        set_counter.create(`counter_set_${player.id}`, {
+        value: player.set,
+        playerCounter: "set",
         playerId: player.id,
       });
       });

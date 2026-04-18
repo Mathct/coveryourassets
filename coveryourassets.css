@@ -227,7 +227,7 @@
   flex-wrap: wrap;
   align-items: center;
   width: 100%;
-  gap: 95px 50px;
+  gap: 95px 60px;
   margin-top: 45px;
 }
 
@@ -387,7 +387,23 @@
   position: relative;
   width: 56px;
   height: 50px;
-  background-image: url('img/hand_card.png');
+  background-image: url('img/hand_card_v2.png');
+  background-size: 100% 100%;
+}
+
+.set_card_pannel {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  
+}
+
+.set_card_pannel_image{
+
+  position: relative;
+  width: 56px;
+  height: 50px;
+  background-image: url('img/set_image_v2.png');
   background-size: 100% 100%;
 }
 
@@ -502,15 +518,6 @@
   background-image: url('img/Cards.png');
   background-size: 1000% 200%;
   border-radius: 5%;
-}
-
-.set_pannel_image{
-
-  position: relative;
-  width: 50px;
-  height: 50px;
-  background-image: url('img/set_image.png');
-  background-size: 100% 100%;
 }
 
 .cumul_score_pannel{

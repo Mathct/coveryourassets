@@ -277,6 +277,7 @@ class Pending extends Game
             );
 
             $this->majSetCounters($this->player_id);
+            $g->set->inc($this->player_id, 1);
             $this->Lock();
 
             if($count_deck >= 1) {
@@ -785,6 +786,9 @@ class Pending extends Game
                     'card_for_set' => $card_for_set,
                 ]
             );
+
+            $g->set->inc($attaquant, 1);
+            $g->set->inc($defenseur, -1);
 
         }
 
