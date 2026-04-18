@@ -70,6 +70,7 @@ class Game extends \Bga\GameFramework\Table
             "attaquant" => 11,
             "defenseur" => 12,
             "round" => 13,
+            "player_turn" => 14,
 
             // options
             'game_mode'            => 100,
@@ -128,6 +129,7 @@ class Game extends \Bga\GameFramework\Table
         $this->setGameStateInitialValue("attaquant", 0);
         $this->setGameStateInitialValue("defenseur", 0);
         $this->setGameStateInitialValue("round", 1);
+        $this->setGameStateInitialValue("player_turn", 1);
 
         
         // Set the colors of the players with HTML color code. The default below is red/green/blue/orange/brown. The
@@ -199,8 +201,18 @@ class Game extends \Bga\GameFramework\Table
         $this->DbQuery("UPDATE cards SET `value` = 50000 WHERE `card_type` = 12");
         
         //distribution des cartes
-        foreach ($players as $player_id => $player) {
-            $this->cards_DB->pickCards(5, 'deck', (int) $player_id);
+        if($this->getGameStateValue('game_mode') == 1)
+        {
+            foreach ($players as $player_id => $player) {
+                $this->cards_DB->pickCards(5, 'deck', (int) $player_id);
+            }
+        }
+
+        if($this->getGameStateValue('game_mode') == 2)
+        {
+            foreach ($players as $player_id => $player) {
+                $this->cards_DB->pickCards(6, 'deck', (int) $player_id);
+            }
         }
 
         //mise en defausse de la premier carte du deck
@@ -210,7 +222,17 @@ class Game extends \Bga\GameFramework\Table
 
         //counters
         $this->deck->initDb($count_deck);
-        $this->hand->initDb(array_keys($players), 5);
+
+        if($this->getGameStateValue('game_mode') == 1)
+        {
+            $this->hand->initDb(array_keys($players), 5);
+        }
+
+        if($this->getGameStateValue('game_mode') == 2)
+        {
+            $this->hand->initDb(array_keys($players), 6);
+        }
+        
         $this->set->initDb(array_keys($players), 0);
         $this->last_set->initDb(array_keys($players), 0);
         $this->second_to_last_set->initDb(array_keys($players), 0);
@@ -238,9 +260,18 @@ class Game extends \Bga\GameFramework\Table
         //return PlayerTurn::class;
 
 
+        if($this->getGameStateValue('game_mode') == 1)
+        {
+            foreach (array_keys($players) as $player_id) {
+                $this->addPendingFirst($player_id, "PlayerTurn");
+            }
+        }
 
-        foreach (array_keys($players) as $player_id) {
-            $this->addPendingFirst($player_id, "PlayerTurn");
+        if($this->getGameStateValue('game_mode') == 2)
+        {
+            foreach (array_keys($players) as $player_id) {
+                $this->addPendingFirst($player_id, "PlayerTurn2");
+            }
         }
 
         $first = (int)$this->getUniqueValueFromDB("SELECT player_id FROM player WHERE player_no = 1");

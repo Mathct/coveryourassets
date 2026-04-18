@@ -155,6 +155,17 @@ class NormalTurn {
               { color: "alert" },
             );
             break;
+
+          case "pass_btn":
+            this.bga.statusBar.addActionButton(
+              _("Pass"),
+              () =>
+                this.bga.actions.performAction("actButton", {
+                  arg1: key,
+                }),
+              { color: "alert" },
+            );
+            break;
           
           case "create_set_btn":
             this.bga.statusBar.addActionButton(

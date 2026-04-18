@@ -2,108 +2,8 @@
 
 namespace Bga\Games\coveryourassets;   // ATTENTION NOM DU JEU
 
-require_once 'PendingConfirm.php'; // ATTENTION
-require_once 'PendingAdvanced.php'; // ATTENTION
-
-use Bga\GameFramework\UserException;
-use Bga\GameFramework\NotificationMessage;
-
-class Pending extends Game
+trait PendingAdvancedTrait  // ATTENTION
 {
-    use PendingConfirmTrait; // ATTENTION TRAIT
-    use PendingAdvancedTrait; // ATTENTION TRAIT
-
-    public $player_id;
-    public $player_no;
-    public $player_name;
-    public $player_score;
-    public $player_color;
-    public $player_pref_confirm;
-
-    public function __construct($player_id)
-    {
-        $this->player_id = $player_id;
-        $p = game::$instance->getObjectFromDB("SELECT * FROM player WHERE player_id = {$player_id}");
-        $this->player_no = $p['player_no'];
-        $this->player_id = $p['player_id'];
-        $this->player_name = $p['player_name'];
-        $this->player_score = $p['player_score'];
-        $this->player_color = $p['player_color'];
-
-        $this->round_nb = game::$instance->getGameStateValue('round');
-
-        $this->player_turn = game::$instance->getGameStateValue('player_turn');
-
-        /// PREFERENCE DE CONFIRMATION
-        $this->player_pref_confirm = game::$instance->userPreferences->get($this->player_id, 100);
-
-        /// GAME MODE (Normal / Advanced)
-        if(game::$instance->getGameStateValue('game_mode') == 1)
-        {
-            $this->game_mode = 1;
-        }
-
-        if(game::$instance->getGameStateValue('game_mode') == 2)
-        {
-            $this->game_mode = 2;
-        }
-
-        /// WINNING CONDITION
-        if(game::$instance->getGameStateValue('winning_condition') == 1)
-        {
-            $this->winning_condition = 1;
-        }
-
-        if(game::$instance->getGameStateValue('winning_condition') == 2)
-        {
-            $this->winning_condition = 2;
-        }
-
-        if(game::$instance->getGameStateValue('winning_condition') == 3)
-        {
-            $this->winning_condition = 3;
-        }
-
-        if(game::$instance->getGameStateValue('winning_condition') == 4)
-        {
-            $this->winning_condition = 4;
-        }
-    }
-
-    function argRound1($parg1, $parg2)
-    {
-        $ret = [];
-        $ret["selectable"] = [];
-        $ret["selectablemulti"] = [];
-        $ret["selected"] = [];
-        $ret["selectedmulti"] = [];
-        $ret['buttons'] = [];
-        $ret['title'] = clienttranslate('');
-        $ret['titleyou'] = clienttranslate('');
-
-       return $ret;
-    }
-
-    function Round1($parg1, $parg2, $varg1, $varg2, $varg3, $varg4)
-    {
-        $g = game::$instance;
-
-        if($this->winning_condition != 2)
-        {
-            $g->notify->all('message', clienttranslate('${message}'), [
-                    'message' => [
-                        'log' => '<div class="log_newRound">${round} ${nb}</div>',
-                        'args' => [
-                            'round' => clienttranslate('Round'),
-                            'nb' => $this->round_nb,
-                            'i18n' => ['round']
-                        ],
-                    ]
-                ]);
-        }
-
-    }
-
     /*
      _______               
     |__   __|              
@@ -115,7 +15,7 @@ class Pending extends Game
     */
 
 
-    function argPlayerTurn($parg1, $parg2)
+    function argPlayerTurn2($parg1, $parg2)
     {
         $ret = [];
         $ret["selectable"] = [];
@@ -215,6 +115,11 @@ class Pending extends Game
 
             
             }
+
+            if($this->player_turn == 2)
+            {
+               $ret['buttons'][] = 'pass_btn'; 
+            }
         }
          
 
@@ -223,22 +128,119 @@ class Pending extends Game
 
 
 
-    function PlayerTurn($parg1, $parg2, $varg1, $varg2, $varg3, $varg4)
+    function PlayerTurn2($parg1, $parg2, $varg1, $varg2, $varg3, $varg4)
     {
         $g = game::$instance;
         $count_deck = count($g->getObjectListFromDB( "SELECT `card_id` `id` FROM cards WHERE card_location = 'deck'", true ));
-       
+
+               
         if($varg1 == null)
         {
-            $count_all_cards = count($g->getObjectListFromDB( "SELECT card_id FROM cards WHERE card_location = 'hand'", true ));
-            if($count_all_cards >= 1)
+            $g->setGameStateValue("player_turn", 1);
+
+            if($count_deck >= 1)
             {
-                $g->addPendingFirst($this->player_id, "PlayerTurn");
+                $handCards = game::$instance->cards_DB->getCardsInLocation('hand', $this->player_id);
+                $count_hand_cards = count($handCards);
+
+                $need_cards = 6 - $count_hand_cards;
+
+                if($count_deck >= $need_cards)
+                {
+                    $newcards = $g->cards_DB->pickCards($need_cards, 'deck', $this->player_id);
+                    $g->deck->inc(-$need_cards);
+                    $g->hand->inc($this->player_id, $need_cards);
+
+                    $g->notify->player(
+                            $this->player_id,
+                            "drawCards",
+                            '',
+                            [
+                                'player_id' => $this->player_id,
+                                'cards' => $newcards,
+                            ]
+                        );
+                }
+                if (($count_deck < $need_cards)&&($count_deck >= 1))
+                {
+                    $newcards = $g->cards_DB->pickCards($count_deck, 'deck', $this->player_id);
+                    $g->deck->set(0);
+                    $g->hand->inc($this->player_id, $count_deck);
+
+                    $g->notify->player(
+                            $this->player_id,
+                            "drawCards",
+                            '',
+                            [
+                                'player_id' => $this->player_id,
+                                'cards' => $newcards,
+                            ]
+                        );
+
+                }
+
+                $g->addPendingFirst($this->player_id, "PlayerTurn2");
+
             }
+
             else
             {
-                $g->addPending($this->player_id, "EndOfRound");
+                $count_all_cards = count($g->getObjectListFromDB( "SELECT card_id FROM cards WHERE card_location = 'hand'", true ));
+                if($count_all_cards >= 1)
+                {
+                    $g->addPendingFirst($this->player_id, "PlayerTurn2");
+                }
+                else
+                {
+                    $g->addPending($this->player_id, "EndOfRound2");
+                }
             }
+
+        }
+
+        if($varg1 == 'pass_btn')
+        {
+            $handCards = game::$instance->cards_DB->getCardsInLocation('hand', $this->player_id);
+            $count_hand_cards = count($handCards);
+
+            $need_cards = 6 - $count_hand_cards;
+
+            if($count_deck >= $need_cards)
+            {
+                $newcards = $g->cards_DB->pickCards($need_cards, 'deck', $this->player_id);
+                $g->deck->inc(-$need_cards);
+                $g->hand->inc($this->player_id, $need_cards);
+
+                $g->notify->player(
+                        $this->player_id,
+                        "drawCards",
+                        '',
+                        [
+                            'player_id' => $this->player_id,
+                            'cards' => $newcards,
+                        ]
+                    );
+            }
+            if (($count_deck < $need_cards)&&($count_deck >= 1))
+            {
+                $newcards = $g->cards_DB->pickCards($count_deck, 'deck', $this->player_id);
+                $g->deck->set(0);
+                $g->hand->inc($this->player_id, $count_deck);
+
+                $g->notify->player(
+                        $this->player_id,
+                        "drawCards",
+                        '',
+                        [
+                            'player_id' => $this->player_id,
+                            'cards' => $newcards,
+                        ]
+                    );
+
+            }
+            
+            $g->setGameStateValue("player_turn", 1);
+            $g->addPendingFirst($this->player_id, "PlayerTurn2");
 
         }
 
@@ -283,41 +285,68 @@ class Pending extends Game
             $this->majSetCounters($this->player_id);
             $g->set->inc($this->player_id, 1);
             $this->Lock();
+            $g->hand->inc($this->player_id, -2);
 
-            if($count_deck >= 1) {
-                if($count_deck >= 2) {
-                    $newcards = $g->cards_DB->pickCards(2, 'deck', $this->player_id);
-                    $g->deck->inc(-2);
-                }
-                if($count_deck == 1) {
-                    $newcards = $g->cards_DB->pickCards(1, 'deck', $this->player_id);
-                    $g->deck->inc(-1);
-                    $g->hand->inc($this->player_id, -1);
-                }
-                
-                $g->notify->player(
-                    $this->player_id,
-                    "drawCards",
-                    '',
-                    [
-                        'player_id' => $this->player_id,
-                        'cards' => $newcards,
-                    ]
-                );
-            }
-
-            if($count_deck == 0) 
+            if($this->player_turn == 2)
             {
-                $g->hand->inc($this->player_id, -2);
+                $handCards = game::$instance->cards_DB->getCardsInLocation('hand', $this->player_id);
+                $count_hand_cards = count($handCards);
+
+                $need_cards = 6 - $count_hand_cards;
+
+                if($count_deck >= $need_cards)
+                {
+                    $newcards = $g->cards_DB->pickCards($need_cards, 'deck', $this->player_id);
+                    $g->deck->inc(-$need_cards);
+                    $g->hand->inc($this->player_id, $need_cards);
+
+                    $g->notify->player(
+                            $this->player_id,
+                            "drawCards",
+                            '',
+                            [
+                                'player_id' => $this->player_id,
+                                'cards' => $newcards,
+                            ]
+                        );
+                }
+                if (($count_deck < $need_cards)&&($count_deck >= 1))
+                {
+                    $newcards = $g->cards_DB->pickCards($count_deck, 'deck', $this->player_id);
+                    $g->deck->set(0);
+                    $g->hand->inc($this->player_id, $count_deck);
+
+                    $g->notify->player(
+                            $this->player_id,
+                            "drawCards",
+                            '',
+                            [
+                                'player_id' => $this->player_id,
+                                'cards' => $newcards,
+                            ]
+                        );
+
+                }
             }
 
 
             $g->DbQuery(
                 "UPDATE player SET `first_set` = 1 WHERE player_id = '{$this->player_id}'"
             );
-          
 
-            $g->addPendingFirst($this->player_id, "PlayerTurn");
+            if($this->player_turn == 1)
+            {
+                $g->setGameStateValue("player_turn", 2);
+                $g->addPending($this->player_id, "PlayerTurn2");
+            }
+          
+            if($this->player_turn == 2)
+            {
+                $g->setGameStateValue("player_turn", 1);
+                $g->addPendingFirst($this->player_id, "PlayerTurn2");
+            }
+
+            
         }
 
         if($varg1 == 'discard_btn') {
@@ -348,31 +377,90 @@ class Pending extends Game
                 ]
             );
 
-            if($count_deck >= 1) {
-                $newcards = $g->cards_DB->pickCards(1,'deck', $this->player_id);
-                $g->notify->player(
-                    $this->player_id,
-                    "drawCards",
-                    '',
-                    [
-                        'player_id' => $this->player_id,
-                        'cards' => $newcards,
-                    ]
-                );
+            if($this->player_turn == 1)
+            {
 
-                $g->deck->inc(-1);
+                if($count_deck >= 1) {
+                    $newcards = $g->cards_DB->pickCards(1,'deck', $this->player_id);
+                    $g->notify->player(
+                        $this->player_id,
+                        "drawCards",
+                        '',
+                        [
+                            'player_id' => $this->player_id,
+                            'cards' => $newcards,
+                        ]
+                    );
+
+                    $g->deck->inc(-1);
+                }
+
+                else {
+                    $g->hand->inc($this->player_id, -1);
+                }
+
             }
 
-            else {
+            if($this->player_turn == 2)
+            {
                 $g->hand->inc($this->player_id, -1);
+
+                $handCards = game::$instance->cards_DB->getCardsInLocation('hand', $this->player_id);
+                $count_hand_cards = count($handCards);
+
+                $need_cards = 6 - $count_hand_cards;
+
+                if($count_deck >= $need_cards)
+                {
+                    $newcards = $g->cards_DB->pickCards($need_cards, 'deck', $this->player_id);
+                    $g->deck->inc(-$need_cards);
+                    $g->hand->inc($this->player_id, $need_cards);
+
+                    $g->notify->player(
+                            $this->player_id,
+                            "drawCards",
+                            '',
+                            [
+                                'player_id' => $this->player_id,
+                                'cards' => $newcards,
+                            ]
+                        );
+                }
+                if (($count_deck < $need_cards)&&($count_deck >= 1))
+                {
+                    $newcards = $g->cards_DB->pickCards($count_deck, 'deck', $this->player_id);
+                    $g->deck->set(0);
+                    $g->hand->inc($this->player_id, $count_deck);
+
+                    $g->notify->player(
+                            $this->player_id,
+                            "drawCards",
+                            '',
+                            [
+                                'player_id' => $this->player_id,
+                                'cards' => $newcards,
+                            ]
+                        );
+
+                }
             }
 
-            $g->addPendingFirst($this->player_id, "PlayerTurn");
+            if($this->player_turn == 1)
+            {
+                $g->setGameStateValue("player_turn", 2);
+                $g->addPending($this->player_id, "PlayerTurn2");
+            }
+          
+            if($this->player_turn == 2)
+            {
+                $g->setGameStateValue("player_turn", 1);
+                $g->addPendingFirst($this->player_id, "PlayerTurn2");
+            }
         }
 
         if($varg1 == 'challenge_btn') {
 
-            $g->addPending($this->player_id, "ChallengeStep1");
+            $g->addPending($this->player_id, "Challenge2Step1");
         }
 
         
@@ -380,7 +468,7 @@ class Pending extends Game
 
 
     /* choisir l'adversaire */
-    function argChallengeStep1($parg1, $parg2)
+    function argChallenge2Step1($parg1, $parg2)
     {
         $ret = [];
         $ret["selectable"] = [];
@@ -453,17 +541,17 @@ class Pending extends Game
     }
 
 
-    function ChallengeStep1($parg1, $parg2, $varg1, $varg2, $varg3, $varg4)
+    function Challenge2Step1($parg1, $parg2, $varg1, $varg2, $varg3, $varg4)
     {
         $g = game::$instance;
 
         if($varg1 == 'cancel_btn')
         {
-            $g->addPending($this->player_id, "PlayerTurn");
+            $g->addPending($this->player_id, "PlayerTurn2");
         }
 
         else {
-            $g->addPending($this->player_id, "ChallengeStep2", $varg1);
+            $g->addPending($this->player_id, "Challenge2Step2", $varg1);
         }
 
         
@@ -472,7 +560,7 @@ class Pending extends Game
     }
 
     /* choisir la premere card du défi pour l'attaquant */
-    function argChallengeStep2($parg1, $parg2)
+    function argChallenge2Step2($parg1, $parg2)
     {
         $ret = [];
         $ret["selectable"] = [];
@@ -526,13 +614,13 @@ class Pending extends Game
 
 
 
-    function ChallengeStep2($parg1, $parg2, $varg1, $varg2, $varg3, $varg4)
+    function Challenge2Step2($parg1, $parg2, $varg1, $varg2, $varg3, $varg4)
     {
         $g = game::$instance;
 
         if($varg1 == 'cancel_btn')
         {
-            $g->addPending($this->player_id, "PlayerTurn");
+            $g->addPending($this->player_id, "PlayerTurn2");
         }
 
         else {
@@ -578,7 +666,7 @@ class Pending extends Game
             );
 
             $g->hand->inc($this->player_id, -1);
-            $g->addPending($opponent, "ChallengeStep3");
+            $g->addPending($opponent, "Challenge2Step3");
         }
 
         
@@ -587,7 +675,7 @@ class Pending extends Game
     }
 
     /* DEFI tour par tour jusqu'a abandon*/
-    function argChallengeStep3($parg1, $parg2)
+    function argChallenge2Step3($parg1, $parg2)
     {
         $ret = [];
         $ret["selectable"] = [];
@@ -644,13 +732,13 @@ class Pending extends Game
 
 
 
-    function ChallengeStep3($parg1, $parg2, $varg1, $varg2, $varg3, $varg4)
+    function Challenge2Step3($parg1, $parg2, $varg1, $varg2, $varg3, $varg4)
     {
         $g = game::$instance;
 
         if($varg1 == 'abandon_btn')
         {
-            $g->addPending($this->player_id, "ChallengeStep4");
+            $g->addPending($this->player_id, "Challenge2Step4");
         }
 
         else {
@@ -678,7 +766,7 @@ class Pending extends Game
                 ]
             );
             $g->hand->inc($this->player_id, -1);
-            $g->addPending($defenseur, "ChallengeStep3");
+            $g->addPending($defenseur, "Challenge2Step3");
         }
 
         if($defenseur == $this->player_id)
@@ -698,7 +786,7 @@ class Pending extends Game
                 ]
             );
             $g->hand->inc($this->player_id, -1);
-            $g->addPending($attaquant, "ChallengeStep3");
+            $g->addPending($attaquant, "Challenge2Step3");
         }
 
         }
@@ -708,7 +796,7 @@ class Pending extends Game
     }
 
     /* Abandon*/
-    function argChallengeStep4($parg1, $parg2)
+    function argChallenge2Step4($parg1, $parg2)
     {
         $ret = [];
         $ret["selectable"] = [];
@@ -726,7 +814,7 @@ class Pending extends Game
 
 
 
-    function ChallengeStep4($parg1, $parg2, $varg1, $varg2, $varg3, $varg4)
+    function Challenge2Step4($parg1, $parg2, $varg1, $varg2, $varg3, $varg4)
     {
         $g = game::$instance;
 
@@ -822,13 +910,13 @@ class Pending extends Game
 
         $count_hand_attaquant = count($g->getObjectListFromDB( "SELECT `card_id` `id` FROM cards WHERE card_location = 'hand' AND card_location_arg = '{$attaquant}'", true ));
         $count_hand_defenseur = count($g->getObjectListFromDB( "SELECT `card_id` `id` FROM cards WHERE card_location = 'hand' AND card_location_arg = '{$defenseur}'", true ));
-        $draw_attaquant = 5 - $count_hand_attaquant;
-        $draw_defenseur = 5 - $count_hand_defenseur;
+        $draw_attaquant = 6 - $count_hand_attaquant;
+        $draw_defenseur = 6 - $count_hand_defenseur;
 
         $count_deck = count($g->getObjectListFromDB( "SELECT `card_id` `id` FROM cards WHERE card_location = 'deck'", true ));
         $draw = 0;
 
-        if(($draw_attaquant < 5)&&($count_deck >= 1))
+        if(($draw_attaquant < 6)&&($count_deck >= 1))
         {
             if($count_deck >= $draw_attaquant)
             {
@@ -857,7 +945,7 @@ class Pending extends Game
         $count_deck = count($g->getObjectListFromDB( "SELECT `card_id` `id` FROM cards WHERE card_location = 'deck'", true ));
         $draw = 0;
 
-        if(($draw_defenseur < 5)&&($count_deck >= 1))
+        if(($draw_defenseur < 6)&&($count_deck >= 1))
         {
             if($count_deck >= $draw_defenseur)
             {
@@ -888,14 +976,12 @@ class Pending extends Game
         $g->setGameStateValue("defenseur", 0);
         $g->setGameStateValue("challenge", 0);
 
-        $g->addPendingFirst($attaquant, "PlayerTurn");
+        $g->addPendingFirst($attaquant, "PlayerTurn2");
         
     }
 
-
-
     /* END OF ROUND*/
-    function argEndOfRound($parg1, $parg2)
+    function argEndOfRound2($parg1, $parg2)
     {
         $ret = [];
         $ret["selectable"] = [];
@@ -914,7 +1000,7 @@ class Pending extends Game
 
 
 
-    function EndOfRound($parg1, $parg2, $varg1, $varg2, $varg3, $varg4)
+    function EndOfRound2($parg1, $parg2, $varg1, $varg2, $varg3, $varg4)
     {
         $g = game::$instance;
         $mode = $this->winning_condition;
@@ -1006,7 +1092,7 @@ class Pending extends Game
         else{
 
             $this->newRound();
-            $g->addPendingFirst($this->player_id, "PlayerTurn");
+            $g->addPendingFirst($this->player_id, "PlayerTurn2");
 
         }
         
@@ -1045,7 +1131,7 @@ class Pending extends Game
         else{
 
             $this->newRound();
-            $g->addPendingFirst($this->player_id, "PlayerTurn");
+            $g->addPendingFirst($this->player_id, "PlayerTurn2");
 
         }
 
@@ -1080,7 +1166,7 @@ class Pending extends Game
 
         else {
             $this->newRound();
-            $g->addPendingFirst($this->player_id, "PlayerTurn");
+            $g->addPendingFirst($this->player_id, "PlayerTurn2");
         }
 
 
@@ -1088,206 +1174,9 @@ class Pending extends Game
 
     
         
-    }
-
-   
-
-
-    /*
-     _                     
-    | |                    
-    | |     ___   __ _ ___ 
-    | |    / _ \ / _` / __|
-    | |___| (_) | (_| \__ \
-    |______\___/ \__, |___/
-                __/ |    
-                |___/     
-
-    */
-
-    function getSetLog($type1, $type2)
-    {
-        if($type1 <= $type2)
-        {
-            $typeA = $type1;
-            $typeB = $type2;
-        }
-
-        else
-        {
-            $typeA = $type2;
-            $typeB = $type1;
-        }
-
-
-        if($typeA <= 10){
-            $positionX1 = ($type1-1)*100;
-            $positionY1 = 0;
-        }
-        else
-        {
-            $positionX1 = ($type1-11)*100;
-            $positionY1 = 100;
-        }
-
-        if($typeB <= 10){
-            $positionX2 = ($type2-1)*100;
-            $positionY2 = 0;
-        }
-        else
-        {
-            $positionX2 = ($type2-11)*100;
-            $positionY2 = 100;
-        }
-
-        return "<div class='cards_log_container'><div class='card_log' title='' style='background-position-x : -{$positionX1}%; background-position-y : -{$positionY1}%;'></div><div class='card_log' title='' style='background-position-x : -{$positionX2}%; background-position-y : -{$positionY2}%;'></div></div>";
+}
 
         
-    }
-
-    function getCardLog($type)
-    {
-        $position = ($type-1)*100;
-        $position2 = ($type-11)*100;
-
-        if($type <= 10)
-        {
-            return "<div class='cards_log_container'><div class='card_log' title='' style='background-position-x : -{$position}%; background-position-y : 0%;'></div></div>";
-        }
-        else
-        {
-            return "<div class='cards_log_container'><div class='card_log' title='' style='background-position-x : -{$position2}%; background-position-y : -100%;'></div></div>";
-        }
-
-        
-    }
-
-    function majSetCounters ($player_id)
-    {
-        $g = game::$instance;
-
-        $impaire = $g->getUniqueValueFromDB("SELECT COUNT(*) FROM cards WHERE card_location = 'set'AND card_location_arg = '{$player_id}' AND position = (SELECT MAX(position) FROM cards WHERE card_location = 'set' AND card_location_arg = '{$player_id}' AND position % 2 = 1)");
-        $paire = $g->getUniqueValueFromDB("SELECT COUNT(*) FROM cards WHERE card_location = 'set'AND card_location_arg = '{$player_id}' AND position = (SELECT MAX(position) FROM cards WHERE card_location = 'set' AND card_location_arg = '{$player_id}' AND position % 2 = 0)");
-        $g->second_to_last_set->set($player_id, $impaire);
-        $g->last_set->set($player_id, $paire);
-    }
-
-    function newRound()
-    {
-        $g = game::$instance;
-
-        $players = $g->getObjectListFromDB( "SELECT player_id FROM player", true );
-
-        $g->DbQuery("UPDATE cards SET `card_location` = 'deck'");
-        $g->DbQuery("UPDATE cards SET `card_location_arg` = 0");
-        $g->DbQuery("UPDATE cards SET `position` = 0");
-        $g->cards_DB->shuffle('deck');
-
-        $players_hand = [];
-
-        if($this->game_mode == 1)
-        {
-            foreach ($players as $player) {
-                $g->cards_DB->pickCards(5, 'deck', (int) $player);
-                $g->hand->set($player, 5);
-                $this->majSetCounters($player);
-
-                $players_hand[$player] = $g->getCollectionFromDB( "SELECT `card_id` `id`, `card_type` `type`, `card_type_arg` `type_arg`, `card_location` `location`, `card_location_arg` `location_arg`, `position` `position` FROM `cards` WHERE `card_location` ='hand' AND `card_location_arg`='{$player}'" );
-            }
-        }
-
-        if($this->game_mode == 2)
-        {
-            foreach ($players as $player) {
-                $g->cards_DB->pickCards(6, 'deck', (int) $player);
-                $g->hand->set($player, 6);
-                $this->majSetCounters($player);
-
-                $players_hand[$player] = $g->getCollectionFromDB( "SELECT `card_id` `id`, `card_type` `type`, `card_type_arg` `type_arg`, `card_location` `location`, `card_location_arg` `location_arg`, `position` `position` FROM `cards` WHERE `card_location` ='hand' AND `card_location_arg`='{$player}'" );
-            }
-        }
-
-        $g->cards_DB->pickCardForLocation('deck', 'discard', 0);
-        $discard = $g->getUniqueValueFromDB( "SELECT `card_type` `type` FROM `cards` WHERE `card_location` ='discard' ORDER BY `position` DESC LIMIT 1" );
-
-        $g->DbQuery("UPDATE player SET `first_set` = 0");
-
-        $count_deck = count($g->getObjectListFromDB( "SELECT `card_id` `id` FROM cards WHERE card_location = 'deck'", true ));
-        $g->deck->set($count_deck);
-
-        $g->notify->all(
-            "initRound",
-            '',
-            [
-                'player_id' => $this->player_id,
-                'discard' => $discard,
-                'players_hand' => $players_hand,
-               
-            ]
-        );
-
-        $round = $g->getGameStateValue("round");
-        $new_round = $round + 1;
-        $g->setGameStateValue("round", $new_round);
-
-
-        $g->notify->all('message', clienttranslate('${message}'), [
-                'message' => [
-                    'log' => '<div class="log_newRound">${round} ${nb}</div>',
-                    'args' => [
-                        'round' => clienttranslate('Round'),
-                        'nb' => $new_round,
-                        'i18n' => ['round']
-                    ],
-                ]
-            ]);
-
-
-    }
-
-    function Lock()
-    {
-        $g = game::$instance;
-
-        $players = $g->getObjectListFromDB( "SELECT player_id FROM player", true );
-
-        foreach ($players as $player) {
-
-            $position_max = self::getUniqueValueFromDB( "SELECT `position` FROM `cards` WHERE `card_location` ='set' AND `card_location_arg`='{$player}' ORDER BY `position` DESC LIMIT 1" );
-            if($position_max != null)
-            {
-                if(($position_max == 1)||($position_max == 2))
-                {
-                    $g->notify->all(
-                    "addLock",
-                    '',
-                        [
-                            'player' => $player,
-                        
-                        ]
-                    );
-                    
-                }
-
-                else
-                {
-                    $g->notify->all(
-                    "removeLock",
-                    '',
-                        [
-                            'player' => $player,
-                        
-                        ]
-                    );
-                    
-                }
-            }
-        }
-
-
-    }
 
     
-
-
 }
