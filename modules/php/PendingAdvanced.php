@@ -909,7 +909,19 @@ trait PendingAdvancedTrait  // ATTENTION
         $ret['title'] = clienttranslate('${actplayer} must choose an action');
         $ret['titleyou'] = clienttranslate('${you} must choose an other player for the swap action');
 
+        $g = game::$instance;
+
+        $players = game::$instance->getObjectListFromDB( "SELECT `player_id` FROM `player`", true );
+
         $ret["selected"][] = 'my_cards_item_'.$parg1;
+
+        foreach($players as $player)
+        {
+            if(($player != $this->player_id) && ($g->set->get($player) >= 1))
+            {
+                $ret["selectable"][] = 'set_'.$player;
+            }
+        }
 
         $ret['buttons'][] = 'cancel_btn';
 
@@ -919,10 +931,197 @@ trait PendingAdvancedTrait  // ATTENTION
     function Swap($parg1, $parg2, $varg1, $varg2, $varg3, $varg4)
     {
         $g = game::$instance;
+        $count_deck = count($g->getObjectListFromDB( "SELECT `card_id` `id` FROM cards WHERE card_location = 'deck'", true ));
 
+        if($varg1 == 'cancel_btn')
+        {
+            $g->addPending($this->player_id, "PlayerTurn2");
+        }
+
+        else
+        {
+            $player = (int)explode('_', $varg1)[1];
+            $max_position_set_my = $g->getUniqueValueFromDB("SELECT MAX(position) AS valeur_max FROM cards WHERE card_location = 'set' AND card_location_arg = '{$this->player_id}'");
+            $my_position_inc = (int)$max_position_set_my + 1;
+            $max_position_set_player = $g->getUniqueValueFromDB("SELECT MAX(position) AS valeur_max FROM cards WHERE card_location = 'set' AND card_location_arg = '{$player}'");
+
+            $g->DbQuery("UPDATE cards SET position = {$my_position_inc}, card_location_arg = {$this->player_id} WHERE card_location ='set' AND card_location_arg = '{$player}' AND position = '{$max_position_set_player}'");
+            $g->DbQuery("UPDATE cards SET position = {$max_position_set_player}, card_location_arg = {$player} WHERE card_location ='set' AND card_location_arg = '{$this->player_id}' AND position = '{$max_position_set_my}'");
+            $g->DbQuery("UPDATE cards SET position = {$max_position_set_my} WHERE card_location ='set' AND card_location_arg = '{$this->player_id}' AND position = '{$my_position_inc}'");
+
+            $g->cards_DB->moveCard($parg1, 'discard', 0);
+            $min_position_discard = $g->getUniqueValueFromDB("SELECT MIN(position) AS valeur_min FROM cards WHERE card_location = 'discard'");
+            $g->DbQuery("UPDATE cards SET position = {$min_position_discard} -1 WHERE card_id = '{$parg1}'");
+
+            $txt = clienttranslate('${player_name} uses: ${log}');
+            $g->notify->all(
+                "message",
+                $txt,
+                [
+                    'player_id' => $this->player_id,
+                    'log' => $this->getCardLog(14),
+                ]
+            );
+
+            $playercards = [];
+            $sets = self::getObjectListFromDB( "SELECT `card_id` `id`, `card_type` `type`, `card_type_arg` `type_arg`, `card_location` `location`, `card_location_arg` `location_arg`, `position` `position` FROM `cards` WHERE `card_location` ='set' AND `card_location_arg`='{$player}' AND position >= 1 ORDER BY position ASC, card_type ASC");
+            foreach ($sets as $card) {
+                // On garde la première carte rencontrée par position
+                if (!isset($playercards[$card['position']])) {
+                    $playercards[$card['position']] = $card;
+                }
+            }
+
+            $mycards = [];
+            $sets = self::getObjectListFromDB( "SELECT `card_id` `id`, `card_type` `type`, `card_type_arg` `type_arg`, `card_location` `location`, `card_location_arg` `location_arg`, `position` `position` FROM `cards` WHERE `card_location` ='set' AND `card_location_arg`='{$this->player_id}' AND position >= 1 ORDER BY position ASC, card_type ASC");
+            foreach ($sets as $card) {
+                // On garde la première carte rencontrée par position
+                if (!isset($mycards[$card['position']])) {
+                    $mycards[$card['position']] = $card;
+                }
+            }
+
+            $opponent_name = $g->getUniqueValueFromDB("SELECT player_name FROM player WHERE player_id='{$player}'");
+            $opponent_color = $g->getUniqueValueFromDB("SELECT player_color FROM player WHERE player_id='{$player}'");
+
+            $txt = clienttranslate('${player_name} swaps with ${opponent}');
+            $g->notify->all(
+                "swapCard",
+                $txt,
+                [
+                    'opponent' =>    [
+                        'log' => '<b style="color: #${color};">${opponent_name}</b>',
+                        'args' => ['opponent_name' => $opponent_name, 'color' => $opponent_color]
+                    ],
+                    'player_id' => $this->player_id,
+                    'player' => $player,
+                    'discardID' => $parg1,
+                    'discard_player' => $this->player_id,
+                    'mycards' => $mycards,
+                    'playercards' => $playercards,
+                    'my_position' => $max_position_set_my,
+                    'player_position' => $max_position_set_player
+                    
+                ]
+            );
+
+
+            $g->hand->inc($this->player_id, -1);
+
+            $this->majSetCounters($this->player_id);
+            $this->majSetCounters($player);
+            $this->Lock();
+
+                       
+            if($this->player_turn == 1)
+            {
+                $g->setGameStateValue("player_turn", 2);
+                $g->addPending($this->player_id, "PlayerTurn2");
+            }
+
+            if($this->player_turn == 2)
+            {
+                $handCards = game::$instance->cards_DB->getCardsInLocation('hand', $this->player_id);
+                $count_hand_cards = count($handCards);
+
+                $need_cards = 6 - $count_hand_cards;
+
+                if($count_deck >= $need_cards)
+                {
+                    $newcards = $g->cards_DB->pickCards($need_cards, 'deck', $this->player_id);
+                    $g->deck->inc(-$need_cards);
+                    $g->hand->inc($this->player_id, $need_cards);
+
+                    $g->notify->player(
+                            $this->player_id,
+                            "drawCards",
+                            '',
+                            [
+                                'player_id' => $this->player_id,
+                                'cards' => $newcards,
+                            ]
+                        );
+                }
+                if (($count_deck < $need_cards)&&($count_deck >= 1))
+                {
+                    $newcards = $g->cards_DB->pickCards($count_deck, 'deck', $this->player_id);
+                    $g->deck->set(0);
+                    $g->hand->inc($this->player_id, $count_deck);
+
+                    $g->notify->player(
+                            $this->player_id,
+                            "drawCards",
+                            '',
+                            [
+                                'player_id' => $this->player_id,
+                                'cards' => $newcards,
+                            ]
+                        );
+
+                }
+
+                $last_defenseur = $g->getGameStateValue("defenseur_first_turn");
+                $count_deck = count($g->getObjectListFromDB( "SELECT `card_id` `id` FROM cards WHERE card_location = 'deck'", true ));
+
+                if(($last_defenseur != 0)&&($count_deck >= 1))
+                {
+                    $handCards = game::$instance->cards_DB->getCardsInLocation('hand', $last_defenseur);
+                    $count_hand_cards = count($handCards);
+
+                    $need_cards = 6 - $count_hand_cards;
+
+                    if($count_deck >= $need_cards)
+                    {
+                        $newcards = $g->cards_DB->pickCards($need_cards, 'deck', $last_defenseur);
+                        $g->deck->inc(-$need_cards);
+                        $g->hand->inc($last_defenseur, $need_cards);
+
+                        $g->notify->player(
+                                $last_defenseur,
+                                "drawCards",
+                                '',
+                                [
+                                    'player_id' => $last_defenseur,
+                                    'cards' => $newcards,
+                                ]
+                            );
+                    }
+                    if (($count_deck < $need_cards)&&($count_deck >= 1))
+                    {
+                        $newcards = $g->cards_DB->pickCards($count_deck, 'deck', $last_defenseur);
+                        $g->deck->set(0);
+                        $g->hand->inc($last_defenseur, $count_deck);
+
+                        $g->notify->player(
+                                $last_defenseur,
+                                "drawCards",
+                                '',
+                                [
+                                    'player_id' => $last_defenseur,
+                                    'cards' => $newcards,
+                                ]
+                            );
+
+                    }
+
+                }
+
+                $g->setGameStateValue("attaquant", 0);
+                $g->setGameStateValue("defenseur", 0);
+                $g->setGameStateValue("challenge", 0);
+                $g->setGameStateValue("defenseur_first_turn", 0);
+                $g->setGameStateValue("win_first_turn", 0);
+                $g->setGameStateValue("player_turn", 1);
+                $g->addPendingFirst($this->player_id, "PlayerTurn2");
+            }
         
-        $g->addPending($this->player_id, "PlayerTurn2");
+            
+        }
+
     }
+
+
+
 
 
     function argMove($parg1, $parg2)

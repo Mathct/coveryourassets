@@ -1290,6 +1290,9 @@ export class Game {
           else if(card_type == 12) {
             card_div.style.backgroundPosition = `-100% -100%`;
           }
+          else if(card_type == 13) {
+            card_div.style.backgroundPosition = `-200% -100%`;
+          }
         });
 
       }
@@ -1311,6 +1314,9 @@ export class Game {
           }
           else if(card_type == 12) {
             card_div.style.backgroundPosition = `-100% -100%`;
+          }
+          else if(card_type == 13) {
+            card_div.style.backgroundPosition = `-200% -100%`;
           }
         });
       }
@@ -1518,6 +1524,9 @@ export class Game {
         else if(card_type == 12) {
           card_div.style.backgroundPosition = `-100% -100%`;
         }
+        else if(card_type == 13) {
+          card_div.style.backgroundPosition = `-200% -100%`;
+        }
                     
       }, "500");
 
@@ -1555,6 +1564,9 @@ export class Game {
         }
         else if(card_type == 12) {
           card_div.style.backgroundPosition = `-100% -100%`;
+        }
+        else if(card_type == 13) {
+          card_div.style.backgroundPosition = `-200% -100%`;
         }
                     
       }, "500");
@@ -1689,7 +1701,7 @@ export class Game {
     async notif_moveCard(args) {
 
       let player_id = 0;
-      
+
       if(!this.bga.players.isCurrentPlayerSpectator()) {
         player_id = this.bga.players.getCurrentPlayer().id;
       }
@@ -1708,6 +1720,24 @@ export class Game {
         this.addCardSet(set);
  
       }) 
+
+      
+    }
+
+    async notif_swapCard(args) {
+
+      let player_id = 0;
+      
+      if(!this.bga.players.isCurrentPlayerSpectator()) {
+        player_id = this.bga.players.getCurrentPlayer().id;
+      }
+
+      if((player_id == args.discard_player)&&(!this.bga.players.isCurrentPlayerSpectator()))
+      {
+        this.handStock.removeFromStockById(args.discardID);
+      }
+     
+      //ANIM A FAIRE
 
       
     }
