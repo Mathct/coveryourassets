@@ -398,6 +398,14 @@ class Game extends \Bga\GameFramework\Table
             
         }
 
+        foreach ($players as $player)
+        {
+            $last_set_type = self::getUniqueValueFromDB( "SELECT `card_type` FROM `cards` WHERE `card_location` ='set' AND `card_location_arg`='{$player}' ORDER BY `position` DESC, `card_type` ASC LIMIT 1" );
+            $result['last_set_type'][$player] = (int)$last_set_type;
+            
+        }
+
+
         
         //counters
         $this->deck->fillResult($result);

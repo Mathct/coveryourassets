@@ -215,6 +215,18 @@ class NormalTurn {
             );
             break;
 
+          case "improve_btn":
+            this.bga.statusBar.addActionButton(
+              _("Improve"),
+              () =>
+                this.bga.actions.performAction("actButton", {
+                  arg1: key,
+                  arg2: this.game.SelectImprove(),
+                }),
+              { color: "primary", id: "improve_btn", disabled: true },
+            );
+            break;
+
           case "challenge_btn":
             this.bga.statusBar.addActionButton(
               _("Challenge"),
@@ -349,6 +361,8 @@ export class Game {
         this.defenseur = gamedatas.defenseur;
         this.challenge_attack = gamedatas.challenge_attack;
         this.challenge_defense = gamedatas.challenge_defense;
+
+        this.last_set_type = gamedatas.last_set_type;
 
         this.players_order = gamedatas.players_ordered;
 
@@ -548,6 +562,7 @@ export class Game {
         this.TestDiscardButton();
         this.TestSwapButton();
         this.TestMoveButton();
+        this.TestImproveButton();
         
     }
 
@@ -674,6 +689,38 @@ export class Game {
         
     }
 
+    TestImproveButton() {
+      const ids = Array.from(document.querySelectorAll('.selectedmulti')).map(el => el.id);
+      const count = ids.length;
+      const btn = document.getElementById('improve_btn');
+
+      if(btn) {
+        if(count == 1)
+        { 
+          const id1 = ids[0].split("_");
+          const type1 = this.all_cards[id1[3]].type;
+          const player_id = this.bga.players.getCurrentPlayer().id;
+        
+
+          if(type1 == this.last_set_type[player_id])
+          {
+            btn.disabled = false;
+          }
+          else
+          {
+            btn.disabled = true;
+          }
+          
+        }
+
+        else
+        {        
+          btn.disabled = true;
+        }
+      }        
+        
+    }
+
     SelectSet() {
 
       const ids = Array.from(document.querySelectorAll('.selectedmulti')).map(el => el.id);
@@ -700,6 +747,13 @@ export class Game {
     }
 
     SelectMove() {
+
+      const ids = Array.from(document.querySelectorAll('.selectedmulti')).map(el => el.id);
+      const id1 = ids[0].split("_")[3];
+      return id1;
+    }
+
+    SelectImprove() {
 
       const ids = Array.from(document.querySelectorAll('.selectedmulti')).map(el => el.id);
       const id1 = ids[0].split("_")[3];
@@ -1330,7 +1384,10 @@ export class Game {
           
         }
 
-        this.addCardSet(args.card_for_set)
+        this.last_set_type[args.player_id] = Number(args.card_for_set.type);
+        this.addCardSet(args.card_for_set);
+
+
                
         
 
@@ -1526,6 +1583,7 @@ export class Game {
       this.attachToNewParentNoDestroy( set_steal.id, targetId);
       this.bga.gameui.slideToObjectAndDestroy( set_steal.id, targetId, 500, 0 );
 
+      this.last_set_type[args.winner] = Number(args.card_for_set.type);
 
       setTimeout(() => 
       {
@@ -1578,5 +1636,36 @@ export class Game {
       
     }
 
+    async notif_cardImprove(args) {
+
+      const card = args.card;
+      let player_id = 0;
+      
+      if(!this.bga.players.isCurrentPlayerSpectator()) {
+        player_id = this.bga.players.getCurrentPlayer().id;
+      }
+              
+
+      if((player_id == args.player_id)&&(!this.bga.players.isCurrentPlayerSpectator()))
+      {
+       
+        const enfant = document.getElementById('my_cards_item_'+card.id);
+        const targetId = document.getElementById('set_'+card.location_arg).id;
+        this.attachToNewParentNoDestroy( enfant.id, targetId);
+        this.bga.gameui.slideToObjectAndDestroy( enfant.id, targetId, 500, 0 );
+          
+        await this.bga.gameui.wait(400);
+        this.handStock.removeFromStockById( card.id);
+        
+        
+      }
+      
+    }
+
+
+
+
+
     
 }
+
