@@ -28,6 +28,8 @@ trait PendingAdvancedTrait  // ATTENTION
 
         $g = game::$instance;
 
+        $players = game::$instance->getObjectListFromDB( "SELECT `player_id` FROM `player`", true );
+
         $handCards = game::$instance->cards_DB->getCardsInLocation('hand', $this->player_id);
         $count_hand_cards = count($handCards);
 
@@ -35,6 +37,29 @@ trait PendingAdvancedTrait  // ATTENTION
         $last_win = $g->getGameStateValue("win_first_turn");
 
         $last_set_type = $g->getUniqueValueFromDB( "SELECT `card_type` FROM `cards` WHERE `card_location` ='set' AND `card_location_arg`='{$this->player_id}' ORDER BY `position` DESC, `card_type` ASC LIMIT 1" );
+
+        $possible_swap = 0;
+        $possible_move = 0;
+
+        if($g->set->get($this->player_id) >= 1)
+        {
+            foreach($players as $player)
+            {
+                if(($player != $this->player_id) && ($g->set->get($player) >= 1))
+                {
+                    $possible_swap = 1;
+                }
+            }
+        }
+        
+        foreach($players as $player)
+        {
+            if($g->set->get($player) >= 2)
+            {
+                $possible_move = 1;
+            }
+        }
+    
 
                         
         if($count_hand_cards >= 1)
@@ -99,12 +124,12 @@ trait PendingAdvancedTrait  // ATTENTION
                 $ret['buttons'][] = 'improve_btn';
             }
 
-            if($swap == 1)
+            if(($swap == 1)&&($possible_swap == 1))
             {
                 $ret['buttons'][] = 'swap_btn';
             }
 
-            if($move == 1)
+            if(($move == 1)&&($possible_move == 1))
             {
                 $ret['buttons'][] = 'move_btn';
             }
@@ -118,8 +143,7 @@ trait PendingAdvancedTrait  // ATTENTION
 
 
             $last_set = [];
-            $players = game::$instance->getObjectListFromDB( "SELECT `player_id` FROM `player`", true );
-
+            
             foreach ($players as $player)
             {
                 
@@ -857,16 +881,12 @@ trait PendingAdvancedTrait  // ATTENTION
 
         if($varg1 == 'swap_btn')
         {
-            $g->hand->inc($this->player_id, -1);
-
-            $g->addPending($this->player_id, "PlayerTurn2");
+            $g->addPending($this->player_id, "Swap", $varg2);
         }
 
         if($varg1 == 'move_btn')
         {
-            $g->hand->inc($this->player_id, -1);
-
-            $g->addPending($this->player_id, "PlayerTurn2");
+            $g->addPending($this->player_id, "Move", $varg2);
         }
 
         if($varg1 == 'challenge_btn') {
@@ -876,6 +896,429 @@ trait PendingAdvancedTrait  // ATTENTION
 
         
     }
+
+
+    function argSwap($parg1, $parg2)
+    {
+        $ret = [];
+        $ret["selectable"] = [];
+        $ret["selectablemulti"] = [];
+        $ret["selected"] = [];
+        $ret["selectedmulti"] = [];
+        $ret['buttons'] = [];
+        $ret['title'] = clienttranslate('${actplayer} must choose an action');
+        $ret['titleyou'] = clienttranslate('${you} must choose an other player for the swap action');
+
+        $ret["selected"][] = 'my_cards_item_'.$parg1;
+
+        $ret['buttons'][] = 'cancel_btn';
+
+        return $ret;
+    }
+
+    function Swap($parg1, $parg2, $varg1, $varg2, $varg3, $varg4)
+    {
+        $g = game::$instance;
+
+        
+        $g->addPending($this->player_id, "PlayerTurn2");
+    }
+
+
+    function argMove($parg1, $parg2)
+    {
+        $ret = [];
+        $ret["selectable"] = [];
+        $ret["selectablemulti"] = [];
+        $ret["selected"] = [];
+        $ret["selectedmulti"] = [];
+        $ret['buttons'] = [];
+        $ret['title'] = clienttranslate('${actplayer} must choose an action');
+        $ret['titleyou'] = clienttranslate('${you} muste choose a player for the move action');
+
+        $ret["selected"][] = 'my_cards_item_'.$parg1;
+
+        $g = game::$instance;
+
+        $players = game::$instance->getObjectListFromDB( "SELECT `player_id` FROM `player`", true );
+
+        foreach($players as $player)
+        {
+            if($g->set->get($player) >= 2)
+            {
+                $ret["selectable"][] = 'set_'.$player;
+            }
+        }
+
+        $ret['buttons'][] = 'cancel_btn';
+
+        return $ret;
+    }
+
+    function Move($parg1, $parg2, $varg1, $varg2, $varg3, $varg4)
+    {
+        $g = game::$instance;
+
+        if($varg1 == 'cancel_btn')
+        {
+            $g->addPending($this->player_id, "PlayerTurn2");
+        }
+
+        else
+        {
+            $g->addPending($this->player_id, "MoveStep2", $parg1, $varg1);
+        }
+        
+        
+
+    }
+
+    function argMoveStep2($parg1, $parg2)
+    {
+        $ret = [];
+        $ret["selectable"] = [];
+        $ret["selectablemulti"] = [];
+        $ret["selected"] = [];
+        $ret["selectedmulti"] = [];
+        $ret['buttons'] = [];
+        $ret['title'] = clienttranslate('${actplayer} must choose an action');
+        $ret['titleyou'] = clienttranslate('${you} must choose the direction of the move');
+
+        $ret["selected"][] = 'my_cards_item_'.$parg1;
+        $ret["selected"][] = $parg2;
+
+        
+        $ret['buttons'][] = 'movetoptobottom_btn';
+        $ret['buttons'][] = 'movebottomtotop_btn';
+
+        $ret['buttons'][] = 'cancel_btn';
+
+        return $ret;
+    }
+
+    function MoveStep2($parg1, $parg2, $varg1, $varg2, $varg3, $varg4)
+    {
+        $g = game::$instance;
+        $count_deck = count($g->getObjectListFromDB( "SELECT `card_id` `id` FROM cards WHERE card_location = 'deck'", true ));
+
+        if($varg1 == 'cancel_btn')
+        {
+            $g->addPending($this->player_id, "PlayerTurn2");
+        }
+
+        if($varg1 == 'movetoptobottom_btn')
+        {
+            $player = (int)explode('_', $parg2)[1];
+            $max_position_set = $g->getUniqueValueFromDB("SELECT MAX(position) AS valeur_max FROM cards WHERE card_location = 'set' AND card_location_arg = '{$player}'");
+
+            $g->DbQuery("UPDATE cards SET position = 0 WHERE card_location ='set' AND card_location_arg = '{$player}' AND position = '{$max_position_set}'");
+            $g->DbQuery("UPDATE cards SET position = position +1 WHERE card_location ='set' AND card_location_arg = '{$player}'");
+
+            $g->cards_DB->moveCard($parg1, 'discard', 0);
+            $min_position_discard = $g->getUniqueValueFromDB("SELECT MIN(position) AS valeur_min FROM cards WHERE card_location = 'discard'");
+            $g->DbQuery("UPDATE cards SET position = {$min_position_discard} -1 WHERE card_id = '{$parg1}'");
+
+
+            $cards = [];
+            $sets = self::getObjectListFromDB( "SELECT `card_id` `id`, `card_type` `type`, `card_type_arg` `type_arg`, `card_location` `location`, `card_location_arg` `location_arg`, `position` `position` FROM `cards` WHERE `card_location` ='set' AND `card_location_arg`='{$player}' AND position >= 1 ORDER BY position ASC, card_type ASC");
+            foreach ($sets as $card) {
+                // On garde la première carte rencontrée par position
+                if (!isset($cards[$card['position']])) {
+                    $cards[$card['position']] = $card;
+                }
+            }
+
+
+            $txt = clienttranslate('${player_name} uses: ${log}');
+            $g->notify->all(
+                "message",
+                $txt,
+                [
+                    'player_id' => $this->player_id,
+                    'log' => $this->getCardLog(15),
+                ]
+            );
+
+            $txt = clienttranslate('${player_name} moves the set From Top to Bottom');
+            $g->notify->all(
+                "moveCard",
+                $txt,
+                [
+                    'player_id' => $player,
+                    'cards' => $cards,
+                    'discardID' => $parg1,
+                    'discard_player' => $this->player_id
+                ]
+            );
+            
+
+            $this->majSetCounters($player);
+            $this->Lock();
+
+            $g->hand->inc($this->player_id, -1);
+            
+            if($this->player_turn == 1)
+            {
+                $g->setGameStateValue("player_turn", 2);
+                $g->addPending($this->player_id, "PlayerTurn2");
+            }
+
+            if($this->player_turn == 2)
+            {
+                $handCards = game::$instance->cards_DB->getCardsInLocation('hand', $this->player_id);
+                $count_hand_cards = count($handCards);
+
+                $need_cards = 6 - $count_hand_cards;
+
+                if($count_deck >= $need_cards)
+                {
+                    $newcards = $g->cards_DB->pickCards($need_cards, 'deck', $this->player_id);
+                    $g->deck->inc(-$need_cards);
+                    $g->hand->inc($this->player_id, $need_cards);
+
+                    $g->notify->player(
+                            $this->player_id,
+                            "drawCards",
+                            '',
+                            [
+                                'player_id' => $this->player_id,
+                                'cards' => $newcards,
+                            ]
+                        );
+                }
+                if (($count_deck < $need_cards)&&($count_deck >= 1))
+                {
+                    $newcards = $g->cards_DB->pickCards($count_deck, 'deck', $this->player_id);
+                    $g->deck->set(0);
+                    $g->hand->inc($this->player_id, $count_deck);
+
+                    $g->notify->player(
+                            $this->player_id,
+                            "drawCards",
+                            '',
+                            [
+                                'player_id' => $this->player_id,
+                                'cards' => $newcards,
+                            ]
+                        );
+
+                }
+
+                $last_defenseur = $g->getGameStateValue("defenseur_first_turn");
+                $count_deck = count($g->getObjectListFromDB( "SELECT `card_id` `id` FROM cards WHERE card_location = 'deck'", true ));
+
+                if(($last_defenseur != 0)&&($count_deck >= 1))
+                {
+                    $handCards = game::$instance->cards_DB->getCardsInLocation('hand', $last_defenseur);
+                    $count_hand_cards = count($handCards);
+
+                    $need_cards = 6 - $count_hand_cards;
+
+                    if($count_deck >= $need_cards)
+                    {
+                        $newcards = $g->cards_DB->pickCards($need_cards, 'deck', $last_defenseur);
+                        $g->deck->inc(-$need_cards);
+                        $g->hand->inc($last_defenseur, $need_cards);
+
+                        $g->notify->player(
+                                $last_defenseur,
+                                "drawCards",
+                                '',
+                                [
+                                    'player_id' => $last_defenseur,
+                                    'cards' => $newcards,
+                                ]
+                            );
+                    }
+                    if (($count_deck < $need_cards)&&($count_deck >= 1))
+                    {
+                        $newcards = $g->cards_DB->pickCards($count_deck, 'deck', $last_defenseur);
+                        $g->deck->set(0);
+                        $g->hand->inc($last_defenseur, $count_deck);
+
+                        $g->notify->player(
+                                $last_defenseur,
+                                "drawCards",
+                                '',
+                                [
+                                    'player_id' => $last_defenseur,
+                                    'cards' => $newcards,
+                                ]
+                            );
+
+                    }
+
+                }
+
+                $g->setGameStateValue("attaquant", 0);
+                $g->setGameStateValue("defenseur", 0);
+                $g->setGameStateValue("challenge", 0);
+                $g->setGameStateValue("defenseur_first_turn", 0);
+                $g->setGameStateValue("win_first_turn", 0);
+                $g->setGameStateValue("player_turn", 1);
+                $g->addPendingFirst($this->player_id, "PlayerTurn2");
+            }
+        }
+
+        if($varg1 == 'movebottomtotop_btn')
+        {
+            $player = (int)explode('_', $parg2)[1];
+            $max_position_set = $g->getUniqueValueFromDB("SELECT MAX(position) AS valeur_max FROM cards WHERE card_location = 'set' AND card_location_arg = '{$player}'");
+
+            $g->DbQuery("UPDATE cards SET position = {$max_position_set} + 1 WHERE card_location ='set' AND card_location_arg = '{$player}' AND position = 1");
+            $g->DbQuery("UPDATE cards SET position = position -1 WHERE card_location ='set' AND card_location_arg = '{$player}'");
+
+            $g->cards_DB->moveCard($parg1, 'discard', 0);
+            $min_position_discard = $g->getUniqueValueFromDB("SELECT MIN(position) AS valeur_min FROM cards WHERE card_location = 'discard'");
+            $g->DbQuery("UPDATE cards SET position = {$min_position_discard} -1 WHERE card_id = '{$parg1}'");
+
+            $cards = [];
+            $sets = self::getObjectListFromDB( "SELECT `card_id` `id`, `card_type` `type`, `card_type_arg` `type_arg`, `card_location` `location`, `card_location_arg` `location_arg`, `position` `position` FROM `cards` WHERE `card_location` ='set' AND `card_location_arg`='{$player}' AND position >= 1 ORDER BY position ASC, card_type ASC");
+            foreach ($sets as $card) {
+                // On garde la première carte rencontrée par position
+                if (!isset($cards[$card['position']])) {
+                    $cards[$card['position']] = $card;
+                }
+            }
+
+            $txt = clienttranslate('${player_name} uses: ${log}');
+            $g->notify->all(
+                "message",
+                $txt,
+                [
+                    'player_id' => $this->player_id,
+                    'log' => $this->getCardLog(15),
+                ]
+            );
+
+            $txt = clienttranslate('${player_name} moves the set From Bottom to Top');
+            $g->notify->all(
+                "moveCard",
+                $txt,
+                [
+                    'player_id' => $player,
+                    'cards' => $cards,
+                    'discardID' => $parg1,
+                    'discard_player' => $this->player_id
+                    
+                ]
+            );
+
+            $this->majSetCounters($player);
+            $this->Lock();
+
+            $g->hand->inc($this->player_id, -1);
+            
+            if($this->player_turn == 1)
+            {
+                $g->setGameStateValue("player_turn", 2);
+                $g->addPending($this->player_id, "PlayerTurn2");
+            }
+
+            if($this->player_turn == 2)
+            {
+                $handCards = game::$instance->cards_DB->getCardsInLocation('hand', $this->player_id);
+                $count_hand_cards = count($handCards);
+
+                $need_cards = 6 - $count_hand_cards;
+
+                if($count_deck >= $need_cards)
+                {
+                    $newcards = $g->cards_DB->pickCards($need_cards, 'deck', $this->player_id);
+                    $g->deck->inc(-$need_cards);
+                    $g->hand->inc($this->player_id, $need_cards);
+
+                    $g->notify->player(
+                            $this->player_id,
+                            "drawCards",
+                            '',
+                            [
+                                'player_id' => $this->player_id,
+                                'cards' => $newcards,
+                            ]
+                        );
+                }
+                if (($count_deck < $need_cards)&&($count_deck >= 1))
+                {
+                    $newcards = $g->cards_DB->pickCards($count_deck, 'deck', $this->player_id);
+                    $g->deck->set(0);
+                    $g->hand->inc($this->player_id, $count_deck);
+
+                    $g->notify->player(
+                            $this->player_id,
+                            "drawCards",
+                            '',
+                            [
+                                'player_id' => $this->player_id,
+                                'cards' => $newcards,
+                            ]
+                        );
+
+                }
+
+                $last_defenseur = $g->getGameStateValue("defenseur_first_turn");
+                $count_deck = count($g->getObjectListFromDB( "SELECT `card_id` `id` FROM cards WHERE card_location = 'deck'", true ));
+
+                if(($last_defenseur != 0)&&($count_deck >= 1))
+                {
+                    $handCards = game::$instance->cards_DB->getCardsInLocation('hand', $last_defenseur);
+                    $count_hand_cards = count($handCards);
+
+                    $need_cards = 6 - $count_hand_cards;
+
+                    if($count_deck >= $need_cards)
+                    {
+                        $newcards = $g->cards_DB->pickCards($need_cards, 'deck', $last_defenseur);
+                        $g->deck->inc(-$need_cards);
+                        $g->hand->inc($last_defenseur, $need_cards);
+
+                        $g->notify->player(
+                                $last_defenseur,
+                                "drawCards",
+                                '',
+                                [
+                                    'player_id' => $last_defenseur,
+                                    'cards' => $newcards,
+                                ]
+                            );
+                    }
+                    if (($count_deck < $need_cards)&&($count_deck >= 1))
+                    {
+                        $newcards = $g->cards_DB->pickCards($count_deck, 'deck', $last_defenseur);
+                        $g->deck->set(0);
+                        $g->hand->inc($last_defenseur, $count_deck);
+
+                        $g->notify->player(
+                                $last_defenseur,
+                                "drawCards",
+                                '',
+                                [
+                                    'player_id' => $last_defenseur,
+                                    'cards' => $newcards,
+                                ]
+                            );
+
+                    }
+
+                }
+
+                $g->setGameStateValue("attaquant", 0);
+                $g->setGameStateValue("defenseur", 0);
+                $g->setGameStateValue("challenge", 0);
+                $g->setGameStateValue("defenseur_first_turn", 0);
+                $g->setGameStateValue("win_first_turn", 0);
+                $g->setGameStateValue("player_turn", 1);
+                $g->addPendingFirst($this->player_id, "PlayerTurn2");
+            }
+        }
+        
+        
+
+    }
+
+
+
+
 
 
     /* choisir l'adversaire */

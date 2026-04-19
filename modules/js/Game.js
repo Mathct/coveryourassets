@@ -215,6 +215,29 @@ class NormalTurn {
             );
             break;
 
+          case "movetoptobottom_btn":
+            this.bga.statusBar.addActionButton(
+              _("From Top to Bottom"),
+              () =>
+                this.bga.actions.performAction("actButton", {
+                  arg1: key,
+                }),
+              { color: "primary" },
+            );
+            break;
+
+          case "movebottomtotop_btn":
+            this.bga.statusBar.addActionButton(
+              _("From Bottom to Top"),
+              () =>
+                this.bga.actions.performAction("actButton", {
+                  arg1: key,
+                }),
+              { color: "primary" },
+            );
+            break;
+
+
           case "improve_btn":
             this.bga.statusBar.addActionButton(
               _("Improve"),
@@ -1659,6 +1682,33 @@ export class Game {
         
         
       }
+      
+    }
+
+
+    async notif_moveCard(args) {
+
+      let player_id = 0;
+      
+      if(!this.bga.players.isCurrentPlayerSpectator()) {
+        player_id = this.bga.players.getCurrentPlayer().id;
+      }
+
+      if((player_id == args.discard_player)&&(!this.bga.players.isCurrentPlayerSpectator()))
+      {
+        this.handStock.removeFromStockById(args.discardID);
+      }
+     
+      const selector = `[id^="set_card_${args.player}"]`;
+      const elements = document.querySelectorAll(selector);
+      elements.forEach(el => el.remove());
+
+      Object.values(args.cards).forEach(set => {
+
+        this.addCardSet(set);
+ 
+      }) 
+
       
     }
 
