@@ -1654,7 +1654,14 @@ export class Game {
       // suppression des sets
       document.querySelectorAll('.card_impaire').forEach(el => el.remove());
       document.querySelectorAll('.card_paire').forEach(el => el.remove());
-      
+
+      //init de this.last_set_type
+      Object.values(this.gamedatas.players).forEach((player) => {
+
+        this.last_set_type[player.id] = 0; 
+
+      });
+
     }
 
     async notif_addLock(args) {

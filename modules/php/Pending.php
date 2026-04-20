@@ -1209,6 +1209,8 @@ class Pending extends Game
             }
         }
 
+        $this->Lock();
+
         $g->cards_DB->pickCardForLocation('deck', 'discard', 0);
         $discard = $g->getUniqueValueFromDB( "SELECT `card_type` `type` FROM `cards` WHERE `card_location` ='discard' ORDER BY `position` DESC LIMIT 1" );
 
