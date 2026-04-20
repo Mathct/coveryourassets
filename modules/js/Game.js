@@ -1740,7 +1740,41 @@ export class Game {
         this.handStock.removeFromStockById(args.discardID);
       }
      
-      //ANIM A FAIRE
+      //ANIM
+      const cardID1 = document.getElementById('set_card_'+args.player_id+'_'+args.my_position).id;
+      const targetID2 = document.getElementById('set_'+args.player).id;
+      this.attachToNewParentNoDestroy( cardID1, targetID2);
+      this.bga.gameui.slideToObjectAndDestroy( cardID1, targetID2, 500, 0 );
+
+      const cardID2 = document.getElementById('set_card_'+args.player+'_'+args.player_position).id;
+      const targetID1 = document.getElementById('set_'+args.player_id).id;
+      this.attachToNewParentNoDestroy( cardID2, targetID1);
+      this.bga.gameui.slideToObjectAndDestroy( cardID2, targetID1, 500, 0 );
+
+      await this.bga.gameui.wait(500);
+
+      const selector1 = `[id^="set_card_${args.player_id}"]`;
+      const elements1 = document.querySelectorAll(selector1);
+      elements1.forEach(el1 => el1.remove());
+
+      Object.values(args.mycards).forEach(set1 => {
+
+        this.addCardSet(set1);
+ 
+      })
+
+      const selector2 = `[id^="set_card_${args.player}"]`;
+      const elements2 = document.querySelectorAll(selector2);
+      elements2.forEach(el2 => el2.remove());
+
+      Object.values(args.playercards).forEach(set2 => {
+
+        this.addCardSet(set2);
+ 
+      })
+
+      this.last_set_type[args.player_id] = Number(args.my_last_set_type);
+      this.last_set_type[args.player] = Number(args.player_last_set_type);
 
       
     }
