@@ -981,6 +981,9 @@ trait PendingAdvancedTrait  // ATTENTION
                 }
             }
 
+            $my_last_set_type = self::getUniqueValueFromDB( "SELECT `card_type` FROM `cards` WHERE `card_location` ='set' AND `card_location_arg`='{$this->player_id}' ORDER BY `position` DESC, `card_type` ASC LIMIT 1" );
+            $player_last_set_type = self::getUniqueValueFromDB( "SELECT `card_type` FROM `cards` WHERE `card_location` ='set' AND `card_location_arg`='{$player}' ORDER BY `position` DESC, `card_type` ASC LIMIT 1" );
+
             $opponent_name = $g->getUniqueValueFromDB("SELECT player_name FROM player WHERE player_id='{$player}'");
             $opponent_color = $g->getUniqueValueFromDB("SELECT player_color FROM player WHERE player_id='{$player}'");
 
@@ -1000,7 +1003,9 @@ trait PendingAdvancedTrait  // ATTENTION
                     'mycards' => $mycards,
                     'playercards' => $playercards,
                     'my_position' => $max_position_set_my,
-                    'player_position' => $max_position_set_player
+                    'player_position' => $max_position_set_player,
+                    'my_last_set_type' => $my_last_set_type,
+                    'player_last_set_type' => $player_last_set_type
                     
                 ]
             );

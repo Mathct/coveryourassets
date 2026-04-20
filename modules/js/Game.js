@@ -1729,13 +1729,13 @@ export class Game {
 
     async notif_swapCard(args) {
 
-      let player_id = 0;
-      
+      let current_player = 0;
+
       if(!this.bga.players.isCurrentPlayerSpectator()) {
-        player_id = this.bga.players.getCurrentPlayer().id;
+        current_player = this.bga.players.getCurrentPlayer().id;
       }
 
-      if((player_id == args.discard_player)&&(!this.bga.players.isCurrentPlayerSpectator()))
+      if((current_player == args.discard_player)&&(!this.bga.players.isCurrentPlayerSpectator()))
       {
         this.handStock.removeFromStockById(args.discardID);
       }
