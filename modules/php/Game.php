@@ -405,7 +405,7 @@ class Game extends \Bga\GameFramework\Table
             
         }
 
-
+    
         
         //counters
         $this->deck->fillResult($result);

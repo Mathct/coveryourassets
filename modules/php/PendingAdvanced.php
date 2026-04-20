@@ -1227,6 +1227,8 @@ trait PendingAdvancedTrait  // ATTENTION
                 }
             }
 
+            $last_set_type = self::getUniqueValueFromDB( "SELECT `card_type` FROM `cards` WHERE `card_location` ='set' AND `card_location_arg`='{$player}' ORDER BY `position` DESC, `card_type` ASC LIMIT 1" );
+
 
             $txt = clienttranslate('${player_name} uses: ${log}');
             $g->notify->all(
@@ -1244,9 +1246,12 @@ trait PendingAdvancedTrait  // ATTENTION
                 $txt,
                 [
                     'player_id' => $player,
+                    'player' => $player,
                     'cards' => $cards,
                     'discardID' => $parg1,
-                    'discard_player' => $this->player_id
+                    'discard_player' => $this->player_id,
+                    'last_type' => $last_set_type
+
                 ]
             );
             
@@ -1380,6 +1385,8 @@ trait PendingAdvancedTrait  // ATTENTION
                 }
             }
 
+            $last_set_type = self::getUniqueValueFromDB( "SELECT `card_type` FROM `cards` WHERE `card_location` ='set' AND `card_location_arg`='{$player}' ORDER BY `position` DESC, `card_type` ASC LIMIT 1" );
+
             $txt = clienttranslate('${player_name} uses: ${log}');
             $g->notify->all(
                 "message",
@@ -1396,9 +1403,11 @@ trait PendingAdvancedTrait  // ATTENTION
                 $txt,
                 [
                     'player_id' => $player,
+                    'player' => $player,
                     'cards' => $cards,
                     'discardID' => $parg1,
-                    'discard_player' => $this->player_id
+                    'discard_player' => $this->player_id,
+                    'last_type' => $last_set_type
                     
                 ]
             );
