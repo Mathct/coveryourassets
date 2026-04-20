@@ -1190,6 +1190,7 @@ class Pending extends Game
             foreach ($players as $player) {
                 $g->cards_DB->pickCards(5, 'deck', (int) $player);
                 $g->hand->set($player, 5);
+                $g->set->set($player, 0);
                 $this->majSetCounters($player);
 
                 $players_hand[$player] = $g->getCollectionFromDB( "SELECT `card_id` `id`, `card_type` `type`, `card_type_arg` `type_arg`, `card_location` `location`, `card_location_arg` `location_arg`, `position` `position` FROM `cards` WHERE `card_location` ='hand' AND `card_location_arg`='{$player}'" );
@@ -1201,6 +1202,7 @@ class Pending extends Game
             foreach ($players as $player) {
                 $g->cards_DB->pickCards(6, 'deck', (int) $player);
                 $g->hand->set($player, 6);
+                $g->set->set($player, 0);
                 $this->majSetCounters($player);
 
                 $players_hand[$player] = $g->getCollectionFromDB( "SELECT `card_id` `id`, `card_type` `type`, `card_type_arg` `type_arg`, `card_location` `location`, `card_location_arg` `location_arg`, `position` `position` FROM `cards` WHERE `card_location` ='hand' AND `card_location_arg`='{$player}'" );
