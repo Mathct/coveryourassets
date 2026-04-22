@@ -1958,6 +1958,9 @@ trait PendingAdvancedTrait  // ATTENTION
                 "SELECT `card_id` `id`, `card_type` `type`, `card_type_arg` `type_arg`, `card_location` `location`, `card_location_arg` `location_arg`, `position` `position` FROM cards WHERE card_location ='set' AND card_location_arg = '{$attaquant}' AND position = '{$new_position}' ORDER BY `card_type` ASC"
             )[0];
 
+            $attaquant_last_set_type = self::getUniqueValueFromDB( "SELECT `card_type` FROM `cards` WHERE `card_location` ='set' AND `card_location_arg`='{$attaquant}' ORDER BY `position` DESC, `card_type` ASC LIMIT 1" );
+            $defenseur_last_set_type = self::getUniqueValueFromDB( "SELECT `card_type` FROM `cards` WHERE `card_location` ='set' AND `card_location_arg`='{$defenseur}' ORDER BY `position` DESC, `card_type` ASC LIMIT 1" );
+
             $txt = clienttranslate('${player_name} abandons the challenge');
             $g->notify->all(
                 "challengeWinByAttack",
@@ -1968,6 +1971,8 @@ trait PendingAdvancedTrait  // ATTENTION
                     'winner' => $attaquant,
                     'cards' => $cards_defi,
                     'card_for_set' => $card_for_set,
+                    'attaquant_last_set_type' => $attaquant_last_set_type,
+                    'defenseur_last_set_type' => $defenseur_last_set_type
                 ]
             );
 

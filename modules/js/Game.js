@@ -386,6 +386,7 @@ export class Game {
         this.challenge_defense = gamedatas.challenge_defense;
 
         this.last_set_type = gamedatas.last_set_type;
+        this.first_set_type = gamedatas.first_set_type;
 
         this.players_order = gamedatas.players_ordered;
 
@@ -794,56 +795,119 @@ export class Game {
 
     setupPlayersPannel() {
 
-        Object.values(this.gamedatas.players).forEach((player) => {
+      Object.values(this.gamedatas.players).forEach((player) => {
 
-        if(this.gamedatas.mode_end != 4)
+        if(this.gamedatas.mode == 1)
+        {
+          if(this.gamedatas.mode_end != 4)
+          {
+
+            this.bga.playerPanels.getElement(player.id).insertAdjacentHTML(
+                "beforeend",
+                `
+                <div class="hand_card_pannel">
+                  <div class="hand_card_pannel_image"></div>
+                  <div id="counter_hand_${player.id}" class="counter_hand"></div>
+                </div>
+
+                <div class="set_card_pannel">
+                  <div class="set_card_pannel_image"></div>
+                  <div id="counter_set_${player.id}" class="counter_hand"></div>
+                </div>
+
+                <div class="cumul_score_pannel">
+                  <div class="billet"></div>
+                  <div>$</div>
+                  <div id="counter_cumul_score_${player.id}" class="counter_cumul_score"></div>
+                </div>
+                            
+                `,
+            );
+          }
+
+          else {
+
+            this.bga.playerPanels.getElement(player.id).insertAdjacentHTML(
+                "beforeend",
+                `
+                <div class="hand_card_pannel">
+                  <div class="hand_card_pannel_image"></div>
+                  <div id="counter_hand_${player.id}" class="counter_hand"></div>
+                </div>
+
+                <div class="set_card_pannel">
+                  <div class="set_card_pannel_image"></div>
+                  <div id="counter_set_${player.id}" class="counter_hand"></div>
+                </div>
+                
+                `,
+            );
+          }
+
+        }
+
+        if(this.gamedatas.mode == 2)
         {
 
-          this.bga.playerPanels.getElement(player.id).insertAdjacentHTML(
-              "beforeend",
-              `
-              <div class="hand_card_pannel">
-                <div class="hand_card_pannel_image"></div>
-                <div id="counter_hand_${player.id}" class="counter_hand"></div>
-              </div>
+          if(this.gamedatas.mode_end != 4)
+          {
 
-              <div class="set_card_pannel">
-                <div class="set_card_pannel_image"></div>
-                <div id="counter_set_${player.id}" class="counter_hand"></div>
-              </div>
+            this.bga.playerPanels.getElement(player.id).insertAdjacentHTML(
+                "beforeend",
+                `
+                <div class="hand_card_pannel">
+                  <div class="hand_card_pannel_image"></div>
+                  <div id="counter_hand_${player.id}" class="counter_hand"></div>
+                </div>
 
-              <div class="cumul_score_pannel">
-                <div class="billet"></div>
-                <div>$</div>
-                <div id="counter_cumul_score_${player.id}" class="counter_cumul_score"></div>
-              </div>
-                          
-              `,
-          );
+                <div class="set_card_pannel">
+                  <div class="set_card_pannel_image"></div>
+                  <div id="counter_set_${player.id}" class="counter_hand"></div>
+                </div>
+
+                <div id="first_set_${player.id}" class="first_set hidden">
+                  <div id="first_card_set_type_${player.id}" class="first_card_set_type"></div>
+                  <div class="lock_first_set"></div>
+                </div>
+
+                <div class="cumul_score_pannel">
+                  <div class="billet"></div>
+                  <div>$</div>
+                  <div id="counter_cumul_score_${player.id}" class="counter_cumul_score"></div>
+                </div>
+                            
+                `,
+            );
+          }
+
+          else {
+
+            this.bga.playerPanels.getElement(player.id).insertAdjacentHTML(
+                "beforeend",
+                `
+                <div class="hand_card_pannel">
+                  <div class="hand_card_pannel_image"></div>
+                  <div id="counter_hand_${player.id}" class="counter_hand"></div>
+                </div>
+
+                <div class="set_card_pannel">
+                  <div class="set_card_pannel_image"></div>
+                  <div id="counter_set_${player.id}" class="counter_hand"></div>
+                </div>
+
+                <div id="first_set_${player.id}" class="first_set hidden">
+                  <div id="first_card_set_type_${player.id}" class="first_card_set_type"></div>
+                  <div class="lock_first_set"></div>
+                </div>
+
+                
+                `,
+            );
+          }
+
         }
 
-        else {
-
-          this.bga.playerPanels.getElement(player.id).insertAdjacentHTML(
-              "beforeend",
-              `
-              <div class="hand_card_pannel">
-                <div class="hand_card_pannel_image"></div>
-                <div id="counter_hand_${player.id}" class="counter_hand"></div>
-              </div>
-
-              <div class="set_card_pannel">
-                <div class="set_card_pannel_image"></div>
-                <div id="counter_set_${player.id}" class="counter_hand"></div>
-              </div>
-              
-              `,
-          );
-        }
-
-       
-
-        });
+      });
 
     }
 
@@ -1001,6 +1065,7 @@ export class Game {
       this.setupDiscard();
       this.setupSet();
       this.setupLock();
+      this.setupFirstTypeSet();
 
       if(this.challenge == 1) {
         this.setupChallenge();
@@ -1082,6 +1147,46 @@ export class Game {
         }
       
       });
+
+    }
+
+    setupFirstTypeSet() {
+
+      if(this.gamedatas.mode == 2)
+      {
+        Object.values(this.gamedatas.players).forEach((player) => {
+
+          let x = 0;
+          let y = 0;
+
+          const first_set_type = this.first_set_type[player.id];
+        
+          if(first_set_type <= 10)
+          {
+            x = (first_set_type-1)*100; 
+            y = 0;
+          }
+          if(first_set_type >= 11)
+          {
+            x = (first_set_type-11)*100;
+            y = 100;
+          }
+
+          if(first_set_type >= 1)
+          {
+            const container = document.getElementById('first_set_'+player.id);
+            container.classList.remove('hidden');
+            const card = document.getElementById('first_card_set_type_'+player.id);
+            card.style.backgroundPosition = `-${x}% -${y}%`;
+
+
+          }
+
+        
+      
+        });
+
+      }
 
     }
 
@@ -1418,7 +1523,7 @@ export class Game {
 
 
                
-        
+        await this.bga.gameui.wait(1000);
 
     }
 
@@ -1455,7 +1560,7 @@ export class Game {
         const discard_div = document.getElementById("discard_card");
         this.applyCardFaceToElement(discard_div, discard_type);
 
-        await this.bga.gameui.wait(500);
+        await this.bga.gameui.wait(1000);
     }
 
     async notif_drawCards(args) {
@@ -1531,7 +1636,7 @@ export class Game {
       }, "500");
 
 
-      
+      await this.bga.gameui.wait(1000);
     }
 
     async notif_cardMoveChallengeDefense(args) {
@@ -1570,6 +1675,7 @@ export class Game {
         }
                     
       }, "500");
+
     }
 
     async notif_challengeWinByDefense(args) {
@@ -1595,6 +1701,7 @@ export class Game {
         challenge_container.classList.add('hidden');
                
       }, "500");
+
     }
 
     async notif_challengeWinByAttack(args) {
@@ -1618,7 +1725,8 @@ export class Game {
       this.attachToNewParentNoDestroy( set_steal.id, targetId);
       this.bga.gameui.slideToObjectAndDestroy( set_steal.id, targetId, 500, 0 );
 
-      this.last_set_type[args.winner] = Number(args.card_for_set.type);
+      this.last_set_type[args.winner] = Number(args.attaquant_last_set_type);
+      this.last_set_type[args.player_id] = Number(args.defenseur_last_set_type);
 
       setTimeout(() => 
       {
@@ -1730,7 +1838,6 @@ export class Game {
       
       this.last_set_type[args.player] = Number(args.last_type);
 
-
       
     }
 
@@ -1758,8 +1865,9 @@ export class Game {
       this.attachToNewParentNoDestroy( cardID2, targetID1);
       this.bga.gameui.slideToObjectAndDestroy( cardID2, targetID1, 500, 0 );
 
-      await this.bga.gameui.wait(500);
 
+      setTimeout(() => 
+      {
       const selector1 = `[id^="set_card_${args.player_id}"]`;
       const elements1 = document.querySelectorAll(selector1);
       elements1.forEach(el1 => el1.remove());
@@ -1780,12 +1888,44 @@ export class Game {
  
       })
 
+      }, "500");
+
       this.last_set_type[args.player_id] = Number(args.my_last_set_type);
       this.last_set_type[args.player] = Number(args.player_last_set_type);
 
       
     }
 
+
+    async notif_showFirstSetTypePannel(args) {
+
+      let x = 0;
+      let y = 0;
+
+      const first_set_type = args.type;
+    
+      if(first_set_type <= 10)
+      {
+        x = (first_set_type-1)*100; 
+        y = 0;
+      }
+      if(first_set_type >= 11)
+      {
+        x = (first_set_type-11)*100;
+        y = 100;
+      }
+
+      if(first_set_type >= 1)
+      {
+        const container = document.getElementById('first_set_'+args.player_id);
+        container.classList.remove('hidden');
+        const card = document.getElementById('first_card_set_type_'+args.player_id);
+        card.style.backgroundPosition = `-${x}% -${y}%`;
+
+
+      }
+
+    }
 
 
 

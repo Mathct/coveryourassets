@@ -405,6 +405,13 @@ class Game extends \Bga\GameFramework\Table
             
         }
 
+        foreach ($players as $player)
+        {
+            $first_set_type = self::getUniqueValueFromDB( "SELECT `card_type` FROM `cards` WHERE `card_location` ='set' AND `position` = 1 AND `card_location_arg`='{$player}' ORDER BY `card_type` ASC LIMIT 1" );
+            $result['first_set_type'][$player] = (int)$first_set_type;
+            
+        }
+
     
         
         //counters
@@ -415,8 +422,11 @@ class Game extends \Bga\GameFramework\Table
         $this->second_to_last_set->fillResult($result);
         $this->cumul_score->fillResult($result);
 
-        //mode
+        //mode_end
         $result['mode_end'] = $this->getGameStateValue('winning_condition');
+
+        //mode
+        $result['mode'] = $this->getGameStateValue('game_mode');
                
 
         // TODO: Gather all information about current game situation (visible by player $current_player_id).

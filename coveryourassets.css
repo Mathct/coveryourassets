@@ -529,6 +529,30 @@
   gap: 2px;
 }
 
+.first_set{
+  font-size: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 5px;
+  gap: 10px;
+}
+
+.first_card_set_type {
+    width: 46px;
+    height: 56px;
+    background-image: url('img/Cards.png');
+    background-size: 1000% 200%;
+    border-radius: 5%;  
+}
+
+.lock_first_set{
+  width: 18px;
+  height: 20px;
+  background-image: url('img/cadena.png');
+  background-size: 100% 100%;
+}
+
 .billet{
   position: relative;
   width: 42px;
@@ -547,12 +571,49 @@
   font-size: 24px;
   font-family: 'Garamond', 'Montserrat', 'Raleway', 'Segoe UI', Arial, sans-serif;
   display: block;
-  position: relative; 
+  position: relative;
+  display: flex;
+  justify-content: center;
+  padding-bottom: 7px; 
   
 }
 
 .log_endofRound {
-  background: #5c917a;
+  background: #60371d;
+  text-align: center;
+  color: #efd5ab;
+  border: 1px solid black;
+  font-weight: bold;
+  padding: 5px 2px 2px;
+  font-size: 24px;
+  font-family: 'Garamond', 'Montserrat', 'Raleway', 'Segoe UI', Arial, sans-serif;
+  display: block;
+  position: relative; 
+  display: flex;
+  justify-content: center;
+  padding-bottom: 7px; 
+  
+}
+
+.log_turn_ff0000 {
+  background: #ff0000;
+  text-align: center;
+  color: #efd5ab;
+  border: 1px solid black;
+  font-weight: bold;
+  padding: 5px 2px 2px;
+  font-size: 24px;
+  font-family: 'Garamond', 'Montserrat', 'Raleway', 'Segoe UI', Arial, sans-serif;
+  display: block;
+  position: relative; 
+  display: flex;
+  justify-content: center;
+  padding-bottom: 7px; 
+  
+}
+
+.log_turn_008000 {
+  background: #008000;
   text-align: center;
   color: #efd5ab;
   border: 1px solid black;
@@ -565,6 +626,63 @@
   
 }
 
+.log_turn_0000ff {
+  background: #0000ff;
+  text-align: center;
+  color: #efd5ab;
+  border: 1px solid black;
+  font-weight: bold;
+  padding: 5px 2px 2px;
+  font-size: 24px;
+  font-family: 'Garamond', 'Montserrat', 'Raleway', 'Segoe UI', Arial, sans-serif;
+  display: block;
+  position: relative; 
+  
+}
+
+.log_turn_ffa500 {
+  background: #ffa500;
+  text-align: center;
+  color: #efd5ab;
+  border: 1px solid black;
+  font-weight: bold;
+  padding: 5px 2px 2px;
+  font-size: 24px;
+  font-family: 'Garamond', 'Montserrat', 'Raleway', 'Segoe UI', Arial, sans-serif;
+  display: block;
+  position: relative; 
+  
+}
+
+.log_turn_e94190 {
+  background: #e94190;
+  text-align: center;
+  color: #efd5ab;
+  border: 1px solid black;
+  font-weight: bold;
+  padding: 5px 2px 2px;
+  font-size: 24px;
+  font-family: 'Garamond', 'Montserrat', 'Raleway', 'Segoe UI', Arial, sans-serif;
+  display: block;
+  position: relative; 
+  
+}
+
+.log_turn_982fff {
+  background: #982fff;
+  text-align: center;
+  color: #efd5ab;
+  border: 1px solid black;
+  font-weight: bold;
+  padding: 5px 2px 2px;
+  font-size: 24px;
+  font-family: 'Garamond', 'Montserrat', 'Raleway', 'Segoe UI', Arial, sans-serif;
+  display: block;
+  position: relative; 
+  
+}
+
+
 .lock_set{
   width: 18px;
   height: 20px;
@@ -574,6 +692,7 @@
   bottom: -42px;
   left: 46px;
 }
+
 
 .pile_set_impaire{
   width: 45px;

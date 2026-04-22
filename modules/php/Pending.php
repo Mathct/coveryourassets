@@ -102,6 +102,20 @@ class Pending extends Game
                 ]);
         }
 
+        // if($this->game_mode == 2)
+        // {
+        //     $g->notify->all('message', clienttranslate('${message}'), [
+        //             'message' => [
+        //                 'log' => '<div class="log_turn_' . $this->player_color . '">${turn} 1</div>',
+        //                 'args' => [
+        //                     'turn' => clienttranslate('Turn'),
+        //                     'i18n' => ['turn']
+        //                 ],
+        //             ]
+        //         ]);
+        // }
+        
+
     }
 
     /*
@@ -906,9 +920,7 @@ class Pending extends Game
         $ret['title'] = clienttranslate('');
         $ret['titleyou'] = clienttranslate('');
 
-    
-        //$ret['buttons'][] = 'yes_btn';
-    
+   
         return $ret;
     }
 
@@ -919,16 +931,19 @@ class Pending extends Game
         $g = game::$instance;
         $mode = $this->winning_condition;
 
-        $g->notify->all('message', clienttranslate('${message}'), [
-                'message' => [
-                    'log' => '<div class="log_endofRound">${round} ${nb}</div>',
-                    'args' => [
-                        'round' => clienttranslate('End of Round'),
-                        'nb' => $this->round_nb,
-                        'i18n' => ['round']
-                    ],
-                ]
-            ]);
+        if($mode != 2)
+        {
+            $g->notify->all('message', clienttranslate('${message}'), [
+                    'message' => [
+                        'log' => '<div class="log_endofRound">${round} ${nb}</div>',
+                        'args' => [
+                            'round' => clienttranslate('End of Round'),
+                            'nb' => $this->round_nb,
+                            'i18n' => ['round']
+                        ],
+                    ]
+                ]);
+        }
 
 
  
@@ -1284,6 +1299,24 @@ class Pending extends Game
                         ]
                     );
                     
+                }
+
+
+                if($this->game_mode == 2)
+                {
+                    if($position_max >= 1)
+                    {
+                        $first_set_type = self::getUniqueValueFromDB( "SELECT `card_type` FROM `cards` WHERE `card_location` ='set' AND `position` = 1 AND `card_location_arg`='{$player}' ORDER BY `card_type` ASC LIMIT 1" );
+                        $g->notify->all(
+                            "showFirstSetTypePannel",
+                            '',
+                            [                       
+                                'player_id' => $player,
+                                'type' => $first_set_type
+                            ]
+                        );
+
+                    }
                 }
             }
         }
