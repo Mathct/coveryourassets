@@ -868,6 +868,7 @@ export class Game {
                 <div id="first_set_${player.id}" class="first_set hidden">
                   <div id="first_card_set_type_${player.id}" class="first_card_set_type"></div>
                   <div class="lock_first_set"></div>
+                  <div id="counter_first_set_${player.id}" class="counter_hand"></div>
                 </div>
 
                 <div class="cumul_score_pannel">
@@ -898,6 +899,7 @@ export class Game {
                 <div id="first_set_${player.id}" class="first_set hidden">
                   <div id="first_card_set_type_${player.id}" class="first_card_set_type"></div>
                   <div class="lock_first_set"></div>
+                  <div id="counter_first_set_${player.id}" class="counter_hand"></div>
                 </div>
 
                 
@@ -1125,6 +1127,18 @@ export class Game {
           cumul_score.create(`counter_cumul_score_${player.id}`, {
           value: player.cumul_score,
           playerCounter: "cumul_score",
+          playerId: player.id,
+        });
+        });
+      }
+
+      if(this.gamedatas.mode == 2)
+      {
+        Object.values(this.gamedatas.players).forEach((player) => {
+          const first_set = new ebg.counter();
+          first_set.create(`counter_first_set_${player.id}`, {
+          value: player.first_set,
+          playerCounter: "first_set",
           playerId: player.id,
         });
         });

@@ -40,6 +40,7 @@ class Game extends \Bga\GameFramework\Table
     public playerCounter $last_set;
     public playerCounter $second_to_last_set;
     public playerCounter $cumul_score;
+    public playerCounter $first_set;
     
     //databases decks
     public $cards_DB;
@@ -91,6 +92,7 @@ class Game extends \Bga\GameFramework\Table
         $this->last_set = $this->counterFactory->createPlayerCounter('last_set');
         $this->second_to_last_set = $this->counterFactory->createPlayerCounter('second_to_last_set');
         $this->cumul_score = $this->counterFactory->createPlayerCounter('cumul_score');
+        $this->first_set = $this->counterFactory->createPlayerCounter('first_set');
        
 
         // Deck db_card created with table card 
@@ -253,6 +255,7 @@ class Game extends \Bga\GameFramework\Table
         $this->last_set->initDb(array_keys($players), 0);
         $this->second_to_last_set->initDb(array_keys($players), 0);
         $this->cumul_score->initDb(array_keys($players), 0);
+        $this->first_set->initDb(array_keys($players), 0);
 
 
 
@@ -421,6 +424,7 @@ class Game extends \Bga\GameFramework\Table
         $this->last_set->fillResult($result);
         $this->second_to_last_set->fillResult($result);
         $this->cumul_score->fillResult($result);
+        $this->first_set->fillResult($result);
 
         //mode_end
         $result['mode_end'] = $this->getGameStateValue('winning_condition');

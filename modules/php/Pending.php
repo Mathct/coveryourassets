@@ -1272,7 +1272,7 @@ class Pending extends Game
 
         foreach ($players as $player) {
 
-            $position_max = self::getUniqueValueFromDB( "SELECT `position` FROM `cards` WHERE `card_location` ='set' AND `card_location_arg`='{$player}' ORDER BY `position` DESC LIMIT 1" );
+            $position_max = $g->getUniqueValueFromDB( "SELECT `position` FROM `cards` WHERE `card_location` ='set' AND `card_location_arg`='{$player}' ORDER BY `position` DESC LIMIT 1" );
             if($position_max != null)
             {
                 if(($position_max == 1)||($position_max == 2))
@@ -1306,7 +1306,7 @@ class Pending extends Game
                 {
                     if($position_max >= 1)
                     {
-                        $first_set_type = self::getUniqueValueFromDB( "SELECT `card_type` FROM `cards` WHERE `card_location` ='set' AND `position` = 1 AND `card_location_arg`='{$player}' ORDER BY `card_type` ASC LIMIT 1" );
+                        $first_set_type = $g->getUniqueValueFromDB( "SELECT `card_type` FROM `cards` WHERE `card_location` ='set' AND `position` = 1 AND `card_location_arg`='{$player}' ORDER BY `card_type` ASC LIMIT 1" );
                         $g->notify->all(
                             "showFirstSetTypePannel",
                             '',
@@ -1316,7 +1316,11 @@ class Pending extends Game
                             ]
                         );
 
+                        $count_first_set = count($g->getObjectListFromDB( "SELECT `card_id` FROM `cards` WHERE `card_location` = 'set' AND `card_location_arg`='{$player}' AND `position`= 1", true ));
+                        $g->first_set->set($player, $count_first_set);
+
                     }
+
                 }
             }
         }
