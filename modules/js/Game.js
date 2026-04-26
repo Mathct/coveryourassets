@@ -979,9 +979,8 @@ export class Game {
             <div id="deck-counter" class="deck-counter"></div>
             </div>
 
-            <div id="discard_container" class="discard-container">
-              <div id="discard_card" class="discard_card"></div>
-            </div>
+            <div id="discard_container" class="discard-container"></div>
+
           </div>
           
        
@@ -1411,7 +1410,7 @@ export class Game {
         type = `-${(card.type-11) * 100}% -100%`;
       }
       
-      const emplacement = document.getElementById('discard_card').id;
+      const emplacement = document.getElementById('discard_container').id;
       
       const discard = `<div id="discard_card_${card.id}" class="card" style="z-index: ${zIndex}; background-position: ${type};"></div>`;
       dojo.place(discard, emplacement);
@@ -1622,7 +1621,7 @@ export class Game {
                     card.outerHTML,
                     'game_play_area',
                     cardDivId,
-                    'discard_card',
+                    'discard_container',
                     500,
                     0
                 );
