@@ -142,6 +142,8 @@ class Pending extends Game
 
         $handCards = game::$instance->cards_DB->getCardsInLocation('hand', $this->player_id);
         $count_hand_cards = count($handCards);
+
+        $discard_card = $g->getObjectFromDB( "SELECT `card_id` `id`, `card_type` `type`, `card_type_arg` `type_arg`, `card_location` `location`, `card_location_arg` `location_arg`, `position` `position` FROM `cards` WHERE `card_location` ='discard' ORDER BY `position` DESC LIMIT 1" );
         
         if($count_hand_cards >= 1)
         {
@@ -161,18 +163,39 @@ class Pending extends Game
             }
 
             $canCreateSet = false;
+            $canCreateSetwithDiscard = false;
+
             foreach ($assetCounts as $count) {
                 if ($count >= 2) {
                     $canCreateSet = true;
-                    break;
                 }
             }
-            if (!$canCreateSet && $jokerCount > 0 && count($assetCounts) > 0) {
+            if ($jokerCount > 0 && count($assetCounts) > 0) {
                 $canCreateSet = true;
+            }
+
+            if (!isset($discard_card['type'])) {
+                // aucune carte dans la défausse → skip
+            } else {
+                $type = (int)$discard_card['type'];
+
+                if (
+                    isset($assetCounts[$type]) ||
+                    $type === 12 ||
+                    $type === 13
+                ) {
+                    $canCreateSet = true;
+                    $canCreateSetwithDiscard = true;
+                }
             }
 
             if ($canCreateSet) {
                 $ret['buttons'][] = 'create_set_btn';
+            }
+
+            if ($canCreateSetwithDiscard)
+            {
+                $ret["selectablemulti"][] = 'discard_card_'.$discard_card['id'];
             }
 
             $ret['buttons'][] = 'discard_btn';
@@ -261,6 +284,7 @@ class Pending extends Game
             $ids = explode('_', $varg2);
             $id1 = (int) $ids[0];
             $id2 = (int) $ids[1];
+            $discard = (int) $ids[2];
 
             $cards = $g->getObjectListFromDB(
                 "SELECT `card_id` `id`, `card_type` `type`, `card_type_arg` `type_arg`, `card_location` `location`, `card_location_arg` `location_arg`, `position` `position` FROM cards WHERE card_id IN ({$id1}, {$id2})"
@@ -290,6 +314,7 @@ class Pending extends Game
                     'player_id' => $this->player_id,
                     'cards' => $cards,
                     'card_for_set' => $card_for_set,
+                    'discard_id' => $discard,
                     'log' => $this->getSetLog($cards[0]['type'],$cards[1]['type']),
                 ]
             );
@@ -1227,9 +1252,8 @@ class Pending extends Game
 
         $this->Lock();
 
-        $g->cards_DB->pickCardForLocation('deck', 'discard', 0);
-        $discard = $g->getUniqueValueFromDB( "SELECT `card_type` `type` FROM `cards` WHERE `card_location` ='discard' ORDER BY `position` DESC LIMIT 1" );
-
+        $discard = $g->cards_DB->pickCardForLocation('deck', 'discard', 0);
+        
         $g->DbQuery("UPDATE player SET `first_set` = 0");
 
         $count_deck = count($g->getObjectListFromDB( "SELECT `card_id` `id` FROM cards WHERE card_location = 'deck'", true ));

@@ -600,8 +600,31 @@ export class Game {
         { 
           const id1 = ids[0].split("_");
           const id2 = ids[1].split("_");
-          const type1 = this.all_cards[id1[3]].type;  
-          const type2 = this.all_cards[id2[3]].type;
+
+          let type1 = '';
+          let type2 = '';
+
+          if(!ids[0].startsWith("discard"))
+          {
+            type1 = this.all_cards[id1[3]].type; 
+          }
+
+          else
+          {
+            type1 = this.all_cards[id1[2]].type;
+          }
+
+          if(!ids[1].startsWith("discard"))
+          {
+            type2 = this.all_cards[id2[3]].type; 
+          }
+
+          else
+          {
+            type2 = this.all_cards[id2[2]].type;
+          }
+           
+          
           if((type1 <= 11)&&(type2 <= 11)&&(type1 == type2))
           {
             btn.disabled = false;
@@ -632,7 +655,7 @@ export class Game {
       const btn = document.getElementById('discard_btn');
 
       if(btn) {
-        if(count == 1)
+        if((count == 1)&&(!ids[0].startsWith("discard")))
         { 
           const id1 = ids[0].split("_");
           const type1 = this.all_cards[id1[3]].type;
@@ -663,7 +686,7 @@ export class Game {
       const btn = document.getElementById('swap_btn');
 
       if(btn) {
-        if(count == 1)
+        if((count == 1)&&(!ids[0].startsWith("discard")))
         { 
           const id1 = ids[0].split("_");
           const type1 = this.all_cards[id1[3]].type;
@@ -692,7 +715,7 @@ export class Game {
       const btn = document.getElementById('move_btn');
 
       if(btn) {
-        if(count == 1)
+        if((count == 1)&&(!ids[0].startsWith("discard")))
         { 
           const id1 = ids[0].split("_");
           const type1 = this.all_cards[id1[3]].type;
@@ -721,7 +744,7 @@ export class Game {
       const btn = document.getElementById('improve_btn');
 
       if(btn) {
-        if(count == 1)
+        if((count == 1)&&(!ids[0].startsWith("discard")))
         { 
           const id1 = ids[0].split("_");
           const type1 = this.all_cards[id1[3]].type;
@@ -750,10 +773,33 @@ export class Game {
     SelectSet() {
 
       const ids = Array.from(document.querySelectorAll('.selectedmulti')).map(el => el.id);
-      const id1 = ids[0].split("_")[3];
-      const id2 = ids[1].split("_")[3];
+      let id1 = 0;
+      let id2 = 0;
+      let discard = 0;
 
-      return id1+'_'+id2;
+      if((!ids[0].startsWith("discard")))
+      {
+        id1 = ids[0].split("_")[3];
+      }
+
+      else
+      {
+        id1 = ids[0].split("_")[2];
+        discard = id1;
+      }
+
+      if((!ids[1].startsWith("discard")))
+      {
+        id2 = ids[1].split("_")[3];
+      }
+
+      else
+      {
+        id2 = ids[1].split("_")[2];
+        discard = id2;
+      }
+
+      return id1+'_'+id2+'_'+discard;
         
         
     }
@@ -1498,27 +1544,46 @@ export class Game {
         
         
         const cards = args.cards;
+        const discard_id = args.discard_id;
         let player_id = 0;
         
         if(!this.bga.players.isCurrentPlayerSpectator()) {
           player_id = this.bga.players.getCurrentPlayer().id;
         }
-                
+        
+        for (const card of cards) {
+
+          if(card.id == discard_id)
+          {
+            const enfant = document.getElementById('discard_card_'+card.id);
+            const targetId = document.getElementById('set_'+args.player_id).id;
+            this.attachToNewParentNoDestroy( enfant.id, targetId);
+            this.bga.gameui.slideToObjectAndDestroy( enfant.id, targetId, 500, 0 );
+
+          }
+        }
 
         if((player_id == args.player_id)&&(!this.bga.players.isCurrentPlayerSpectator()))
         {
           for (const card of cards) {
-            const enfant = document.getElementById('my_cards_item_'+card.id);
-            const targetId = document.getElementById('set_'+card.location_arg).id;
-            this.attachToNewParentNoDestroy( enfant.id, targetId);
-            this.bga.gameui.slideToObjectAndDestroy( enfant.id, targetId, 500, 0 );
+
+            if(card.id != discard_id)
+            {
+              const enfant = document.getElementById('my_cards_item_'+card.id);
+              const targetId = document.getElementById('set_'+args.player_id).id;
+              this.attachToNewParentNoDestroy( enfant.id, targetId);
+              this.bga.gameui.slideToObjectAndDestroy( enfant.id, targetId, 500, 0 );
+            }
             
           }
 
           await this.bga.gameui.wait(400);
 
           for (const card of cards) {
-            this.handStock.removeFromStockById( card.id);
+            if(card.id != discard_id)
+            {
+              this.handStock.removeFromStockById(card.id);
+            }
           }
           
         }
@@ -1751,10 +1816,7 @@ export class Game {
 
     async notif_initRound(args) {
 
-      // place la card en discard
-      this.discard = args.discard;
-      this.setupDiscard();
-      
+          
       //donne les cartes dans les mains des joueurs
       if(!this.bga.players.isCurrentPlayerSpectator())
       {
@@ -1774,6 +1836,11 @@ export class Game {
       // suppression des sets
       document.querySelectorAll('.card_impaire').forEach(el => el.remove());
       document.querySelectorAll('.card_paire').forEach(el => el.remove());
+
+      //ini du discard
+      document.querySelectorAll('[id^="discard_card"]').forEach(el => el.remove());
+      this.addCardDiscard(args.discard, 0);
+
 
       //init de this.last_set_type
       Object.values(this.gamedatas.players).forEach((player) => {
