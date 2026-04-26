@@ -323,31 +323,53 @@ class Pending extends Game
             $g->set->inc($this->player_id, 1);
             $this->Lock();
 
-            if($count_deck >= 1) {
-                if($count_deck >= 2) {
-                    $newcards = $g->cards_DB->pickCards(2, 'deck', $this->player_id);
-                    $g->deck->inc(-2);
-                }
-                if($count_deck == 1) {
-                    $newcards = $g->cards_DB->pickCards(1, 'deck', $this->player_id);
-                    $g->deck->inc(-1);
-                    $g->hand->inc($this->player_id, -1);
-                }
-                
-                $g->notify->player(
-                    $this->player_id,
-                    "drawCards",
-                    '',
-                    [
-                        'player_id' => $this->player_id,
-                        'cards' => $newcards,
-                    ]
-                );
-            }
-
-            if($count_deck == 0) 
+            if($discard == 0)
             {
                 $g->hand->inc($this->player_id, -2);
+            }
+            else
+            {
+                $g->hand->inc($this->player_id, -1);
+            }
+        
+
+            $handCards = game::$instance->cards_DB->getCardsInLocation('hand', $this->player_id);
+            $count_hand_cards = count($handCards);
+
+            $need_cards = 5 - $count_hand_cards;
+
+            if($count_deck >= $need_cards)
+            {
+                $newcards = $g->cards_DB->pickCards($need_cards, 'deck', $this->player_id);
+                $g->deck->inc(-$need_cards);
+                $g->hand->inc($this->player_id, $need_cards);
+
+                $g->notify->player(
+                        $this->player_id,
+                        "drawCards",
+                        '',
+                        [
+                            'player_id' => $this->player_id,
+                            'cards' => $newcards,
+                        ]
+                    );
+            }
+            if (($count_deck < $need_cards)&&($count_deck >= 1))
+            {
+                $newcards = $g->cards_DB->pickCards($count_deck, 'deck', $this->player_id);
+                $g->deck->set(0);
+                $g->hand->inc($this->player_id, $count_deck);
+
+                $g->notify->player(
+                        $this->player_id,
+                        "drawCards",
+                        '',
+                        [
+                            'player_id' => $this->player_id,
+                            'cards' => $newcards,
+                        ]
+                    );
+
             }
 
 

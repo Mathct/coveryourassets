@@ -116,7 +116,7 @@ trait PendingAdvancedTrait  // ATTENTION
             if ($jokerCount > 0 && count($assetCounts) > 0) {
                 $canCreateSet = true;
             }
-            
+
  
             if (!isset($discard_card['type'])) {
                 // aucune carte dans la défausse → skip
@@ -494,7 +494,14 @@ trait PendingAdvancedTrait  // ATTENTION
             $this->majSetCounters($this->player_id);
             $g->set->inc($this->player_id, 1);
             $this->Lock();
-            $g->hand->inc($this->player_id, -2);
+            if($discard == 0)
+            {
+                $g->hand->inc($this->player_id, -2);
+            }
+            else
+            {
+                $g->hand->inc($this->player_id, -1);
+            }
 
             if($this->player_turn == 2)
             {
