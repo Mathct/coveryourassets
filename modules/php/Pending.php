@@ -176,14 +176,19 @@ class Pending extends Game
 
             if (!isset($discard_card['type'])) {
                 // aucune carte dans la défausse → skip
-            } else {
+            } 
+            else 
+            {
                 $type = (int)$discard_card['type'];
 
-                if (
-                    isset($assetCounts[$type]) ||
-                    $type === 12 ||
-                    $type === 13
-                ) {
+                if (isset($assetCounts[$type]) || ($type == 12 && count($assetCounts) > 0) || ($type == 13 && count($assetCounts) > 0)) 
+                {
+                    $canCreateSet = true;
+                    $canCreateSetwithDiscard = true;
+                }
+
+                if ($jokerCount > 0 && $type <= 11)
+                {
                     $canCreateSet = true;
                     $canCreateSetwithDiscard = true;
                 }
