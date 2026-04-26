@@ -636,14 +636,16 @@ export class Game {
         { 
           const id1 = ids[0].split("_");
           const type1 = this.all_cards[id1[3]].type;
-          if((type1 != 14)&&(type1 != 15))
-          {
-            btn.disabled = false;
-          }
-          else
-          {
-            btn.disabled = true;
-          }
+          // if((type1 != 14)&&(type1 != 15))
+          // {
+          //   btn.disabled = false;
+          // }
+          // else
+          // {
+          //   btn.disabled = true;
+          // }
+
+          btn.disabled = false;
           
         }
 
@@ -1232,10 +1234,8 @@ export class Game {
         }
         if (t <= 10) {
             element.style.backgroundPosition = `-${(t - 1) * 100}% 0%`;
-        } else if (t === 11) {
-            element.style.backgroundPosition = `0% -100%`;
-        } else if (t === 12) {
-            element.style.backgroundPosition = `-100% -100%`;
+        } else if (t >= 11) {
+            element.style.backgroundPosition = `-${(t - 11) * 100}% -100%`;
         }
     }
      
@@ -1316,12 +1316,10 @@ export class Game {
       if(discard_type <= 10) {
         discard_div.style.backgroundPosition = `-${(discard_type-1) * 100}% 0%`;
       }
-      else if(discard_type == 11) {
-        discard_div.style.backgroundPosition = `0% -100%`;
+      else if(discard_type >= 11) {
+        discard_div.style.backgroundPosition = `-${(discard_type-11) * 100}% -100%`;
       }
-      else if(discard_type == 12) {
-        discard_div.style.backgroundPosition = `-100% -100%`;
-      }
+      
     }
 
     setupSet() {
@@ -1350,12 +1348,10 @@ export class Game {
       if(set.type <= 10) {
         position = `-${(set.type-1) * 100}% 0%`;
       }
-      else if(set.type == 11) {
-        position = `0% -100%`;
+      else if(set.type >= 11) {
+        position = `-${(set.type-11) * 100}% -100%`;
       }
-      else if(set.type == 12) {
-        position = `-100% -100%`;
-      }
+      
 
       const emplacement = document.getElementById('set_'+set.location_arg).id;
 
@@ -1403,15 +1399,10 @@ export class Game {
           if(card_type <= 10) {
             card_div.style.backgroundPosition = `-${(card_type-1) * 100}% 0%`;
           }
-          else if(card_type == 11) {
-            card_div.style.backgroundPosition = `0% -100%`;
+          else if(card_type >= 11) {
+            card_div.style.backgroundPosition = `-${(card_type-11) * 100}% -100%`;
           }
-          else if(card_type == 12) {
-            card_div.style.backgroundPosition = `-100% -100%`;
-          }
-          else if(card_type == 13) {
-            card_div.style.backgroundPosition = `-200% -100%`;
-          }
+          
         });
 
       }
@@ -1428,15 +1419,10 @@ export class Game {
           if(card_type <= 10) {
             card_div.style.backgroundPosition = `-${(card_type-1) * 100}% 0%`;
           }
-          else if(card_type == 11) {
-            card_div.style.backgroundPosition = `0% -100%`;
+          else if(card_type >= 11) {
+            card_div.style.backgroundPosition = `-${(card_type-11) * 100}% -100%`;
           }
-          else if(card_type == 12) {
-            card_div.style.backgroundPosition = `-100% -100%`;
-          }
-          else if(card_type == 13) {
-            card_div.style.backgroundPosition = `-200% -100%`;
-          }
+          
         });
       }
     }
@@ -1637,14 +1623,8 @@ export class Game {
         if(card_type <= 10) {
           card_div.style.backgroundPosition = `-${(card_type-1) * 100}% 0%`;
         }
-        else if(card_type == 11) {
-          card_div.style.backgroundPosition = `0% -100%`;
-        }
-        else if(card_type == 12) {
-          card_div.style.backgroundPosition = `-100% -100%`;
-        }
-        else if(card_type == 13) {
-          card_div.style.backgroundPosition = `-200% -100%`;
+        else if(card_type >= 11) {
+          card_div.style.backgroundPosition = `-${(card_type-11) * 100}% -100%`;
         }
                     
       }, "500");
@@ -1678,15 +1658,10 @@ export class Game {
         if(card_type <= 10) {
           card_div.style.backgroundPosition = `-${(card_type-1) * 100}% 0%`;
         }
-        else if(card_type == 11) {
-          card_div.style.backgroundPosition = `0% -100%`;
+        else if(card_type >= 11) {
+          card_div.style.backgroundPosition = `-${(card_type-11) * 100}% -100%`;
         }
-        else if(card_type == 12) {
-          card_div.style.backgroundPosition = `-100% -100%`;
-        }
-        else if(card_type == 13) {
-          card_div.style.backgroundPosition = `-200% -100%`;
-        }
+        
                     
       }, "500");
 
