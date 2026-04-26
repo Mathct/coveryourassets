@@ -205,9 +205,6 @@
 
   width: 128px;
   height: 179px;
-  background-image: url('img/Cards.png');
-  background-size: 1000% 200%;
-  /* box-shadow: 1px 2px 1px 1px rgba(0, 0, 0, 0.44); */
   border-radius: 5%;
 
 }

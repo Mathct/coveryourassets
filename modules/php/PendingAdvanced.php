@@ -587,18 +587,29 @@ trait PendingAdvancedTrait  // ATTENTION
             $ids = explode('_', $varg2);
             $id1 = (int) $ids[0];
 
+            $newDiscardPosition = 0;
+
             $card = $g->cards_DB->getCard($id1);
 
-            $maxDiscardPosition = (int) $g->getUniqueValueFromDB(
-                "SELECT COALESCE(MAX(`position`), 0) FROM cards WHERE card_location = 'discard' AND card_location_arg = {$this->player_id}"
-            );
-            $newDiscardPosition = $maxDiscardPosition + 1;
+            $type = $card['type'];
 
-            $g->DbQuery(
-                "UPDATE cards SET `position` = {$newDiscardPosition} WHERE card_id = {$id1}"
-            );
+            if($type <= 13)
+            {
+                $maxDiscardPosition = (int) $g->getUniqueValueFromDB("SELECT `position` FROM cards WHERE `card_location` ='discard' ORDER BY `position` DESC LIMIT 1");
+                $newDiscardPosition = $maxDiscardPosition + 1;
 
-            $g->cards_DB->moveCard($id1, 'discard', 0);
+                $g->DbQuery(
+                    "UPDATE cards SET `position` = {$newDiscardPosition} WHERE card_id = {$id1}"
+                );
+
+                $g->cards_DB->moveCard($id1, 'discard', 0);
+
+            }
+
+            else
+            {
+                $g->cards_DB->moveCard($id1, 'discardaction');
+            }
 
             $txt = clienttranslate('${player_name} discards: ${log}');
             $g->notify->all(
@@ -607,7 +618,8 @@ trait PendingAdvancedTrait  // ATTENTION
                 [
                     'player_id' => $this->player_id,
                     'card' => $card,
-                    'log' => $this->getCardLog($card['type']),
+                    'position' => $newDiscardPosition,
+                    'log' => $this->getCardLog($type),
                 ]
             );
 
@@ -949,9 +961,8 @@ trait PendingAdvancedTrait  // ATTENTION
             $g->DbQuery("UPDATE cards SET position = {$max_position_set_player}, card_location_arg = {$player} WHERE card_location ='set' AND card_location_arg = '{$this->player_id}' AND position = '{$max_position_set_my}'");
             $g->DbQuery("UPDATE cards SET position = {$max_position_set_my} WHERE card_location ='set' AND card_location_arg = '{$this->player_id}' AND position = '{$my_position_inc}'");
 
-            $g->cards_DB->moveCard($parg1, 'discard', 0);
-            $min_position_discard = $g->getUniqueValueFromDB("SELECT MIN(position) AS valeur_min FROM cards WHERE card_location = 'discard'");
-            $g->DbQuery("UPDATE cards SET position = {$min_position_discard} -1 WHERE card_id = '{$parg1}'");
+            $g->cards_DB->moveCard($parg1, 'discardaction');
+            
 
             $txt = clienttranslate('${player_name} uses: ${log}');
             $g->notify->all(
@@ -1218,9 +1229,8 @@ trait PendingAdvancedTrait  // ATTENTION
             $g->DbQuery("UPDATE cards SET position = 0 WHERE card_location ='set' AND card_location_arg = '{$player}' AND position = '{$max_position_set}'");
             $g->DbQuery("UPDATE cards SET position = position +1 WHERE card_location ='set' AND card_location_arg = '{$player}'");
 
-            $g->cards_DB->moveCard($parg1, 'discard', 0);
-            $min_position_discard = $g->getUniqueValueFromDB("SELECT MIN(position) AS valeur_min FROM cards WHERE card_location = 'discard'");
-            $g->DbQuery("UPDATE cards SET position = {$min_position_discard} -1 WHERE card_id = '{$parg1}'");
+            $g->cards_DB->moveCard($parg1, 'discardaction');
+           
 
 
             $cards = [];

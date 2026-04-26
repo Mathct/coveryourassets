@@ -1226,19 +1226,7 @@ export class Game {
         return Number.isFinite(type) ? type : 0;
     }
 
-    /** Sprite carte (Cards.png) sur un div : même logique que discard / setupSet. */
-    applyCardFaceToElement(element, type) {
-        const t = Number(type);
-        if (!element || !Number.isFinite(t)) {
-            return;
-        }
-        if (t <= 10) {
-            element.style.backgroundPosition = `-${(t - 1) * 100}% 0%`;
-        } else if (t >= 11) {
-            element.style.backgroundPosition = `-${(t - 11) * 100}% -100%`;
-        }
-    }
-     
+        
     createStockForCards(element)
     {
         let stock = new ebg.stock();
@@ -1310,16 +1298,13 @@ export class Game {
     }
 
     setupDiscard() {
-      const discard_type = this.discard;
-      
-      const discard_div = document.getElementById('discard_card');
-      if(discard_type <= 10) {
-        discard_div.style.backgroundPosition = `-${(discard_type-1) * 100}% 0%`;
-      }
-      else if(discard_type >= 11) {
-        discard_div.style.backgroundPosition = `-${(discard_type-11) * 100}% -100%`;
-      }
-      
+
+      Object.values(this.discard).forEach((card) => {
+
+        this.addCardDiscard(card, card.position);
+
+      });
+          
     }
 
     setupSet() {
@@ -1365,6 +1350,26 @@ export class Game {
           const card = `<div id="set_card_${set.location_arg}_${set.position}" class="card card_impaire" style="z-index: ${zIndex}; background-position: ${position};"></div>`;
           dojo.place(card, emplacement);
         }
+      
+    }
+
+    addCardDiscard(card, newposition) {
+
+      var zIndex = Number(newposition);
+      var type = '';
+
+      if(card.type <= 10) {
+        type = `-${(card.type-1) * 100}% 0%`;
+      }
+      else if(card.type >= 11) {
+        type = `-${(card.type-11) * 100}% -100%`;
+      }
+      
+      const emplacement = document.getElementById('discard_card').id;
+      
+      const discard = `<div id="discard_card_${card.id}" class="card" style="z-index: ${zIndex}; background-position: ${type};"></div>`;
+      dojo.place(discard, emplacement);
+        
       
     }
 
@@ -1528,17 +1533,22 @@ export class Game {
     }
 
     async notif_cardsMovedToDiscard(args) {
+
+      const card_id = String(args.card.id);
+      const cardDivId = 'my_cards_item_' + card_id;
+      const card = document.getElementById(cardDivId);
+
+      if (card) {
+          card.style.outline = 'none';
+      }
+
+      if(args.card.type <= 13)
+      {
         let player_id = 0;
         if(!this.bga.players.isCurrentPlayerSpectator()) {
           player_id = this.bga.players.getCurrentPlayer().id;
         }
-        const card_id = String(args.card.id);
-        const cardDivId = 'my_cards_item_' + card_id;
-        const card = document.getElementById(cardDivId);
-
-        if (card) {
-            card.style.outline = 'none';
-        }
+        
 
         if ((player_id == args.card.location_arg)&&(!this.bga.players.isCurrentPlayerSpectator())) {
             // Clone animé vers la défausse ; la main se met à jour dès le départ (le clone porte le visuel).
@@ -1556,9 +1566,22 @@ export class Game {
             }
         }
 
-        const discard_type = args.card.type;
-        const discard_div = document.getElementById("discard_card");
-        this.applyCardFaceToElement(discard_div, discard_type);
+        this.addCardDiscard(args.card, args.position);
+      }
+
+      else
+      {
+        let player_id = 0;
+        if(!this.bga.players.isCurrentPlayerSpectator()) {
+          player_id = this.bga.players.getCurrentPlayer().id;
+        }
+
+        if((player_id == args.card.location_arg)&&(!this.bga.players.isCurrentPlayerSpectator()))
+        {
+          this.handStock.removeFromStockById(card_id);
+        }
+
+      }
 
         await this.bga.gameui.wait(1000);
     }

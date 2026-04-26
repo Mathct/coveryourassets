@@ -338,11 +338,11 @@ class Pending extends Game
             $ids = explode('_', $varg2);
             $id1 = (int) $ids[0];
 
+            $newDiscardPosition = 0;
+
             $card = $g->cards_DB->getCard($id1);
 
-            $maxDiscardPosition = (int) $g->getUniqueValueFromDB(
-                "SELECT COALESCE(MAX(`position`), 0) FROM cards WHERE card_location = 'discard' AND card_location_arg = {$this->player_id}"
-            );
+            $maxDiscardPosition = (int) $g->getUniqueValueFromDB("SELECT `position` FROM cards WHERE `card_location` ='discard' ORDER BY `position` DESC LIMIT 1");
             $newDiscardPosition = $maxDiscardPosition + 1;
 
             $g->DbQuery(
@@ -358,6 +358,7 @@ class Pending extends Game
                 [
                     'player_id' => $this->player_id,
                     'card' => $card,
+                    'position' => $newDiscardPosition,
                     'log' => $this->getCardLog($card['type']),
                 ]
             );
