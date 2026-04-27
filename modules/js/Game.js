@@ -853,17 +853,17 @@ export class Game {
             this.bga.playerPanels.getElement(player.id).insertAdjacentHTML(
                 "beforeend",
                 `
-                <div class="hand_card_pannel">
+                <div class="hand_card_pannel" title="${_("Number of cards in hand")}">
                   <div class="hand_card_pannel_image"></div>
                   <div id="counter_hand_${player.id}" class="counter_hand"></div>
                 </div>
 
-                <div class="set_card_pannel">
+                <div class="set_card_pannel" title="${_("Number of sets")}">
                   <div class="set_card_pannel_image"></div>
                   <div id="counter_set_${player.id}" class="counter_hand"></div>
                 </div>
 
-                <div class="cumul_score_pannel">
+                <div class="cumul_score_pannel" title="${_("Total money earned")}">
                   <div class="billet"></div>
                   <div>$</div>
                   <div id="counter_cumul_score_${player.id}" class="counter_cumul_score"></div>
@@ -878,12 +878,12 @@ export class Game {
             this.bga.playerPanels.getElement(player.id).insertAdjacentHTML(
                 "beforeend",
                 `
-                <div class="hand_card_pannel">
+                <div class="hand_card_pannel" title="${_("Number of cards in hand")}">
                   <div class="hand_card_pannel_image"></div>
                   <div id="counter_hand_${player.id}" class="counter_hand"></div>
                 </div>
 
-                <div class="set_card_pannel">
+                <div class="set_card_pannel" title="${_("Number of sets")}">
                   <div class="set_card_pannel_image"></div>
                   <div id="counter_set_${player.id}" class="counter_hand"></div>
                 </div>
@@ -903,23 +903,23 @@ export class Game {
             this.bga.playerPanels.getElement(player.id).insertAdjacentHTML(
                 "beforeend",
                 `
-                <div class="hand_card_pannel">
+                <div class="hand_card_pannel" title="${_("Number of cards in hand")}">
                   <div class="hand_card_pannel_image"></div>
                   <div id="counter_hand_${player.id}" class="counter_hand"></div>
                 </div>
 
-                <div class="set_card_pannel">
+                <div class="set_card_pannel" title="${_("Number of sets")}">
                   <div class="set_card_pannel_image"></div>
                   <div id="counter_set_${player.id}" class="counter_hand"></div>
                 </div>
 
-                <div id="first_set_${player.id}" class="first_set hidden">
+                <div id="first_set_${player.id}" class="first_set hidden" title="${_("Protected set")}">
                   <div id="first_card_set_type_${player.id}" class="first_card_set_type"></div>
                   <div class="lock_first_set"></div>
                   <div id="counter_first_set_${player.id}" class="counter_hand"></div>
                 </div>
 
-                <div class="cumul_score_pannel">
+                <div class="cumul_score_pannel" title="${_("Total money earned")}">
                   <div class="billet"></div>
                   <div>$</div>
                   <div id="counter_cumul_score_${player.id}" class="counter_cumul_score"></div>
@@ -934,17 +934,17 @@ export class Game {
             this.bga.playerPanels.getElement(player.id).insertAdjacentHTML(
                 "beforeend",
                 `
-                <div class="hand_card_pannel">
+                <div class="hand_card_pannel" title="${_("Number of cards in hand")}">
                   <div class="hand_card_pannel_image"></div>
                   <div id="counter_hand_${player.id}" class="counter_hand"></div>
                 </div>
 
-                <div class="set_card_pannel">
+                <div class="set_card_pannel" title="${_("Number of sets")}">
                   <div class="set_card_pannel_image"></div>
                   <div id="counter_set_${player.id}" class="counter_hand"></div>
                 </div>
 
-                <div id="first_set_${player.id}" class="first_set hidden">
+                <div id="first_set_${player.id}" class="first_set hidden" title="${_("Protected set")}">
                   <div id="first_card_set_type_${player.id}" class="first_card_set_type"></div>
                   <div class="lock_first_set"></div>
                   <div id="counter_first_set_${player.id}" class="counter_hand"></div>
