@@ -129,7 +129,7 @@
 }
 
 .title {
-  width: 100%;
+  width: 133%;
   text-align: center;
   font-weight: bold;
   font-family: 'Garamond', 'Montserrat', 'Raleway', 'Segoe UI', Arial, sans-serif;
@@ -217,7 +217,7 @@
   flex-wrap: wrap;
   align-items: center;
   width: 100%;
-  gap: 95px 60px;
+  gap: 50px 40px;
   margin-top: 45px;
 }
 
@@ -270,6 +270,12 @@
   position: absolute;
 }
 
+.set_container{
+  width: 179px;
+  height: 179px;
+  padding: 0px 57px 53px 0;
+}
+
 .sets-container {
   display: flex;
   flex-direction: column;
@@ -278,7 +284,7 @@
   background-color: rgba(255, 255, 255, 0.5);
   margin-top: 20px;
   border-radius: 20px;
-  padding-bottom: 45px;
+  padding-bottom: 10px;
   margin-bottom: 10px;
 }
 
@@ -424,11 +430,12 @@
   padding: 3px;
   font-weight: bold;
   color: white;
+  pointer-events: none;
  
 }
 
 .counter_second_to_last_set{
-  bottom: -34px;
+  bottom: -45px;
   left: 7px;
   position: absolute;
   z-index: 600;
@@ -436,8 +443,8 @@
 }
 
 .counter_last_set{
-  top: -2px;
-  right: -44px;;
+  top: 4px;
+  right: -50px;
   position: absolute;
   z-index: 600;
   font-size: 14px !important;
@@ -679,7 +686,7 @@
   position: absolute;
   background-image: url('img/cadena.png');
   background-size: 100% 100%;
-  bottom: -42px;
+  bottom: -53px;
   left: 46px;
 }
 
@@ -690,7 +697,7 @@
   position: absolute;
   background-image: url('img/pile.png');
   background-size: 100% 100%;
-  bottom: -44px;
+  bottom: -55px;
   left: 1px;
   z-index: 230;
 }
@@ -701,7 +708,7 @@
     position: absolute;
     background-image: url('img/pile2.png');
     background-size: 100% 100%;
-    bottom: 138px;
-    left: 185px;
+    bottom: 133px;
+    left: 190px;
     z-index: 230;
 }

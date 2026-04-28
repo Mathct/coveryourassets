@@ -55,6 +55,10 @@ class NormalTurn {
           {
             this.game.safeClass(sid, "add", "selectable_"+this.game.players[split[1]].color);
           }
+          if(split[0] == 'pile')
+          {
+            this.game.safeClass(sid, "add", "selectable_"+this.game.players[split[3]].color);
+          }
         });
       }
 
@@ -1007,16 +1011,18 @@ export class Game {
 
           <div id="sets_container" class="sets-container" style="border: 2px solid #${color};">
             <div id="set_opponent_container" class="set-opponent-container">
+            <div class="set_container">
               <div id="set_${player_id}" class="set">
                 <div id="counter_second_to_last_set_${player_id}" class="counter_second_to_last_set"></div>
                 <div id="counter_last_set_${player_id}" class="counter_last_set"></div>
                 <div id="lock_set_${player_id}" class="lock_set hidden"></div>
-                <div class="pile_set_impaire"></div>
-                <div class="pile_set_paire"></div>
+                <div id="pile_set_impaire_${player_id}" class="pile_set_impaire"></div>
+                <div id="pile_set_paire_${player_id}" class="pile_set_paire"></div>
                 <div class="title title_name_set" style="color: #${color};">${_("My sets")}</div>
                 <div id="set_cards_impaire_${player_id}" class="set-cards-impaire"></div>
                 <div id="set_cards_paire_${player_id}" class="set-cards-paire"></div>
               </div>
+            </div>
             </div>
           </div>
           
@@ -1032,15 +1038,17 @@ export class Game {
           const set_container = document.getElementById(`set_opponent_container`);
           if(player.id != player_id) {
             set_container.insertAdjacentHTML("beforeend", `
+              <div class="set_container">
               <div id="set_${player.id}" class="set">
               <div id="counter_second_to_last_set_${player.id}" class="counter_second_to_last_set"></div>
               <div id="counter_last_set_${player.id}" class="counter_last_set"></div>
               <div id="lock_set_${player.id}" class="lock_set hidden"></div>
-              <div class="pile_set_impaire"></div>
-              <div class="pile_set_paire"></div>
+              <div id="pile_set_impaire_${player.id}" class="pile_set_impaire"></div>
+              <div id="pile_set_paire_${player.id}" class="pile_set_paire"></div>
               <div class="title title_name_set" style="color: #${player.color};">${player.name}</div>
               <div id="set_cards_impaire_${player.id}" class="set-cards-impaire"></div>
               <div id="set_cards_paire_${player.id}" class="set-cards-paire"></div>
+            </div>
             </div>
           `);
           }

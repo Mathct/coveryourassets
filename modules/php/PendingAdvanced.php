@@ -172,7 +172,9 @@ trait PendingAdvancedTrait  // ATTENTION
 
 
             $last_set = [];
+            $second_last_set = [];
             
+            // dernier set
             foreach ($players as $player)
             {
                 
@@ -187,11 +189,28 @@ trait PendingAdvancedTrait  // ATTENTION
         
             }
 
+            // avant dernier set non protégé
+            foreach ($players as $player)
+            {
+                $nb_set = $g->set->get($player);
+                if($nb_set >= 3)
+                {
+                    $position_second_set = $nb_set - 1;
+                    $second_type = $g->getUniqueValueFromDB( "SELECT `card_type` FROM `cards` WHERE `card_location` ='set' AND `card_location_arg`='{$player}' AND `position` = '{$position_second_set}' ORDER BY `card_type` ASC LIMIT 1" );
+                    $second_last_set[$player] = $second_type;
+                        
+                }
+                
+            }
+
+
             $possible_challenge = 0;
+
             $first_set = game::$instance->getUniqueValueFromDB("SELECT first_set FROM player WHERE player_id = '{$this->player_id}'");
             if($first_set >= 1)
             {
 
+                // test pour dernier set
                 foreach ($players as $player)
                 {
                     if($player != $this->player_id)
@@ -214,6 +233,35 @@ trait PendingAdvancedTrait  // ATTENTION
                     }
                 
                 }
+
+                // test pour avant dernier set
+                foreach ($players as $player)
+                {
+                    if($player != $this->player_id)
+                    {
+                        if(($player == $last_defenseur)&&($last_win == 1)||($player != $last_defenseur))
+                        {
+                            if (isset($second_last_set[$player])) {
+
+                                $type_second_last_set = $second_last_set[$player];
+
+                                if(isset($assetCounts[$type_second_last_set]))
+                                {
+                                    if(($assetCounts[$type_second_last_set] >= 2) || ($assetCounts[$type_second_last_set] == 1 && $jokerCount >= 1))
+                                    {
+                                        $possible_challenge = 1;
+                                    }  
+                                }
+
+                                if($jokerCount >= 2)
+                                {
+                                    $possible_challenge = 1;
+                                }
+                            }
+                        }
+                    }
+                }
+
                 
                 if($possible_challenge == 1)
                 {
@@ -1598,12 +1646,32 @@ trait PendingAdvancedTrait  // ATTENTION
 
         $handCards = game::$instance->cards_DB->getCardsInLocation('hand', $this->player_id);
 
+        $assetCounts = [];
+        $jokerCount = 0;
+        foreach ($handCards as $card) {
+            $ret["selectablemulti"][] = 'my_cards_item_' . $card['id'];
+            $type = (int) $card['type'];
+            if ($type >= 1 && $type <= 11) {
+                if (!isset($assetCounts[$type])) {
+                    $assetCounts[$type] = 0;
+                }
+                $assetCounts[$type]++;
+            } 
+
+            if ($type == 12 || $type == 13) {
+                $jokerCount++;
+            }
+        }
+
         $last_defenseur = $g->getGameStateValue("defenseur_first_turn");
         $last_win = $g->getGameStateValue("win_first_turn");
         
         $last_set = [];
+        $second_last_set = [];
+
         $players = game::$instance->getObjectListFromDB( "SELECT `player_id` FROM `player`", true );
 
+        // dernier set
         foreach ($players as $player)
         {
             
@@ -1618,8 +1686,23 @@ trait PendingAdvancedTrait  // ATTENTION
     
         }
 
+        // avant dernier set non protégé
+        foreach ($players as $player)
+        {
+            $nb_set = $g->set->get($player);
+            if($nb_set >= 3)
+            {
+                $position_second_set = $nb_set - 1;
+                $second_type = $g->getUniqueValueFromDB( "SELECT `card_type` FROM `cards` WHERE `card_location` ='set' AND `card_location_arg`='{$player}' AND `position` = '{$position_second_set}' ORDER BY `card_type` ASC LIMIT 1" );
+                $second_last_set[$player] = $second_type;
+                    
+            }
+            
+        }
+
         $players_challenge = [];
        
+        // test pour dernier set
         foreach ($players as $player)
         {
             if($player != $this->player_id)
@@ -1644,6 +1727,40 @@ trait PendingAdvancedTrait  // ATTENTION
                 }
             }
         
+        }
+
+        // test pour avant dernier set
+        foreach ($players as $player)
+        {
+            if($player != $this->player_id)
+            {
+                if(($player == $last_defenseur)&&($last_win == 1)||($player != $last_defenseur))
+                {
+                    if (isset($second_last_set[$player])) {
+
+                        $type_second_last_set = $second_last_set[$player];
+
+                        if(isset($assetCounts[$type_second_last_set]))
+                        {
+                            if(($assetCounts[$type_second_last_set] >= 2) || ($assetCounts[$type_second_last_set] == 1 && $jokerCount >= 1))
+                            {
+                                if (!in_array($player, $players_challenge)) 
+                                {
+                                    $players_challenge[] = $player;
+                                }
+                            }  
+                        }
+
+                        if($jokerCount >= 2)
+                        {
+                            if (!in_array($player, $players_challenge)) 
+                            {
+                                $players_challenge[] = $player;
+                            }
+                        }
+                    }
+                }
+            }
         }
 
 
@@ -1674,15 +1791,163 @@ trait PendingAdvancedTrait  // ATTENTION
         }
 
         else {
-            $g->addPending($this->player_id, "Challenge2Step2", $varg1);
+            $g->addPending($this->player_id, "ChooseSet", $varg1);
         }
-
-        
-        
-        
+      
     }
 
-    /* choisir la premere card du défi pour l'attaquant */
+
+
+
+    /* choisir le set attaqué */
+    function argChooseSet($parg1, $parg2)
+    {
+        $ret = [];
+        $ret["selectable"] = [];
+        $ret["selectablemulti"] = [];
+        $ret["selected"] = [];
+        $ret["selectedmulti"] = [];
+        $ret['buttons'] = [];
+        $ret['title'] = clienttranslate('${actplayer} must choose an action');
+        $ret['titleyou'] = clienttranslate('Challenge: ${you} must choose which set to attack');
+
+        $g = game::$instance;
+        $ret["selected"][] = $parg1;
+
+
+        $handCards = game::$instance->cards_DB->getCardsInLocation('hand', $this->player_id);
+        $opponent = explode('_', $parg1)[1];
+
+        $assetCounts = [];
+        $jokerCount = 0;
+        foreach ($handCards as $card) {
+            $ret["selectablemulti"][] = 'my_cards_item_' . $card['id'];
+            $type = (int) $card['type'];
+            if ($type >= 1 && $type <= 11) {
+                if (!isset($assetCounts[$type])) {
+                    $assetCounts[$type] = 0;
+                }
+                $assetCounts[$type]++;
+            } 
+
+            if ($type == 12 || $type == 13) {
+                $jokerCount++;
+            }
+        }
+
+        $nb_set = $g->set->get($opponent);
+        $challenge_last_set = 0;
+        $challenge_second_last_set = 0;
+   
+        $last_set = game::$instance->getObjectFromDB( "SELECT `card_id` `id`, `card_type` `type`, `card_type_arg` `type_arg`, `card_location` `location`, `card_location_arg` `location_arg`, `position` `position` FROM `cards` WHERE `card_location` ='set' AND `card_location_arg`='{$opponent}' AND position = '{$nb_set}' ORDER BY card_type ASC LIMIT 1");
+        
+        if(isset($assetCounts[$last_set['type']]))
+        {
+            
+            if(($assetCounts[$last_set['type']] >= 1))
+            {
+                $challenge_last_set = 1;
+            }
+
+        }
+
+        if(isset($assetCounts[11]))
+        {
+            $challenge_last_set = 1;
+        }
+
+        if($jokerCount >= 1)
+        {
+            $challenge_last_set = 1;
+        }
+
+        if($challenge_last_set == 1)
+        {
+            if($nb_set % 2 == 0)
+                {
+                    $ret["selectable"][] = 'pile_set_paire_'.$opponent;
+                }
+                else
+                {
+                    $ret["selectable"][] = 'pile_set_impaire_'.$opponent;
+                }
+        }
+
+
+
+        $second_last_set = [];
+
+        if($nb_set >= 3)
+        {
+            $set = $nb_set - 1;
+            $second_last_set = game::$instance->getObjectFromDB( "SELECT `card_id` `id`, `card_type` `type`, `card_type_arg` `type_arg`, `card_location` `location`, `card_location_arg` `location_arg`, `position` `position` FROM `cards` WHERE `card_location` ='set' AND `card_location_arg`='{$opponent}' AND position = '{$set}' ORDER BY card_type ASC LIMIT 1");
+            
+            if(isset($assetCounts[$second_last_set['type']]))
+            {
+                if($assetCounts[$second_last_set['type']] >= 2)
+                {
+                    $challenge_second_last_set = 1;
+                }
+
+                if(($assetCounts[$second_last_set['type']] == 1) && $jokerCount == 1)
+                {
+                    $challenge_second_last_set = 1;
+                }
+            }
+
+            if($jokerCount >= 2)
+            {
+                $challenge_second_last_set = 1;
+            }
+
+            if(isset($assetCounts[11]))
+            {
+                $challenge_second_last_set = 1;
+            }
+
+
+            if($challenge_last_set == 1)
+            {
+                if($set % 2 == 0)
+                {
+                    $ret["selectable"][] = 'pile_set_paire_'.$opponent;
+                }
+                else
+                {
+                    $ret["selectable"][] = 'pile_set_impaire_'.$opponent;
+                }
+            }
+        }
+
+     
+        $ret['buttons'][] = 'cancel_btn';
+
+        return $ret;
+    }
+
+
+    function ChooseSet($parg1, $parg2, $varg1, $varg2, $varg3, $varg4)
+    {
+        $g = game::$instance;
+
+        if($varg1 == 'cancel_btn')
+        {
+            $g->addPending($this->player_id, "PlayerTurn2");
+        }
+
+        else {
+            $g->addPending($this->player_id, "PlayerTurn2");
+        }
+    }
+
+
+
+
+
+    ////////////////////////////////////////////////////////////////////
+    ////    choisir la premere card du défi pour l'attaquant     ///////
+    ////////////////////////////////////////////////////////////////////
+
     function argChallenge2Step2($parg1, $parg2)
     {
         $ret = [];
@@ -1802,7 +2067,10 @@ trait PendingAdvancedTrait  // ATTENTION
         
     }
 
-    /* DEFI tour par tour jusqu'a abandon*/
+    ////////////////////////////////////////////////////////////////////
+    ///////////    DEFI tour par tour jusqu'a abandon     //////////////
+    ////////////////////////////////////////////////////////////////////
+
     function argChallenge2Step3($parg1, $parg2)
     {
         $ret = [];
