@@ -222,7 +222,7 @@ trait PendingAdvancedTrait  // ATTENTION
 
                                 foreach ($handCards as $card) {
                                     $type = (int) $card['type'];
-                                    if ($type == $type_last_set || $type == 12 || $type == 13) {
+                                    if ($type == $type_last_set || $type == 11 || $type == 12 || $type == 13) {
                                         $possible_challenge = 1;
                                     } 
                                 }
@@ -254,6 +254,11 @@ trait PendingAdvancedTrait  // ATTENTION
                                 }
 
                                 if($jokerCount >= 2)
+                                {
+                                    $possible_challenge = 1;
+                                }
+
+                                if(isset($assetCounts[11]))
                                 {
                                     $possible_challenge = 1;
                                 }
@@ -1714,7 +1719,7 @@ trait PendingAdvancedTrait  // ATTENTION
 
                         foreach ($handCards as $card) {
                             $type = (int) $card['type'];
-                            if ($type == $type_last_set || $type == 12 || $type == 13) {
+                            if ($type == $type_last_set || $type == 11 || $type == 12 || $type == 13) {
                                 if (!in_array($player, $players_challenge))
                                 {
                                     $players_challenge[] = $player;
@@ -1752,6 +1757,14 @@ trait PendingAdvancedTrait  // ATTENTION
                         }
 
                         if($jokerCount >= 2)
+                        {
+                            if (!in_array($player, $players_challenge)) 
+                            {
+                                $players_challenge[] = $player;
+                            }
+                        }
+
+                        if(isset($assetCounts[11]))
                         {
                             if (!in_array($player, $players_challenge)) 
                             {
@@ -1906,7 +1919,7 @@ trait PendingAdvancedTrait  // ATTENTION
             }
 
 
-            if($challenge_last_set == 1)
+            if($challenge_second_last_set == 1)
             {
                 if($set % 2 == 0)
                 {
