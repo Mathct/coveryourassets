@@ -1958,7 +1958,7 @@ trait PendingAdvancedTrait  // ATTENTION
 
 
     ////////////////////////////////////////////////////////////////////
-    ////    choisir la premere card du défi pour l'attaquant     ///////
+    ////           l'attaquant attaque le dernier set            ///////
     ////////////////////////////////////////////////////////////////////
 
     function argChallenge2Step2($parg1, $parg2)
@@ -2204,7 +2204,10 @@ trait PendingAdvancedTrait  // ATTENTION
         
     }
 
-    /* Abandon*/
+    ////////////////////////////////////////////////////////////////////
+    ///////////                Abandon                    //////////////
+    ////////////////////////////////////////////////////////////////////
+
     function argChallenge2Step4($parg1, $parg2)
     {
         $ret = [];
@@ -2442,7 +2445,10 @@ trait PendingAdvancedTrait  // ATTENTION
         
     }
 
-    /* END OF ROUND*/
+    ////////////////////////////////////////////////////////////////////
+    ///////////               End of Round                   ///////////
+    ////////////////////////////////////////////////////////////////////
+
     function argEndOfRound2($parg1, $parg2)
     {
         $ret = [];
