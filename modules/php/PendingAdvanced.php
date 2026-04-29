@@ -1635,7 +1635,11 @@ trait PendingAdvancedTrait  // ATTENTION
 
 
 
-    /* choisir l'adversaire */
+    ////////////////////////////////////////////////////////////////////
+    ////////             choisir l'adversaire                 //////////
+    ////////////////////////////////////////////////////////////////////
+
+
     function argChallenge2Step1($parg1, $parg2)
     {
         $ret = [];
@@ -1811,8 +1815,10 @@ trait PendingAdvancedTrait  // ATTENTION
 
 
 
+    ////////////////////////////////////////////////////////////////////
+    ////////             choisir le set attaqué                /////////
+    ////////////////////////////////////////////////////////////////////
 
-    /* choisir le set attaqué */
     function argChooseSet($parg1, $parg2)
     {
         $ret = [];
