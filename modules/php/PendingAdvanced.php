@@ -2096,7 +2096,16 @@ trait PendingAdvancedTrait  // ATTENTION
             );
 
             $g->hand->inc($this->player_id, -1);
-            $g->addPending($opponent, "Challenge2Step3");
+
+            if($card['type'] != 11)
+            {
+                $g->addPending($opponent, "Challenge2Step3", 1);
+            }
+            else
+            {
+                $g->addPending($opponent, "Challenge2Step3v2", 1);
+            }
+            
         }
 
         
@@ -2106,7 +2115,7 @@ trait PendingAdvancedTrait  // ATTENTION
 
 
     ////////////////////////////////////////////////////////////////////
-    ////           l'attaquant attaque l avant dernier set            ///////
+    ////           l'attaquant attaque l avant dernier set       ///////
     ////////////////////////////////////////////////////////////////////
 
     function argChallenge2Step2v2($parg1, $parg2)
@@ -2237,24 +2246,216 @@ trait PendingAdvancedTrait  // ATTENTION
             {
                 $card = $g->cards_DB->getCard($id1);
 
+                $position = count($g->getObjectListFromDB( "SELECT card_id FROM cards WHERE card_location = 'challenge_attack'", true ));
+                $new_position = $position + 1;
                 
+                $g->cards_DB->moveCard($id1, 'challenge_attack', $this->player_id);
+                $g->DbQuery("UPDATE cards SET position = {$new_position} WHERE card_id = {$id1}");
+
+                $g->notify->all(
+                    "challengeShow",
+                    '',
+                    [
+                        'attaquant' => $this->player_id,
+                        'defenseur' => $opponent,
+                    ]
+                );
+
+
+                $opponent_name = $g->getUniqueValueFromDB("SELECT player_name FROM player WHERE player_id='{$opponent}'");
+                $opponent_color = $g->getUniqueValueFromDB("SELECT player_color FROM player WHERE player_id='{$opponent}'");
+
+                $txt = clienttranslate('${player_name} challenges ${opponent} with: ${log}');
+                $g->notify->all(
+                    "cardMoveChallengeAttack",
+                    $txt,
+                    [
+                        'opponent' =>    [
+                            'log' => '<b style="color: #${color};">${opponent_name}</b>',
+                            'args' => ['opponent_name' => $opponent_name, 'color' => $opponent_color]
+                        ],
+                        'player_id' => $this->player_id,
+                        'card' => $card,
+                        'log' => $this->getCardLog($card['type']),
+                    ]
+                );
+
+                $g->hand->inc($this->player_id, -1);
+                $g->addPending($opponent, "Challenge2Step3v2", 2);
+
+
             }
 
+            else
+            {
+                $card1select = $g->cards_DB->getCard($id1);
+                $card2select = $g->cards_DB->getCard($id2);
+                $card1 = [];
+                $card2 = [];
+
+                if($card1select['type'] <= $card2select['type'])
+                {
+                    $card1 = $card1select;
+                    $card2 = $card2select;
+                }
+                else
+                {
+                    $card1 = $card2select;
+                    $card2 = $card1select;
+                }
+
+                $position = count($g->getObjectListFromDB( "SELECT card_id FROM cards WHERE card_location = 'challenge_attack'", true ));
+                $new_position1 = $position + 1;
+                $new_position2 = $position + 2;
+                
+                $g->cards_DB->moveCard($card1['id'], 'challenge_attack', $this->player_id);
+                $g->DbQuery("UPDATE cards SET position = {$new_position1} WHERE card_id = {$card1['id']}");
+
+                $g->cards_DB->moveCard($card2['id'], 'challenge_attack', $this->player_id);
+                $g->DbQuery("UPDATE cards SET position = {$new_position2} WHERE card_id = {$card2['id']}");
+
+                $g->notify->all(
+                    "challengeShow",
+                    '',
+                    [
+                        'attaquant' => $this->player_id,
+                        'defenseur' => $opponent,
+                    ]
+                );
+
+
+                $opponent_name = $g->getUniqueValueFromDB("SELECT player_name FROM player WHERE player_id='{$opponent}'");
+                $opponent_color = $g->getUniqueValueFromDB("SELECT player_color FROM player WHERE player_id='{$opponent}'");
+
+                $txt = clienttranslate('${player_name} challenges ${opponent} with: ${log}');
+                $g->notify->all(
+                    "cardMoveChallengeAttack2",
+                    $txt,
+                    [
+                        'opponent' =>    [
+                            'log' => '<b style="color: #${color};">${opponent_name}</b>',
+                            'args' => ['opponent_name' => $opponent_name, 'color' => $opponent_color]
+                        ],
+                        'player_id' => $this->player_id,
+                        'card1' => $card1,
+                        'card2' => $card2,
+                        'log' => $this->getSetLog($card1['type'], $card2['type']),
+                        
+                    ]
+                );
+
+                $g->hand->inc($this->player_id, -2);
+                $g->addPending($opponent, "Challenge2Step3", 2);
+
+
+            }
+  
             
-
-
-
-            
-            $g->addPending($this->player_id, "PlayerTurn2");
         }
-
-        
-        
+  
         
     }
 
+
     ////////////////////////////////////////////////////////////////////
-    ///////////    DEFI tour par tour jusqu'a abandon     //////////////
+    ////           le defenseur se fait attaquer par un Wild      //////
+    ////////////////////////////////////////////////////////////////////
+
+    function argChallenge2Step3v2($parg1, $parg2)
+    {
+        $ret = [];
+        $ret["selectable"] = [];
+        $ret["selectablemulti"] = [];
+        $ret["selectablemulti2"] = [];
+        $ret["selected"] = [];
+        $ret["selectedmulti"] = [];
+        $ret["selectedmulti2"] = [];
+        $ret['buttons'] = [];
+        $ret['title'] = clienttranslate('${actplayer} must choose an action');
+        $ret['titleyou'] = clienttranslate('Challenge: ${you} must choose 2 cards or 1 wild card');
+
+        $g = game::$instance;
+
+        $set_attaque = $parg1; // 1 (last) ou 2 (second last)
+
+
+        $ret['buttons'][] = 'validate_btn'; 
+
+        $ret['buttons'][] = 'abandon_btn';
+        
+        return $ret;
+    }
+
+
+
+    function Challenge2Step3v2($parg1, $parg2, $varg1, $varg2, $varg3, $varg4)
+    {
+        $g = game::$instance;
+
+        if($varg1 == 'abandon_btn')
+        {
+            $g->addPending($this->player_id, "Challenge2Step4");
+        }
+
+        else
+        {
+            $card1select = $g->cards_DB->getCard($id1);
+            $card2select = $g->cards_DB->getCard($id2);
+            $card1 = [];
+            $card2 = [];
+
+            if($card1select['type'] <= $card2select['type'])
+            {
+                $card1 = $card1select;
+                $card2 = $card2select;
+            }
+            else
+            {
+                $card1 = $card2select;
+                $card2 = $card1select;
+            }
+
+            $position = count($g->getObjectListFromDB( "SELECT card_id FROM cards WHERE card_location = 'challenge_attack'", true ));
+            $new_position1 = $position + 1;
+            $new_position2 = $position + 2;
+            
+            $g->cards_DB->moveCard($card1['id'], 'challenge_attack', $this->player_id);
+            $g->DbQuery("UPDATE cards SET position = {$new_position1} WHERE card_id = {$card1['id']}");
+
+            $g->cards_DB->moveCard($card2['id'], 'challenge_attack', $this->player_id);
+            $g->DbQuery("UPDATE cards SET position = {$new_position2} WHERE card_id = {$card2['id']}");
+
+          
+
+            $txt = clienttranslate('${player_name} responds to the challenge with: ${log}');
+            $g->notify->all(
+                "cardMoveChallengeAttack2",
+                $txt,
+                [
+                    'player_id' => $this->player_id,
+                    'card1' => $card1,
+                    'card2' => $card2,
+                    'log' => $this->getSetLog($card1['type'], $card2['type']),
+                    
+                ]
+            );
+
+            $g->hand->inc($this->player_id, -2);
+            
+            $attaquant = game::$instance->getGameStateValue("attaquant");
+            $g->addPending($attaquant, "Challenge2Step3", $parg1);
+
+            
+        }
+        
+  
+        
+    }
+
+
+
+    ////////////////////////////////////////////////////////////////////
+    ///////         DEFI tour par tour jusqu'a abandon         /////////
     ////////////////////////////////////////////////////////////////////
 
     function argChallenge2Step3($parg1, $parg2)
@@ -2270,6 +2471,8 @@ trait PendingAdvancedTrait  // ATTENTION
 
         $attaquant = game::$instance->getGameStateValue("attaquant");
         $defenseur = game::$instance->getGameStateValue("defenseur");
+
+        $set_attaque = $parg1;   ///// A FAIRE!!!!!!!!!!!!!!!!!!!
 
     
         $handCards = game::$instance->cards_DB->getCardsInLocation('hand', $this->player_id);
@@ -2300,7 +2503,7 @@ trait PendingAdvancedTrait  // ATTENTION
 
         if(count($ret["selectable"]) != null)
         {
-            $ret['titleyou'] = clienttranslate('Challenge: ${you} must choose a card OR');
+            $ret['titleyou'] = clienttranslate('Challenge: ${you} must choose a card');
         }
 
         else {
@@ -2348,7 +2551,7 @@ trait PendingAdvancedTrait  // ATTENTION
                 ]
             );
             $g->hand->inc($this->player_id, -1);
-            $g->addPending($defenseur, "Challenge2Step3");
+            $g->addPending($defenseur, "Challenge2Step3", $parg1);
         }
 
         if($defenseur == $this->player_id)
@@ -2368,7 +2571,7 @@ trait PendingAdvancedTrait  // ATTENTION
                 ]
             );
             $g->hand->inc($this->player_id, -1);
-            $g->addPending($attaquant, "Challenge2Step3");
+            $g->addPending($attaquant, "Challenge2Step3", $parg1);
         }
 
         }

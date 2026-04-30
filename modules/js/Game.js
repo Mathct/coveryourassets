@@ -1868,6 +1868,7 @@ export class Game {
         const sourceId = `my_cards_item_${card.id}`;
         const sourceEl = document.getElementById(sourceId);
         sourceEl.classList.remove('selectable');
+        sourceEl.classList.remove('selectedmulti2');
         this.handStock.removeFromStockById(card.id, targetDiv.id);
     
       }
@@ -2173,6 +2174,64 @@ export class Game {
 
       }
 
+    }
+
+    async notif_cardMoveChallengeAttack2(args) {
+
+      const card1 = args.card1;
+      const card2 = args.card2;
+      const targetDiv = document.getElementById('challenge_cards_attack');
+      let currentPlayerId;
+      if(!this.bga.players.isCurrentPlayerSpectator()) {
+        currentPlayerId = Number(this.bga.players.getCurrentPlayer().id);
+      }
+
+      if ((Number(card1.location_arg) == currentPlayerId)&&(!this.bga.players.isCurrentPlayerSpectator())) {
+
+        const sourceId1 = `my_cards_item_${card1.id}`;
+        const sourceEl1 = document.getElementById(sourceId1);
+        sourceEl1.classList.remove('selectable');
+        sourceEl1.classList.remove('selectedmulti2');
+        this.handStock.removeFromStockById(card1.id, targetDiv.id);
+
+        const sourceId2 = `my_cards_item_${card2.id}`;
+        const sourceEl2 = document.getElementById(sourceId2);
+        sourceEl2.classList.remove('selectable');
+        sourceEl2.classList.remove('selectedmulti2');
+        this.handStock.removeFromStockById(card2.id, targetDiv.id);
+    
+      }
+
+      setTimeout(() => 
+      {
+        targetDiv.innerHTML += `<div id="card_attack_${card1.id}" class="challenge_card"></div>`;
+        const card_type1 = this.getStockCardType(card1);
+        const card_div1 = document.getElementById(`card_attack_${card1.id}`);
+        if(card_type1 <= 10) {
+          card_div1.style.backgroundPosition = `-${(card_type1-1) * 100}% 0%`;
+        }
+        else if(card_type1 >= 11) {
+          card_div1.style.backgroundPosition = `-${(card_type1-11) * 100}% -100%`;
+        }
+                    
+      }, "500");
+
+      setTimeout(() => 
+      {
+        targetDiv.innerHTML += `<div id="card_attack_${card2.id}" class="challenge_card"></div>`;
+        const card_type2 = this.getStockCardType(card2);
+        const card_div2 = document.getElementById(`card_attack_${card2.id}`);
+        if(card_type2 <= 10) {
+          card_div2.style.backgroundPosition = `-${(card_type2-1) * 100}% 0%`;
+        }
+        else if(card_type2 >= 11) {
+          card_div2.style.backgroundPosition = `-${(card_type2-11) * 100}% -100%`;
+        }
+                    
+      }, "500");
+
+
+      await this.bga.gameui.wait(1000);
     }
 
 
