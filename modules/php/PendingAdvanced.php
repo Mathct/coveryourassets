@@ -2211,7 +2211,41 @@ trait PendingAdvancedTrait  // ATTENTION
         }
 
         else {
-           $g->addPending($this->player_id, "PlayerTurn2");
+
+            $opponent = explode('_', $parg1)[1];
+            $g->setGameStateValue("attaquant", intval($this->player_id));
+            $g->setGameStateValue("defenseur", intval($opponent));
+            $g->setGameStateValue("challenge", 1);
+
+            if($this->player_turn == 1)
+            {
+                $g->setGameStateValue("defenseur_first_turn", intval($opponent));
+            }
+
+            $ids = explode('_', $varg2);
+            $countIds = count($ids);
+            $id1 = (int)$ids[0];
+            $id2 = 0;
+
+            if($countIds == 2)
+            {
+                $id2 = (int)$ids[1];
+            }
+
+
+            if($countIds == 1)
+            {
+                $card = $g->cards_DB->getCard($id1);
+
+                
+            }
+
+            
+
+
+
+            
+            $g->addPending($this->player_id, "PlayerTurn2");
         }
 
         

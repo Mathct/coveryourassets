@@ -438,6 +438,7 @@ export class Game {
 
         this.connections = [];
         this.connectionsMulti = [];
+        this.connectionsMulti2 = [];
         
 
         // Setup game notifications to handle (see "setupNotifications" method below)
@@ -1840,7 +1841,7 @@ export class Game {
       const color_attaquant = this.players[attaquant].color;
       const color_defenseur = this.players[defenseur].color;
       const text = `<span style="color: #${color_attaquant};">${this.players[attaquant].name}</span> ${_("vs")} <span style="color: #${color_defenseur};">${this.players[defenseur].name}</span>`; 
-      title_challenge.innerHTML = `<div class="title">${text}</div>`;
+      title_challenge.innerHTML = `<div class="title0">${text}</div>`;
 
       const challenge_container = document.getElementById('challenge_cards_container');
       challenge_container.classList.remove('hidden');
