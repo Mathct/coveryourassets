@@ -69,30 +69,22 @@
   
 }
 
-.selectablemulti {
+.selectable, .selectablemulti, .selectablemulti2 {
     cursor: pointer !important;
     pointer-events: auto !important;
     border-radius: 4px;
     outline: 3px dashed red;
-    
-}
-
-.selectable {
-    cursor: pointer !important;
-    pointer-events: auto !important;
-    outline: 3px dashed red;
-    border-radius: 4px;
     
 }
 
    
-.selected, .selectedmulti {
+.selected, .selectedmulti, .selectedmulti2 {
     outline: 4px solid red; 
     border-radius: 4px;
     
 }
 
-.selectedmulti{
+.selectedmulti, .selectedmulti2{
   cursor: pointer !important;
 }
 
@@ -130,6 +122,15 @@
 
 .title {
   width: 133%;
+  text-align: center;
+  font-weight: bold;
+  font-family: 'Garamond', 'Montserrat', 'Raleway', 'Segoe UI', Arial, sans-serif;
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+
+.title0 {
+  width: 100%;
   text-align: center;
   font-weight: bold;
   font-family: 'Garamond', 'Montserrat', 'Raleway', 'Segoe UI', Arial, sans-serif;

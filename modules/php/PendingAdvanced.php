@@ -1658,7 +1658,6 @@ trait PendingAdvancedTrait  // ATTENTION
         $assetCounts = [];
         $jokerCount = 0;
         foreach ($handCards as $card) {
-            $ret["selectablemulti"][] = 'my_cards_item_' . $card['id'];
             $type = (int) $card['type'];
             if ($type >= 1 && $type <= 11) {
                 if (!isset($assetCounts[$type])) {
@@ -1840,7 +1839,6 @@ trait PendingAdvancedTrait  // ATTENTION
         $assetCounts = [];
         $jokerCount = 0;
         foreach ($handCards as $card) {
-            $ret["selectablemulti"][] = 'my_cards_item_' . $card['id'];
             $type = (int) $card['type'];
             if ($type >= 1 && $type <= 11) {
                 if (!isset($assetCounts[$type])) {
@@ -1955,7 +1953,26 @@ trait PendingAdvancedTrait  // ATTENTION
         }
 
         else {
-            $g->addPending($this->player_id, "PlayerTurn2");
+
+            $opponent = intval(explode('_', $varg1)[3]);
+            $parite_set = explode('_', $varg1)[2];
+            $nb_set = intval($g->set->get($opponent));
+
+            if((($nb_set %2 == 0) && ($parite_set == 'paire')) || (($nb_set %2 != 0) && ($parite_set == 'impaire')))
+            {
+                // le joueur attaque le dernier set
+                $g->addPending($this->player_id, "Challenge2Step2", $parg1, $varg1);
+            }
+
+            if((($nb_set %2 == 0) && ($parite_set == 'impaire')) || (($nb_set %2 != 0) && ($parite_set == 'paire')))
+            {
+                // le joueur attaque l avant dernier set
+                $g->addPending($this->player_id, "Challenge2Step2v2", $parg1, $varg1);
+            }
+
+                   
+
+            
         }
     }
 
@@ -1979,6 +1996,7 @@ trait PendingAdvancedTrait  // ATTENTION
         $ret['titleyou'] = clienttranslate('Challenge: ${you} must choose a card');
 
         $ret["selected"][] = $parg1;
+        $ret["selected"][] = $parg2;
 
         $handCards = game::$instance->cards_DB->getCardsInLocation('hand', $this->player_id);
         $opponent = explode('_', $parg1)[1];
@@ -2003,7 +2021,7 @@ trait PendingAdvancedTrait  // ATTENTION
                 $ret["selectable"][] = 'my_cards_item_'.$handCard['id'];
             }
 
-            if($handCard['type'] == 12 || $handCard['type'] == 13)
+            if($handCard['type'] == 11 || $handCard['type'] == 12 || $handCard['type'] == 13)
             {
                 $ret["selectable"][] = 'my_cards_item_'.$handCard['id'];
             }
@@ -2079,6 +2097,121 @@ trait PendingAdvancedTrait  // ATTENTION
 
             $g->hand->inc($this->player_id, -1);
             $g->addPending($opponent, "Challenge2Step3");
+        }
+
+        
+        
+        
+    }
+
+
+    ////////////////////////////////////////////////////////////////////
+    ////           l'attaquant attaque l avant dernier set            ///////
+    ////////////////////////////////////////////////////////////////////
+
+    function argChallenge2Step2v2($parg1, $parg2)
+    {
+        $ret = [];
+        $ret["selectable"] = [];
+        $ret["selectablemulti"] = [];
+        $ret["selectablemulti2"] = [];
+        $ret["selected"] = [];
+        $ret["selectedmulti"] = [];
+        $ret["selectedmulti2"] = [];
+        $ret['buttons'] = [];
+        $ret['title'] = clienttranslate('${actplayer} must choose an action');
+        $ret['titleyou'] = clienttranslate('Challenge: ${you} must choose 2 cards or 1 wild card');
+
+        $g = game::$instance;
+
+        $ret["selected"][] = $parg1;
+        $ret["selected"][] = $parg2;
+
+        $handCards = game::$instance->cards_DB->getCardsInLocation('hand', $this->player_id);
+        $opponent = explode('_', $parg1)[1];
+
+        $assetCounts = [];
+        $jokerCount = 0;
+        foreach ($handCards as $card) {
+            $type = (int) $card['type'];
+            if ($type >= 1 && $type <= 11) {
+                if (!isset($assetCounts[$type])) {
+                    $assetCounts[$type] = 0;
+                }
+                $assetCounts[$type]++;
+            } 
+
+            if ($type == 12 || $type == 13) {
+                $jokerCount++;
+            }
+        }
+
+        $position = intval($g->set->get($opponent)) - 1;
+                
+        $second_last_set = game::$instance->getObjectFromDB( "SELECT `card_id` `id`, `card_type` `type`, `card_type_arg` `type_arg`, `card_location` `location`, `card_location_arg` `location_arg`, `position` `position` FROM `cards` WHERE `card_location` ='set' AND `card_location_arg`='{$opponent}' AND position = '{$position}' ORDER BY card_type ASC LIMIT 1");
+               
+
+        foreach ($handCards as $handCard)
+        {
+
+            if(($handCard['type'] == $second_last_set['type'])&&($handCard['type']<= 10))
+            {
+                if($assetCounts[$second_last_set['type']] >= 2)
+                {
+                    $ret["selectablemulti2"][] = 'my_cards_item_'.$handCard['id'];
+                }
+
+                elseif(($assetCounts[$second_last_set['type']] == 1)&&($jokerCount >= 1))
+                {
+                    $ret["selectablemulti2"][] = 'my_cards_item_'.$handCard['id'];
+                }
+
+            }
+
+            if(($handCard['type'] == 12)||($handCard['type'] == 13))
+            {
+                if($jokerCount >= 2)
+                {
+                    $ret["selectablemulti2"][] = 'my_cards_item_'.$handCard['id'];
+                }
+
+                elseif(isset($assetCounts[$second_last_set['type']]))
+                {
+
+                    $ret["selectablemulti2"][] = 'my_cards_item_'.$handCard['id'];
+                }
+
+                
+            }
+            
+
+            if($handCard['type'] == 11)
+            {
+                $ret["selectablemulti2"][] = 'my_cards_item_'.$handCard['id'];
+            }
+        }
+
+    
+        $ret['buttons'][] = 'validate_btn';          
+        $ret['buttons'][] = 'cancel_btn';
+        
+        return $ret;
+    }
+
+
+
+    function Challenge2Step2v2($parg1, $parg2, $varg1, $varg2, $varg3, $varg4)
+    {
+        $g = game::$instance;
+
+
+        if($varg1 == 'cancel_btn')
+        {
+            $g->addPending($this->player_id, "PlayerTurn2");
+        }
+
+        else {
+           $g->addPending($this->player_id, "PlayerTurn2");
         }
 
         

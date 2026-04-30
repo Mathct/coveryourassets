@@ -43,6 +43,7 @@ class NormalTurn {
 
       this.possibles = [];
       this.possiblesMulti = [];
+      this.possiblesMulti2 = [];
 
                             
       // selectable
@@ -71,6 +72,10 @@ class NormalTurn {
           {
             this.game.safeClass(sid, "add", "selected_"+this.game.players[split[1]].color);
           }
+          if(split[0] == 'pile')
+          {
+            this.game.safeClass(sid, "add", "selected_"+this.game.players[split[3]].color);
+          }
         });
       }
 
@@ -89,12 +94,30 @@ class NormalTurn {
         });
       }
 
+      // selectablemulti2
+      if (Array.isArray(args.selectablemulti2) && args.selectablemulti2.length > 0) {
+        args.selectablemulti2.forEach((sid) => {
+          this.game.safeClass(sid, "add", "selectablemulti2");
+          this.possiblesMulti2.push(sid);
+        });
+      }
+
+      // selectedmulti2
+      if (Array.isArray(args.selectedmulti2) && args.selectedmulti2.length > 0) {
+        args.selectedmulti2.forEach((sid) => {
+          this.game.safeClass(sid, "add", "selectedmulti2");
+        });
+      }
+
       // event listeners uniquement s'il y a quelque chose à connecter
       if (this.possibles.length > 0) {
         this.game.setupConnections(this.possibles);
       }
       if (this.possiblesMulti.length > 0) {
         this.game.setupConnectionsMulti(this.possiblesMulti);
+      }
+      if (this.possiblesMulti2.length > 0) {
+        this.game.setupConnectionsMulti2(this.possiblesMulti2);
       }
 
     }
@@ -286,6 +309,18 @@ class NormalTurn {
               { color: "alert"},
             );
             break;
+
+            case "validate_btn":
+            this.bga.statusBar.addActionButton(
+              _("Validate"),
+              () =>
+                this.bga.actions.performAction("actButton", {
+                  arg1: key,
+                  arg2: this.game.SelectMulti2(),
+                }),
+              { color: "primary", id: "validate_btn", disabled: true },
+            );
+            break;
           
           
         }
@@ -304,8 +339,10 @@ class NormalTurn {
     onLeavingState(args, isCurrentPlayerActive) {
         this.game.safeClass(".selectable", "remove", "selectable");
         this.game.safeClass(".selectablemulti", "remove", "selectablemulti");
+        this.game.safeClass(".selectablemulti2", "remove", "selectablemulti2");
         this.game.safeClass(".selected", "remove", "selected");
         this.game.safeClass(".selectedmulti", "remove", "selectedmulti");
+        this.game.safeClass(".selectedmulti2", "remove", "selectedmulti2");
         this.game.safeClass(".selectable_ff0000", "remove", "selectable_ff0000");
         this.game.safeClass(".selectable_008000", "remove", "selectable_008000");
         this.game.safeClass(".selectable_0000ff", "remove", "selectable_0000ff");
@@ -537,6 +574,24 @@ export class Game {
         });
     }
 
+    setupConnectionsMulti2(selectables) {
+        this.connectionsMulti2 = [];
+
+        selectables.forEach((elt_id) => {
+        const element = document.getElementById(elt_id);
+        if (!element) return;
+
+        const clickHandler = (evt) => this.onSelectMulti2(evt);
+        element.addEventListener("click", clickHandler);
+        this.connectionsMulti2.push({
+            element,
+            event: "click",
+            handler: clickHandler,
+        });
+
+        });
+    }
+
     removeConnections() {
         this.connections.forEach((connection) => {
         const { element, event, handler } = connection;
@@ -552,8 +607,16 @@ export class Game {
         }
         });
 
+        this.connectionsMulti2.forEach((connection) => {
+        const { element, event, handler } = connection;
+        if (element) {
+            element.removeEventListener(event, handler);
+        }
+        });
+
         this.connections = [];
         this.connectionsMulti = [];
+        this.connectionsMulti2 = [];
     }
 
     /*************************************************
@@ -591,6 +654,26 @@ export class Game {
         this.TestSwapButton();
         this.TestMoveButton();
         this.TestImproveButton();
+        
+    }
+
+    onSelectMulti2(evt) {
+        dojo.stopEvent(evt);
+
+        const el = evt.currentTarget;
+        
+        if (el.classList.contains("selectablemulti2")) {
+            el.classList.remove("selectablemulti2");
+            el.classList.add("selectedmulti2");
+        } 
+
+        else if (el.classList.contains("selectedmulti2")) {
+            el.classList.remove("selectedmulti2");
+            el.classList.add("selectablemulti2");
+        }
+
+        this.TestMulti2();
+        
         
     }
 
@@ -774,6 +857,65 @@ export class Game {
         
     }
 
+    TestMulti2() {
+
+      const ids = Array.from(document.querySelectorAll('.selectedmulti2')).map(el => el.id);
+      const count = ids.length;
+      const btn = document.getElementById('validate_btn');
+
+      if(btn) {
+
+          if(count == 1)
+          {
+            const id1 = ids[0].split("_");
+            const type1 = this.all_cards[id1[3]].type;
+
+            if(type1 == 11)
+            {
+              btn.disabled = false;
+            }
+            else
+            {
+              btn.disabled = true;
+            }
+          }
+
+          else if (count == 2)
+          {
+            const id1 = ids[0].split("_");
+            const type1 = this.all_cards[id1[3]].type;
+            const id2 = ids[1].split("_");
+            const type2 = this.all_cards[id2[3]].type;
+
+            if((type1 == type2)&&(type1 <= 10)&&(type2 <= 10))
+            {
+              btn.disabled = false;
+            }
+            else if(((type1 <= 10)&&(type2 >= 12)&&(type2 <= 13))||((type2 <= 10)&&(type1 >= 12)&&(type1 <= 13)))
+            {
+              btn.disabled = false;
+            }
+            else if((type1 >= 12)&&(type1 <= 13)&&(type2 >= 12)&&(type2 <= 13))
+            {
+              btn.disabled = false;
+            }
+            else
+            {
+              btn.disabled = true;
+            }
+
+          }
+
+          else
+          {        
+            btn.disabled = true;
+          }
+
+
+      }
+
+    }
+
     SelectSet() {
 
       const ids = Array.from(document.querySelectorAll('.selectedmulti')).map(el => el.id);
@@ -834,6 +976,22 @@ export class Game {
       const ids = Array.from(document.querySelectorAll('.selectedmulti')).map(el => el.id);
       const id1 = ids[0].split("_")[3];
       return id1;
+    }
+
+    SelectMulti2() {
+
+      const ids = Array.from(document.querySelectorAll('.selectedmulti2')).map(el => el.id);
+      const id1 = ids[0].split("_")[3];
+      if(ids.length >= 2)
+      {
+        const id2 = ids[1].split("_")[3];
+        return id1+'_'+id2;
+      }
+      else
+      {
+        return id1;
+      }
+      
     }
 
 
@@ -991,18 +1149,18 @@ export class Game {
           
                         
           <div id="hand_container" class="cards-container" style="border: 2px solid #${color};">
-            <div class="title" id="my_cards_title" style="color: #${color};">${_("My hand")}</div>
+            <div class="title0" id="my_cards_title" style="color: #${color};">${_("My hand")}</div>
             <div id="my_cards" class="cards"></div>
           </div>
 
           <div id="table_cards_container" class="cards-container hidden">
-            <div class="title">${_("Set created")}</div>
+            <div class="title0">${_("Set created")}</div>
             <div id="table_cards" class="cards"></div>
           </div> 
 
           <div id="challenge_cards_container" class="challenge_cards_container hidden">
-            <div class="title">- ${_("CHALLENGE")} -</div>
-            <div id="title_challenge" class="title"></div>
+            <div class="title0">- ${_("CHALLENGE")} -</div>
+            <div id="title_challenge" class="title0"></div>
             <div class="challenge_cards_detail">
             <div id="challenge_cards_attack" class="challenge_cards"></div>
             <div id="challenge_cards_defense" class="challenge_cards"></div>
@@ -1073,12 +1231,13 @@ export class Game {
           </div>
           
           <div id="table_cards_container" class="cards-container hidden">
-            <div class="title">${_("Set created")}</div>
+            <div class="title0">${_("Set created")}</div>
             <div id="table_cards" class="cards"></div>
           </div> 
 
           <div id="challenge_cards_container" class="challenge_cards_container hidden">
-            <div id="title_challenge" class="title"></div>
+            <div class="title0">- ${_("CHALLENGE")} -</div>
+            <div id="title_challenge" class="title0"></div>
             <div class="challenge_cards_detail">
             <div id="challenge_cards_attack" class="challenge_cards"></div>
             <div id="challenge_cards_defense" class="challenge_cards"></div>
@@ -1100,6 +1259,7 @@ export class Game {
           const set_container = document.getElementById(`set_opponent_container`);
           
             set_container.insertAdjacentHTML("beforeend", `
+              <div class="set_container">
               <div id="set_${player.id}" class="set">
               <div id="counter_second_to_last_set_${player.id}" class="counter_second_to_last_set"></div>
               <div id="counter_last_set_${player.id}" class="counter_last_set"></div>
@@ -1109,6 +1269,7 @@ export class Game {
               <div class="title title_name_set" style="color: #${player.color};">${player.name}</div>
               <div id="set_cards_impaire_${player.id}" class="set-cards-impaire"></div>
               <div id="set_cards_paire_${player.id}" class="set-cards-paire"></div>
+            </div>
             </div>
           `);
           
@@ -1434,7 +1595,7 @@ export class Game {
       const color_attaquant = this.players[attaquant].color;
       const color_defenseur = this.players[defenseur].color;
       const text = `<span style="color: #${color_attaquant};">${this.players[attaquant].name}</span> ${_("vs")} <span style="color: #${color_defenseur};">${this.players[defenseur].name}</span>`;
-      title_challenge.innerHTML = `<div class="title">${text}</div>`;
+      title_challenge.innerHTML = `<div class="title0">${text}</div>`;
 
       const challenge_container = document.getElementById('challenge_cards_container');
       challenge_container.classList.remove('hidden');
