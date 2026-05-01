@@ -1984,6 +1984,58 @@ export class Game {
       }, "500");
     }
 
+    async notif_challengeWinByAttack2(args) {
+
+      const cards = args.cards;
+      const targetId = document.getElementById('set_'+args.attaquant).id;
+      for(const card of cards) {
+        if(card.location == 'challenge_attack') {
+          const enfant = document.getElementById('card_attack_'+card.id);
+          this.attachToNewParentNoDestroy( enfant.id, targetId);
+          this.bga.gameui.slideToObjectAndDestroy( enfant.id, targetId, 500, 0 );
+        }
+        else if(card.location == 'challenge_defense') {
+          const enfant = document.getElementById('card_defense_'+card.id);
+          this.attachToNewParentNoDestroy( enfant.id, targetId);
+          this.bga.gameui.slideToObjectAndDestroy( enfant.id, targetId, 500, 0 );
+        }
+      }
+
+      const set_steal = document.getElementById('set_card_'+args.defenseur+'_'+args.set_attaque);
+      this.attachToNewParentNoDestroy( set_steal.id, targetId);
+      this.bga.gameui.slideToObjectAndDestroy( set_steal.id, targetId, 500, 0 );
+
+      this.last_set_type[args.attaquant] = Number(args.attaquant_last_set_type);
+
+      setTimeout(() => 
+      {
+      const selector1 = `[id^="set_card_${args.attaquant}"]`;
+      const elements1 = document.querySelectorAll(selector1);
+      elements1.forEach(el1 => el1.remove());
+
+      Object.values(args.attaquant_cards).forEach(set1 => {
+
+        this.addCardSet(set1);
+ 
+      })
+
+      const selector2 = `[id^="set_card_${args.defenseur}"]`;
+      const elements2 = document.querySelectorAll(selector2);
+      elements2.forEach(el2 => el2.remove());
+
+      Object.values(args.defenseur_cards).forEach(set2 => {
+
+        this.addCardSet(set2);
+ 
+      })
+
+      const challenge_container = document.getElementById('challenge_cards_container');
+      challenge_container.classList.add('hidden');
+
+      }, "500");
+      
+    }
+
     async notif_initRound(args) {
 
           

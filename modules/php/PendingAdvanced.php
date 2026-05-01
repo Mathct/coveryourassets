@@ -2376,7 +2376,7 @@ trait PendingAdvancedTrait  // ATTENTION
 
         $g = game::$instance;
 
-        $set_attaque = $parg1; // 1 (last) ou 2 (second last)
+        $set_attaque = $parg1; // 1 (last) ou 2 (second last)     
 
 
         $ret['buttons'][] = 'validate_btn'; 
@@ -2394,7 +2394,7 @@ trait PendingAdvancedTrait  // ATTENTION
 
         if($varg1 == 'abandon_btn')
         {
-            $g->addPending($this->player_id, "Challenge2Step4");
+            $g->addPending($this->player_id, "Challenge2Step4", $parg1);
         }
 
         else
@@ -2469,28 +2469,35 @@ trait PendingAdvancedTrait  // ATTENTION
         $ret['title'] = clienttranslate('${actplayer} must respond to the Challenge');
         
 
+        $g = game::$instance;
+
         $attaquant = game::$instance->getGameStateValue("attaquant");
         $defenseur = game::$instance->getGameStateValue("defenseur");
 
-        $set_attaque = $parg1;   ///// A FAIRE!!!!!!!!!!!!!!!!!!!
+        $card = [];
 
-    
-        $handCards = game::$instance->cards_DB->getCardsInLocation('hand', $this->player_id);
+        $set_attaque = $parg1;   ///// 1 (last) ou 2 (second last)     
+        $nb_set = $g->set->get($defenseur);
+        $set = 0;
 
-        $last_set = [];
-        $sets = game::$instance->getObjectListFromDB( "SELECT `card_id` `id`, `card_type` `type`, `card_type_arg` `type_arg`, `card_location` `location`, `card_location_arg` `location_arg`, `position` `position` FROM `cards` WHERE `card_location` ='set' AND `card_location_arg`='{$defenseur}' AND position >= 1 ORDER BY position DESC, card_type ASC");
-            
-        foreach ($sets as $card) {
-                    
-            if ($last_set == null) {
-
-            $last_set[] = $card;
-            }
+        if($set_attaque == 1)
+        {
+            $set = $nb_set;
+            $card = game::$instance->getObjectFromDB( "SELECT `card_id` `id`, `card_type` `type`, `card_type_arg` `type_arg`, `card_location` `location`, `card_location_arg` `location_arg`, `position` `position` FROM `cards` WHERE `card_location` ='set' AND `card_location_arg`='{$defenseur}' AND position = '{$set}' ORDER BY card_type ASC LIMIT 1");
         }
+
+        if($set_attaque == 2)
+        {
+            $set = $nb_set - 1;
+            $card = game::$instance->getObjectFromDB( "SELECT `card_id` `id`, `card_type` `type`, `card_type_arg` `type_arg`, `card_location` `location`, `card_location_arg` `location_arg`, `position` `position` FROM `cards` WHERE `card_location` ='set' AND `card_location_arg`='{$defenseur}' AND position = '{$set}' ORDER BY card_type ASC LIMIT 1");
+        }
+
+          
+        $handCards = game::$instance->cards_DB->getCardsInLocation('hand', $this->player_id);
 
         foreach ($handCards as $handCard)
         {
-            if($handCard['type'] == $last_set[0]['type'])
+            if($handCard['type'] == $card['type'])
             {
                 $ret["selectable"][] = 'my_cards_item_'.$handCard['id'];
             }
@@ -2523,7 +2530,7 @@ trait PendingAdvancedTrait  // ATTENTION
 
         if($varg1 == 'abandon_btn')
         {
-            $g->addPending($this->player_id, "Challenge2Step4");
+            $g->addPending($this->player_id, "Challenge2Step4", $parg1);
         }
 
         else {
@@ -2609,93 +2616,213 @@ trait PendingAdvancedTrait  // ATTENTION
         $attaquant = game::$instance->getGameStateValue("attaquant");
         $defenseur = game::$instance->getGameStateValue("defenseur");
         $defenseur_first_turn = game::$instance->getGameStateValue("defenseur_first_turn");
-        $max_position_set_attaquant = $g->getUniqueValueFromDB("SELECT MAX(position) AS valeur_max FROM cards WHERE card_location = 'set' AND card_location_arg = '{$attaquant}'");
-        $max_position_set_defenseur = $g->getUniqueValueFromDB("SELECT MAX(position) AS valeur_max FROM cards WHERE card_location = 'set' AND card_location_arg = '{$defenseur}'");
+
+        $set_attaque = $parg1;   ///// 1 (last) ou 2 (second last)     
+        $nb_set = $g->set->get($defenseur);
 
         $cards_defi = $g->getObjectListFromDB("SELECT `card_id` `id`, `card_type` `type`, `card_type_arg` `type_arg`, `card_location` `location`, `card_location_arg` `location_arg`, `position` `position` FROM `cards` WHERE `card_location` ='challenge_attack' OR `card_location` ='challenge_defense'");
-
-        /* c'est l'attaquant qui abandonne*/
-        if($attaquant == $this->player_id)
+        
+        if($set_attaque == 1)
         {
+            $max_position_set_attaquant = $g->getUniqueValueFromDB("SELECT MAX(position) AS valeur_max FROM cards WHERE card_location = 'set' AND card_location_arg = '{$attaquant}'");
+            $max_position_set_defenseur = $g->getUniqueValueFromDB("SELECT MAX(position) AS valeur_max FROM cards WHERE card_location = 'set' AND card_location_arg = '{$defenseur}'");
 
-            $txt = clienttranslate('${player_name} abandons the challenge');
-            $g->notify->all(
-                "challengeWinByDefense",
-                $txt,
-                [
-                    'player_id' => $attaquant,
-                    'winner' => $defenseur,
-                    'cards' => $cards_defi,
-                ]
-            );
-
-            $txt = clienttranslate('${player_name} wins the challenge');
-            $g->notify->all(
-                "message",
-                $txt,
-                [
-                    'player_id' => $defenseur,
-                    
-                ]
-            );
-
-            foreach ($cards_defi as $card_defi)
+            /* c'est l'attaquant qui abandonne*/
+            if($attaquant == $this->player_id)
             {
-                $g->cards_DB->moveCard($card_defi['id'], 'set', $defenseur);
-                $g->DbQuery("UPDATE cards SET position = {$max_position_set_defenseur} WHERE card_id = {$card_defi['id']}");
+
+                $txt = clienttranslate('${player_name} abandons the challenge');
+                $g->notify->all(
+                    "challengeWinByDefense",
+                    $txt,
+                    [
+                        'player_id' => $attaquant,
+                        'winner' => $defenseur,
+                        'cards' => $cards_defi,
+                    ]
+                );
+
+                $txt = clienttranslate('${player_name} wins the challenge');
+                $g->notify->all(
+                    "message",
+                    $txt,
+                    [
+                        'player_id' => $defenseur,
+                        
+                    ]
+                );
+
+                foreach ($cards_defi as $card_defi)
+                {
+                    $g->cards_DB->moveCard($card_defi['id'], 'set', $defenseur);
+                    $g->DbQuery("UPDATE cards SET position = {$max_position_set_defenseur} WHERE card_id = {$card_defi['id']}");
+                }
+                
             }
-            
+
+            /* c'est le defenseur qui abandonne*/
+            if($defenseur == $this->player_id)
+            {
+                $g->setGameStateValue("win_first_turn", 1);
+
+                $new_position = $max_position_set_attaquant + 1;
+                
+                $g->DbQuery("UPDATE cards SET card_location_arg = {$attaquant}, position = {$new_position} WHERE position = '{$max_position_set_defenseur}' AND card_location_arg = '{$defenseur}'");
+
+                foreach ($cards_defi as $card_defi)
+                {
+                    $g->cards_DB->moveCard($card_defi['id'], 'set', $attaquant);
+                    $g->DbQuery("UPDATE cards SET position = {$new_position} WHERE card_id = {$card_defi['id']}");
+                }
+
+                $card_for_set = $g->getObjectListFromDB(
+                    "SELECT `card_id` `id`, `card_type` `type`, `card_type_arg` `type_arg`, `card_location` `location`, `card_location_arg` `location_arg`, `position` `position` FROM cards WHERE card_location ='set' AND card_location_arg = '{$attaquant}' AND position = '{$new_position}' ORDER BY `card_type` ASC"
+                )[0];
+
+                $attaquant_last_set_type = self::getUniqueValueFromDB( "SELECT `card_type` FROM `cards` WHERE `card_location` ='set' AND `card_location_arg`='{$attaquant}' ORDER BY `position` DESC, `card_type` ASC LIMIT 1" );
+                $defenseur_last_set_type = self::getUniqueValueFromDB( "SELECT `card_type` FROM `cards` WHERE `card_location` ='set' AND `card_location_arg`='{$defenseur}' ORDER BY `position` DESC, `card_type` ASC LIMIT 1" );
+
+                $txt = clienttranslate('${player_name} abandons the challenge');
+                $g->notify->all(
+                    "challengeWinByAttack",
+                    $txt,
+                    [
+                        'player_id' => $defenseur,
+                        'position_def' => $max_position_set_defenseur,
+                        'winner' => $attaquant,
+                        'cards' => $cards_defi,
+                        'card_for_set' => $card_for_set,
+                        'attaquant_last_set_type' => $attaquant_last_set_type,
+                        'defenseur_last_set_type' => $defenseur_last_set_type
+                    ]
+                );
+
+                $txt = clienttranslate('${player_name} wins the challenge');
+                $g->notify->all(
+                    "message",
+                    $txt,
+                    [
+                        'player_id' => $attaquant,
+                        
+                    ]
+                );
+
+                $g->set->inc($attaquant, 1);
+                $g->set->inc($defenseur, -1);
+
+            }
         }
 
-        /* c'est le defenseur qui abandonne*/
-        if($defenseur == $this->player_id)
+        if($set_attaque == 2)
         {
-            $g->setGameStateValue("win_first_turn", 1);
+            $new_position_attaquant = $g->set->get($attaquant) + 1;
+            $position_defenseur = $g->set->get($defenseur) - 1;
+            $max_position_defenseur = $g->set->get($defenseur);
 
-            $new_position = $max_position_set_attaquant + 1;
-            
-            $g->DbQuery("UPDATE cards SET card_location_arg = {$attaquant}, position = {$new_position} WHERE position = '{$max_position_set_defenseur}' AND card_location_arg = '{$defenseur}'");
-
-            foreach ($cards_defi as $card_defi)
+            /* c'est l'attaquant qui abandonne*/
+            if($attaquant == $this->player_id)
             {
-                $g->cards_DB->moveCard($card_defi['id'], 'set', $attaquant);
-                $g->DbQuery("UPDATE cards SET position = {$new_position} WHERE card_id = {$card_defi['id']}");
+
+                $txt = clienttranslate('${player_name} abandons the challenge');
+                $g->notify->all(
+                    "challengeWinByDefense",
+                    $txt,
+                    [
+                        'player_id' => $attaquant,
+                        'winner' => $defenseur,
+                        'cards' => $cards_defi,
+                    ]
+                );
+
+                $txt = clienttranslate('${player_name} wins the challenge');
+                $g->notify->all(
+                    "message",
+                    $txt,
+                    [
+                        'player_id' => $defenseur,
+                        
+                    ]
+                );
+
+                foreach ($cards_defi as $card_defi)
+                {
+                    $g->cards_DB->moveCard($card_defi['id'], 'set', $defenseur);
+                    $g->DbQuery("UPDATE cards SET position = {$position_defenseur} WHERE card_id = {$card_defi['id']}");
+                }
+
+
+
             }
 
-            $card_for_set = $g->getObjectListFromDB(
-                "SELECT `card_id` `id`, `card_type` `type`, `card_type_arg` `type_arg`, `card_location` `location`, `card_location_arg` `location_arg`, `position` `position` FROM cards WHERE card_location ='set' AND card_location_arg = '{$attaquant}' AND position = '{$new_position}' ORDER BY `card_type` ASC"
-            )[0];
 
-            $attaquant_last_set_type = self::getUniqueValueFromDB( "SELECT `card_type` FROM `cards` WHERE `card_location` ='set' AND `card_location_arg`='{$attaquant}' ORDER BY `position` DESC, `card_type` ASC LIMIT 1" );
-            $defenseur_last_set_type = self::getUniqueValueFromDB( "SELECT `card_type` FROM `cards` WHERE `card_location` ='set' AND `card_location_arg`='{$defenseur}' ORDER BY `position` DESC, `card_type` ASC LIMIT 1" );
+            /* c'est le defenseur qui abandonne*/
+            if($defenseur == $this->player_id)
+            {
+                $g->setGameStateValue("win_first_turn", 1);
 
-            $txt = clienttranslate('${player_name} abandons the challenge');
-            $g->notify->all(
-                "challengeWinByAttack",
-                $txt,
-                [
-                    'player_id' => $defenseur,
-                    'position_def' => $max_position_set_defenseur,
-                    'winner' => $attaquant,
-                    'cards' => $cards_defi,
-                    'card_for_set' => $card_for_set,
-                    'attaquant_last_set_type' => $attaquant_last_set_type,
-                    'defenseur_last_set_type' => $defenseur_last_set_type
-                ]
-            );
+                $g->DbQuery("UPDATE cards SET card_location_arg = {$attaquant}, position = {$new_position_attaquant} WHERE position = '{$position_defenseur}' AND card_location_arg = '{$defenseur}'");
+                $g->DbQuery("UPDATE cards SET position = {$position_defenseur} WHERE position = '{$max_position_defenseur}' AND card_location_arg = '{$defenseur}'");
 
-            $txt = clienttranslate('${player_name} wins the challenge');
-            $g->notify->all(
-                "message",
-                $txt,
-                [
-                    'player_id' => $attaquant,
-                    
-                ]
-            );
+                foreach ($cards_defi as $card_defi)
+                {
+                    $g->cards_DB->moveCard($card_defi['id'], 'set', $attaquant);
+                    $g->DbQuery("UPDATE cards SET position = {$new_position_attaquant} WHERE card_id = {$card_defi['id']}");
+                }
 
-            $g->set->inc($attaquant, 1);
-            $g->set->inc($defenseur, -1);
+                $attaquant_cards = [];
+                $sets = self::getObjectListFromDB( "SELECT `card_id` `id`, `card_type` `type`, `card_type_arg` `type_arg`, `card_location` `location`, `card_location_arg` `location_arg`, `position` `position` FROM `cards` WHERE `card_location` ='set' AND `card_location_arg`='{$attaquant}' AND position >= 1 ORDER BY position ASC, card_type ASC");
+                foreach ($sets as $card) {
+                    // On garde la première carte rencontrée par position
+                    if (!isset($attaquant_cards[$card['position']])) {
+                        $attaquant_cards[$card['position']] = $card;
+                    }
+                }
+
+                $defenseur_cards = [];
+                $sets = self::getObjectListFromDB( "SELECT `card_id` `id`, `card_type` `type`, `card_type_arg` `type_arg`, `card_location` `location`, `card_location_arg` `location_arg`, `position` `position` FROM `cards` WHERE `card_location` ='set' AND `card_location_arg`='{$defenseur}' AND position >= 1 ORDER BY position ASC, card_type ASC");
+                foreach ($sets as $card) {
+                    // On garde la première carte rencontrée par position
+                    if (!isset($defenseur_cards[$card['position']])) {
+                        $defenseur_cards[$card['position']] = $card;
+                    }
+                }
+
+                $attaquant_last_set_type = self::getUniqueValueFromDB( "SELECT `card_type` FROM `cards` WHERE `card_location` ='set' AND `card_location_arg`='{$attaquant}' ORDER BY `position` DESC, `card_type` ASC LIMIT 1" );
+
+
+                $txt = clienttranslate('${player_name} abandons the challenge');
+                $g->notify->all(
+                    "challengeWinByAttack2",
+                    $txt,
+                    [
+                        'player_id' => $defenseur,
+                        'cards' => $cards_defi,
+                        'attaquant' => $attaquant,
+                        'defenseur' => $defenseur,
+                        'attaquant_last_set_type' => $attaquant_last_set_type,
+                        'attaquant_cards' => $attaquant_cards,
+                        'defenseur_cards' => $defenseur_cards,
+                        'set_attaque' => $position_defenseur
+
+                        
+                    ]
+                );
+
+                $txt = clienttranslate('${player_name} wins the challenge');
+                $g->notify->all(
+                    "message",
+                    $txt,
+                    [
+                        'player_id' => $attaquant,
+                        
+                    ]
+                );
+
+                $g->set->inc($attaquant, 1);
+                $g->set->inc($defenseur, -1);
+            }
+
+
 
         }
 
