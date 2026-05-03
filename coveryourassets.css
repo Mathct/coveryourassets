@@ -61,7 +61,14 @@
 */
 
 
-
+body {
+    /* background-image: url('img/background2.png');
+    background-repeat: repeat;
+    background-size: 500px 500px; */
+    /*background-color: #d4272d;*/
+    background: linear-gradient(135deg, #d4272d, #f4915c, #fec386); /* ou -45deg*/
+    
+}
 
 #board_id {
   position: relative;
