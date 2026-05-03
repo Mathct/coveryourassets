@@ -55,6 +55,15 @@ CREATE TABLE IF NOT EXISTS `cards` (
   PRIMARY KEY (`card_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
+
+CREATE TABLE IF NOT EXISTS `challenge` (
+  `id` int(10) NOT NULL AUTO_INCREMENT,
+  `name` varchar(50) NULL,  
+  `value` varchar(50) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+
+
 ALTER TABLE `player` ADD `first_set` int(5) NOT NULL DEFAULT 0;
 ALTER TABLE `player` ADD `round_win` int(5) NOT NULL DEFAULT 0;
 ALTER TABLE `player` ADD `cumul_value` int(15) NOT NULL DEFAULT 0;

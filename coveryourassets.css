@@ -507,6 +507,36 @@ body {
   outline: 4px solid #982fff !important;
 }
 
+.challenged_ff0000{
+  outline: 4px solid #ff0000 !important;
+  border-radius: 5%;
+}
+
+.challenged_008000{
+  outline: 4px solid #008000 !important;
+  border-radius: 5%;
+}
+
+.challenged_0000ff{
+  outline: 4px solid #0000ff !important;
+  border-radius: 5%;
+}
+
+.challenged_ffa500{
+  outline: 4px solid #ffa500 !important;
+  border-radius: 5%;
+}
+
+.challenged_e94190{
+  outline: 4px solid #e94190 !important;
+  border-radius: 5%;
+}
+
+.challenged_982fff{
+  outline: 4px solid #982fff !important;
+  border-radius: 5%;
+}
+
 .cards_log_container{
   position: relative;
   display: flex;
@@ -707,7 +737,7 @@ body {
   background-size: 100% 100%;
   bottom: -55px;
   left: 1px;
-  z-index: 230;
+  /* z-index: 230; */
 }
 
 .pile_set_paire{
@@ -718,5 +748,5 @@ body {
     background-size: 100% 100%;
     bottom: 133px;
     left: 190px;
-    z-index: 230;
+    /* z-index: 230; */
 }

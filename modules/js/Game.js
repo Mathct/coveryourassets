@@ -426,6 +426,8 @@ export class Game {
         this.challenge_attack = gamedatas.challenge_attack;
         this.challenge_defense = gamedatas.challenge_defense;
 
+        this.set_attack = gamedatas.set_attack;
+
         this.last_set_type = gamedatas.last_set_type;
         this.first_set_type = gamedatas.first_set_type;
 
@@ -1595,7 +1597,7 @@ export class Game {
       const defenseur = this.defenseur;
       const color_attaquant = this.players[attaquant].color;
       const color_defenseur = this.players[defenseur].color;
-      const text = `<span style="color: #${color_attaquant};">${this.players[attaquant].name}</span> ${_("vs")} <span style="color: #${color_defenseur};">${this.players[defenseur].name}</span>`;
+      const text = `<span style="color: #${color_attaquant};">${this.players[attaquant].name}</span> ${_("attacks")} <span style="color: #${color_defenseur};">${this.players[defenseur].name}</span>`;
       title_challenge.innerHTML = `<div class="title0">${text}</div>`;
 
       const challenge_container = document.getElementById('challenge_cards_container');
@@ -1603,6 +1605,18 @@ export class Game {
 
       const challenge_attack = this.challenge_attack;
       const challenge_defense = this.challenge_defense;
+      
+      if(this.set_attack != '0')
+      {
+        const pile_attack = document.getElementById(this.set_attack);
+        pile_attack.classList.add('challenged_'+this.players[defenseur].color);
+      }
+
+      const set_attack = document.getElementById('set_'+ defenseur);
+      set_attack.classList.add('challenged_'+this.players[defenseur].color);
+
+
+
 
       const challenge_attack_div = document.getElementById('challenge_cards_attack');
       const challenge_defense_div = document.getElementById('challenge_cards_defense');
@@ -1840,18 +1854,22 @@ export class Game {
       const defenseur = args.defenseur;
       const color_attaquant = this.players[attaquant].color;
       const color_defenseur = this.players[defenseur].color;
-      const text = `<span style="color: #${color_attaquant};">${this.players[attaquant].name}</span> ${_("vs")} <span style="color: #${color_defenseur};">${this.players[defenseur].name}</span>`; 
+      const text = `<span style="color: #${color_attaquant};">${this.players[attaquant].name}</span> ${_("attacks")} <span style="color: #${color_defenseur};">${this.players[defenseur].name}</span>`; 
       title_challenge.innerHTML = `<div class="title0">${text}</div>`;
 
       const challenge_container = document.getElementById('challenge_cards_container');
       challenge_container.classList.remove('hidden');
-    }
 
-    async notif_challengeHide(args) {
-      const title_challenge = document.getElementById('title_challenge');
-      title_challenge.innerHTML = '';
-      const challenge_container = document.getElementById('challenge_cards_container');
-      challenge_container.classList.add('hidden');
+      if(args.set != '0')
+      {
+        const pile_attack = document.getElementById(args.set);
+        pile_attack.classList.add('challenged_'+this.players[defenseur].color);
+      }
+
+      const set_attack = document.getElementById('set_'+ defenseur);
+      set_attack.classList.add('challenged_'+this.players[defenseur].color);
+
+
     }
 
     async notif_cardMoveChallengeAttack(args) {
@@ -1946,6 +1964,16 @@ export class Game {
       {
         const challenge_container = document.getElementById('challenge_cards_container');
         challenge_container.classList.add('hidden');
+        const title_challenge = document.getElementById('title_challenge');
+        title_challenge.innerHTML = '';
+        
+        document.querySelectorAll('[class*="challenged"]').forEach(el => {
+          [...el.classList].forEach(cls => {
+            if (cls.startsWith('challenged')) {
+              el.classList.remove(cls);
+            }
+          });
+        });
                
       }, "500");
 
@@ -1980,6 +2008,16 @@ export class Game {
         this.addCardSet(args.card_for_set);
         const challenge_container = document.getElementById('challenge_cards_container');
         challenge_container.classList.add('hidden');
+        const title_challenge = document.getElementById('title_challenge');
+        title_challenge.innerHTML = '';
+        
+        document.querySelectorAll('[class*="challenged"]').forEach(el => {
+          [...el.classList].forEach(cls => {
+            if (cls.startsWith('challenged')) {
+              el.classList.remove(cls);
+            }
+          });
+        });
                
       }, "500");
     }
@@ -2031,6 +2069,16 @@ export class Game {
 
       const challenge_container = document.getElementById('challenge_cards_container');
       challenge_container.classList.add('hidden');
+      const title_challenge = document.getElementById('title_challenge');
+        title_challenge.innerHTML = '';
+        
+        document.querySelectorAll('[class*="challenged"]').forEach(el => {
+          [...el.classList].forEach(cls => {
+            if (cls.startsWith('challenged')) {
+              el.classList.remove(cls);
+            }
+          });
+        });
 
       }, "500");
       

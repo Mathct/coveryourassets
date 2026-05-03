@@ -622,6 +622,7 @@ class Pending extends Game
                 [
                     'attaquant' => $this->player_id,
                     'defenseur' => $opponent,
+                    'set' => '0'
                 ]
             );
 

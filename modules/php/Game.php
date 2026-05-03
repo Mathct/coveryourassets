@@ -258,6 +258,10 @@ class Game extends \Bga\GameFramework\Table
         $this->first_set->initDb(array_keys($players), 0);
 
 
+        // init table Challenge
+        $this->DbQuery("INSERT INTO `challenge` (`name`) VALUES ('set')");
+
+
 
 
         
@@ -355,7 +359,7 @@ class Game extends \Bga\GameFramework\Table
         // Get information about players.
         // NOTE: you can retrieve some extra field you added for "player" table in `dbmodel.sql` if you need it.
         $result["players"] = $this->getCollectionFromDb(
-            "SELECT `player_id` `id`, `player_score` `score` FROM `player`"
+            "SELECT `player_id` `id`, `player_score` `score`, `player_color` `color` FROM `player`"
         );
 
         $sql = "SELECT player_no no FROM player WHERE player_id = $current_player_id";
@@ -431,6 +435,9 @@ class Game extends \Bga\GameFramework\Table
 
         //mode
         $result['mode'] = $this->getGameStateValue('game_mode');
+
+        //set attack
+        $result['set_attack'] = self::getUniqueValueFromDB( "SELECT `value` FROM `challenge` WHERE `name` ='set'");
                
 
         // TODO: Gather all information about current game situation (visible by player $current_player_id).

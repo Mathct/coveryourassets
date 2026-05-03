@@ -2055,6 +2055,7 @@ trait PendingAdvancedTrait  // ATTENTION
             $g->setGameStateValue("attaquant", intval($this->player_id));
             $g->setGameStateValue("defenseur", intval($opponent));
             $g->setGameStateValue("challenge", 1);
+            $g->DbQuery("UPDATE `challenge` SET `value` = '{$parg2}' WHERE `name` = 'set'");
 
             if($this->player_turn == 1)
             {
@@ -2073,6 +2074,7 @@ trait PendingAdvancedTrait  // ATTENTION
                 [
                     'attaquant' => $this->player_id,
                     'defenseur' => $opponent,
+                    'set' => $parg2
                 ]
             );
 
@@ -2225,6 +2227,7 @@ trait PendingAdvancedTrait  // ATTENTION
             $g->setGameStateValue("attaquant", intval($this->player_id));
             $g->setGameStateValue("defenseur", intval($opponent));
             $g->setGameStateValue("challenge", 1);
+            $g->DbQuery("UPDATE `challenge` SET `value` = '{$parg2}' WHERE `name` = 'set'");
 
             if($this->player_turn == 1)
             {
@@ -2258,6 +2261,7 @@ trait PendingAdvancedTrait  // ATTENTION
                     [
                         'attaquant' => $this->player_id,
                         'defenseur' => $opponent,
+                        'set' => $parg2
                     ]
                 );
 
@@ -2320,6 +2324,7 @@ trait PendingAdvancedTrait  // ATTENTION
                     [
                         'attaquant' => $this->player_id,
                         'defenseur' => $opponent,
+                        'set' => $parg2
                     ]
                 );
 
@@ -3053,6 +3058,7 @@ trait PendingAdvancedTrait  // ATTENTION
             $g->setGameStateValue("defenseur_first_turn", 0);
             $g->setGameStateValue("win_first_turn", 0);
             $g->setGameStateValue("player_turn", 1);
+            $g->DbQuery("UPDATE `challenge` SET `value` = '0' WHERE `name` = 'set'");
 
             $g->addPendingFirst($attaquant, "PlayerTurn2");
         }
