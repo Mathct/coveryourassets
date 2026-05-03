@@ -140,6 +140,8 @@ class Pending extends Game
         $ret['title'] = clienttranslate('${actplayer} must choose an action');
         $ret['titleyou'] = clienttranslate('${you} must choose an action');
 
+        $g = game::$instance;
+
         $handCards = game::$instance->cards_DB->getCardsInLocation('hand', $this->player_id);
         $count_hand_cards = count($handCards);
 
@@ -458,6 +460,8 @@ class Pending extends Game
         $ret['title'] = clienttranslate('${actplayer} must choose an action');
         $ret['titleyou'] = clienttranslate('Challenge: ${you} must choose an opponent');
 
+        $g = game::$instance;
+
         $handCards = game::$instance->cards_DB->getCardsInLocation('hand', $this->player_id);
         
         $last_set = [];
@@ -549,6 +553,8 @@ class Pending extends Game
         $ret['buttons'] = [];
         $ret['title'] = clienttranslate('${actplayer} must choose an action');
         $ret['titleyou'] = clienttranslate('Challenge: ${you} must choose a card');
+
+        $g = game::$instance;
 
         $ret["selected"][] = $parg1;
 
@@ -664,6 +670,8 @@ class Pending extends Game
         $ret["selectedmulti"] = [];
         $ret['buttons'] = [];
         $ret['title'] = clienttranslate('${actplayer} must respond to the Challenge');
+
+        $g = game::$instance;
         
 
         $attaquant = game::$instance->getGameStateValue("attaquant");
