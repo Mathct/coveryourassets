@@ -35,7 +35,7 @@ class Pending extends Game
         $this->player_turn = game::$instance->getGameStateValue('player_turn');
 
         /// PREFERENCE DE CONFIRMATION
-        $this->player_pref_confirm = game::$instance->userPreferences->get($this->player_id, 100);
+        //$this->player_pref_confirm = game::$instance->userPreferences->get($this->player_id, 100);
 
         /// GAME MODE (Normal / Advanced)
         if(game::$instance->getGameStateValue('game_mode') == 1)

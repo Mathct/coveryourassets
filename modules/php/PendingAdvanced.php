@@ -2131,7 +2131,7 @@ trait PendingAdvancedTrait  // ATTENTION
         $ret["selectedmulti2"] = [];
         $ret['buttons'] = [];
         $ret['title'] = clienttranslate('${actplayer} must choose an action');
-        $ret['titleyou'] = clienttranslate('Challenge: ${you} must choose 2 cards or 1 wild card');
+        $ret['titleyou'] = clienttranslate('Challenge: ${you} must choose 2 cards or a Penny Jar card');
 
         $g = game::$instance;
 
@@ -2363,7 +2363,7 @@ trait PendingAdvancedTrait  // ATTENTION
 
 
     ////////////////////////////////////////////////////////////////////
-    ////           le defenseur se fait attaquer par un Wild      //////
+    ////           le defenseur se fait attaquer par Penny Jar    //////
     ////////////////////////////////////////////////////////////////////
 
     function argChallenge2Step3v2($parg1, $parg2)
@@ -2377,7 +2377,7 @@ trait PendingAdvancedTrait  // ATTENTION
         $ret["selectedmulti2"] = [];
         $ret['buttons'] = [];
         $ret['title'] = clienttranslate('${actplayer} must choose an action');
-        $ret['titleyou'] = clienttranslate('Challenge: ${you} must choose 2 cards or 1 wild card');
+        $ret['titleyou'] = clienttranslate('Challenge: ${you} must choose 2 cards or a Penny Jar card');
 
         $g = game::$instance;
 

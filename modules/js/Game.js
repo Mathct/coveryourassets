@@ -1137,20 +1137,13 @@ export class Game {
         const gameBoardHTML = `
         <div id="board_id">
 
-          
-
           <div id="deck_discard_container" class="deck-discard-container">
             <div id="deck_container" class="deck-container">
             <div id="deck-counter" class="deck-counter"></div>
             </div>
-
             <div id="discard_container" class="discard-container"></div>
-
           </div>
-          
-       
-          
-                        
+
           <div id="hand_container" class="cards-container" style="border: 2px solid #${color};">
             <div class="title0" id="my_cards_title" style="color: #${color};">${_("My hand")}</div>
             <div id="my_cards" class="cards"></div>
@@ -1279,6 +1272,62 @@ export class Game {
         }
 
       }
+
+      const board = document.getElementById(`board_id`);
+      // help_btn
+      board.insertAdjacentHTML("beforeend", `
+              <div id="aide_btn" class="aide_btn">?</div>
+      `);
+
+      let description_condition = '';
+      
+      if(this.gamedatas.mode_end == 1)
+      {
+        description_condition = _('Play as many rounds as required for a player to pass $1,000,000 total. That player wins.');
+      }
+      if(this.gamedatas.mode_end == 2)
+      {
+        description_condition = _('The player with the highest score at the end of one round wins.');
+      }
+      if(this.gamedatas.mode_end == 3)
+      {
+        description_condition = _('After 3 rounds, the highest score wins.');
+      }
+      if(this.gamedatas.mode_end == 4)
+      {
+        description_condition = _('The first player to win 2 rounds wins.');
+      }
+      
+
+
+
+      const container = document.getElementById(`left-side`);
+      // help_modal
+      container.insertAdjacentHTML("beforeend", `
+              <div id="aide_container" class="aide_container hidden">
+              <div id="aide_modal" class="aide_modal">
+                <div id="aide_croix" class="aide_croix">X</div>
+
+                <div class="title_condition">${_("Victory condition")}:</div>
+                <div class="description_condition">${description_condition}</div>
+
+                <div class="title_advanced">${_("Advanced mode")}:</div>
+
+                <div class="image_jar"></div>
+                <div class="description_jar">${_("The Penny Jar counts as two Wild cards when used to challenge or defend. To counter you must play: two Assets, two Wilds, one of each, or another Penny Jar.")}</div>
+
+                <div class="image_swap"></div>
+                <div class="description_swap">${_("Swap the top set in your stack with the top set of any other player’s stack. The first set may be swapped.")}</div>
+
+                <div class="image_move"></div>
+                <div class="description_move">${_("Move the top set of any player’s stack (including yours) to the bottom or the bottom set to the top.")}</div>
+
+              </div>
+              </div>
+              
+      `);
+
+
     
 
 
@@ -1287,11 +1336,38 @@ export class Game {
       this.setupSet();
       this.setupLock();
       this.setupFirstTypeSet();
+      this.setupAide();
 
       if(this.challenge == 1) {
         this.setupChallenge();
       }
 
+    }
+
+
+    setupAide() {
+      const aide = document.getElementById('aide_btn');
+      aide.addEventListener('click', () => this.showaideModal());
+
+      const aide_croix = document.getElementById('aide_croix');
+      aide_croix.addEventListener('click', () => this.hideaideModal());
+
+      const overlay = document.getElementById('aide_container');
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+          this.hideaideModal();
+        }
+      });
+    }
+
+    showaideModal() {
+      const modal = document.getElementById('aide_container');
+      modal.classList.remove('hidden');
+    }
+
+    hideaideModal() {
+      const modal = document.getElementById('aide_container');
+      modal.classList.add('hidden');
     }
 
     setupCounters() {
