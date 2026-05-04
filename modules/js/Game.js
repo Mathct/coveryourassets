@@ -1299,11 +1299,8 @@ export class Game {
       }
       
 
-
-
-      const container = document.getElementById(`left-side`);
       // help_modal
-      container.insertAdjacentHTML("beforeend", `
+      board.insertAdjacentHTML("beforeend", `
               <div id="aide_container" class="aide_container hidden">
               <div id="aide_modal" class="aide_modal">
                 <div id="aide_croix" class="aide_croix">X</div>
