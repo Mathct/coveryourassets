@@ -1305,19 +1305,25 @@ export class Game {
               <div id="aide_modal" class="aide_modal">
                 <div id="aide_croix" class="aide_croix">X</div>
 
-                <div class="title_condition">${_("Victory condition")}:</div>
+                <div class="title_condition">${_("Victory conditions")}:</div>
                 <div class="description_condition">${description_condition}</div>
 
                 <div class="title_advanced">${_("Advanced mode")}:</div>
 
+                <div class="section_aide">
                 <div class="image_jar"></div>
                 <div class="description_jar">${_("The Penny Jar counts as two Wild cards when used to challenge or defend. To counter you must play: two Assets, two Wilds, one of each, or another Penny Jar.")}</div>
+                </div>
 
+                <div class="section_aide">
                 <div class="image_swap"></div>
                 <div class="description_swap">${_("Swap the top set in your stack with the top set of any other player’s stack. The first set may be swapped.")}</div>
+                </div>
 
+                <div class="section_aide">
                 <div class="image_move"></div>
                 <div class="description_move">${_("Move the top set of any player’s stack (including yours) to the bottom or the bottom set to the top.")}</div>
+                </div>
 
               </div>
               </div>
