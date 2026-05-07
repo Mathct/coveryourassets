@@ -1718,6 +1718,8 @@ export class Game {
           else if(card_type >= 11) {
             card_div.style.backgroundPosition = `-${(card_type-11) * 100}% -100%`;
           }
+
+          this.addToolTip(card.id, card_type, 'attack');
           
         });
 
@@ -1738,6 +1740,8 @@ export class Game {
           else if(card_type >= 11) {
             card_div.style.backgroundPosition = `-${(card_type-11) * 100}% -100%`;
           }
+
+          this.addToolTip(card.id, card_type, 'defense');
           
         });
       }
@@ -1752,80 +1756,80 @@ export class Game {
       if(type == 1)
       {
         titre = _('Baseball');
-        value = '$5000';
+        value = '$5,000';
       }
 
       if(type == 2)
       {
         titre = _('Coin Collection');
-        value = '$5000';
+        value = '$5,000';
       }
 
       if(type == 3)
       {
         titre = _('Piggy Bank');
-        value = '$5000';
+        value = '$5,000';
       }
 
       if(type == 4)
       {
         titre = _('Cash under the Mattress');
-        value = '$10000';
+        value = '$10,000';
       }
 
       if(type == 5)
       {
         titre = _('Bank Account');
-        value = '$10000';
+        value = '$10,000';
       }
 
       if(type == 6)
       {
         titre = _('Stocks');
-        value = '$10000';
+        value = '$10,000';
       }
 
       if(type == 7)
       {
         titre = _('Speed Boat');
-        value = '$15000';
+        value = '$15,000';
       }
 
       if(type == 8)
       {
         titre = _('Jewels');
-        value = '$15000';
+        value = '$15,000';
       }
 
       if(type == 9)
       {
         titre = _('Classic Auto');
-        value = '$15000';
+        value = '$15,000';
       }
 
       if(type == 10)
       {
         titre = _('Home');
-        value = '$20000';
+        value = '$20,000';
       }
 
       if(type == 11)
       {
         titre = _('Penny Jar');
-        value = '$1000';
+        value = '$1,000';
         description = _('The Penny Jar counts as two Wild cards when used to challenge or defend. To counter you must play: two Assets, two Wilds, one of each, or another Penny Jar.');
       }
 
       if(type == 12)
       {
         titre = _('Silver');
-        value = '$25000';
+        value = '$25,000';
       }
 
       if(type == 13)
       {
         titre = _('Gold');
-        value = '$50000';
+        value = '$50,000';
       }
 
       if(type == 14)
@@ -1870,6 +1874,40 @@ export class Game {
         {
           const html = `<div class="tt_container2"><div class="tt_title">${titre}</div><div class="tt_value">${value}</div><div class="tt_description">${description}</div></div>`;
           const elmentId = 'discard_card_'+id;
+          this.bga.gameui.addTooltipHtml(elmentId, html);
+
+        }
+      }
+
+      if(emplacement == 'attack')
+      {
+        if(description == '')
+        {
+          const html = `<div class="tt_container"><div class="tt_title">${titre}</div><div class="tt_value">${value}</div><div class="tt_description">${description}</div></div>`;
+          const elmentId = 'card_attack_'+id;
+          this.bga.gameui.addTooltipHtml(elmentId, html);
+        }
+        else
+        {
+          const html = `<div class="tt_container2"><div class="tt_title">${titre}</div><div class="tt_value">${value}</div><div class="tt_description">${description}</div></div>`;
+          const elmentId = 'card_attack_'+id;
+          this.bga.gameui.addTooltipHtml(elmentId, html);
+
+        }
+      }
+
+      if(emplacement == 'defense')
+      {
+        if(description == '')
+        {
+          const html = `<div class="tt_container"><div class="tt_title">${titre}</div><div class="tt_value">${value}</div><div class="tt_description">${description}</div></div>`;
+          const elmentId = 'card_defense_'+id;
+          this.bga.gameui.addTooltipHtml(elmentId, html);
+        }
+        else
+        {
+          const html = `<div class="tt_container2"><div class="tt_title">${titre}</div><div class="tt_value">${value}</div><div class="tt_description">${description}</div></div>`;
+          const elmentId = 'card_defense_'+id;
           this.bga.gameui.addTooltipHtml(elmentId, html);
 
         }
@@ -2119,6 +2157,8 @@ export class Game {
         else if(card_type >= 11) {
           card_div.style.backgroundPosition = `-${(card_type-11) * 100}% -100%`;
         }
+
+        this.addToolTip(card.id, card_type, 'attack');
                     
       }, "500");
 
@@ -2154,6 +2194,8 @@ export class Game {
         else if(card_type >= 11) {
           card_div.style.backgroundPosition = `-${(card_type-11) * 100}% -100%`;
         }
+
+        this.addToolTip(card.id, card_type, 'defense');
         
                     
       }, "500");
@@ -2530,6 +2572,8 @@ export class Game {
         else if(card_type1 >= 11) {
           card_div1.style.backgroundPosition = `-${(card_type1-11) * 100}% -100%`;
         }
+
+        this.addToolTip(card1.id, card_type1, 'attack');
                     
       }, "500");
 
@@ -2544,6 +2588,8 @@ export class Game {
         else if(card_type2 >= 11) {
           card_div2.style.backgroundPosition = `-${(card_type2-11) * 100}% -100%`;
         }
+
+        this.addToolTip(card2.id, card_type2, 'attack');
                     
       }, "500");
 
@@ -2588,6 +2634,8 @@ export class Game {
         else if(card_type1 >= 11) {
           card_div1.style.backgroundPosition = `-${(card_type1-11) * 100}% -100%`;
         }
+
+        this.addToolTip(card1.id, card_type1, 'defense');
                     
       }, "500");
 
@@ -2602,6 +2650,8 @@ export class Game {
         else if(card_type2 >= 11) {
           card_div2.style.backgroundPosition = `-${(card_type2-11) * 100}% -100%`;
         }
+
+        this.addToolTip(card2.id, card_type2, 'defense');
                     
       }, "500");
 
