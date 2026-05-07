@@ -1573,6 +1573,7 @@ export class Game {
       {
           const card_type = this.getStockCardType(card);
           this.handStock.addToStockWithId(card_type, card.id);
+          this.addToolTip(card.id, card_type, 'hand')
       } );
       this.handStock.updateDisplay();
     }
@@ -1665,6 +1666,8 @@ export class Game {
       
       const discard = `<div id="discard_card_${card.id}" class="card" style="z-index: ${zIndex}; background-position: ${type};"></div>`;
       dojo.place(discard, emplacement);
+
+      this.addToolTip(card.id, card.type, 'discard');
         
       
     }
@@ -1738,6 +1741,140 @@ export class Game {
           
         });
       }
+    }
+
+    addToolTip(id, type, emplacement) {
+
+      let titre = '';
+      let value = '';
+      let description = '';
+
+      if(type == 1)
+      {
+        titre = _('Baseball');
+        value = '$5000';
+      }
+
+      if(type == 2)
+      {
+        titre = _('Coin Collection');
+        value = '$5000';
+      }
+
+      if(type == 3)
+      {
+        titre = _('Piggy Bank');
+        value = '$5000';
+      }
+
+      if(type == 4)
+      {
+        titre = _('Cash under the Mattress');
+        value = '$10000';
+      }
+
+      if(type == 5)
+      {
+        titre = _('Bank Account');
+        value = '$10000';
+      }
+
+      if(type == 6)
+      {
+        titre = _('Stocks');
+        value = '$10000';
+      }
+
+      if(type == 7)
+      {
+        titre = _('Speed Boat');
+        value = '$15000';
+      }
+
+      if(type == 8)
+      {
+        titre = _('Jewels');
+        value = '$15000';
+      }
+
+      if(type == 9)
+      {
+        titre = _('Classic Auto');
+        value = '$15000';
+      }
+
+      if(type == 10)
+      {
+        titre = _('Home');
+        value = '$20000';
+      }
+
+      if(type == 11)
+      {
+        titre = _('Penny Jar');
+        value = '$1000';
+        description = _('The Penny Jar counts as two Wild cards when used to challenge or defend. To counter you must play: two Assets, two Wilds, one of each, or another Penny Jar.');
+      }
+
+      if(type == 12)
+      {
+        titre = _('Silver');
+        value = '$25000';
+      }
+
+      if(type == 13)
+      {
+        titre = _('Gold');
+        value = '$50000';
+      }
+
+      if(type == 14)
+      {
+        titre = _('Swap');
+        description = _('Swap the top set in your stack with the top set of any other player’s stack. The first set may be swapped.');
+      }
+
+      if(type == 15)
+      {
+        titre = _('Move');
+        description = _('Move the top set of any player’s stack (including yours) to the bottom or the bottom set to the top.');
+      }
+
+
+      if(emplacement == 'hand')
+      {
+        if(description == '')
+        {
+          const html = `<div class="tt_container"><div class="tt_title">${titre}</div><div class="tt_value">${value}</div><div class="tt_description">${description}</div></div>`;
+          const elmentId = 'my_cards_item_'+id;
+          this.bga.gameui.addTooltipHtml(elmentId, html);
+        }
+        else
+        {
+          const html = `<div class="tt_container2"><div class="tt_title">${titre}</div><div class="tt_value">${value}</div><div class="tt_description">${description}</div></div>`;
+          const elmentId = 'my_cards_item_'+id;
+          this.bga.gameui.addTooltipHtml(elmentId, html);
+        }
+        
+      }
+
+      if(emplacement == 'discard')
+      {
+        if(description == '')
+        {
+          const html = `<div class="tt_container"><div class="tt_title">${titre}</div><div class="tt_value">${value}</div><div class="tt_description">${description}</div></div>`;
+          const elmentId = 'discard_card_'+id;
+          this.bga.gameui.addTooltipHtml(elmentId, html);
+        }
+        else
+        {
+          const html = `<div class="tt_container2"><div class="tt_title">${titre}</div><div class="tt_value">${value}</div><div class="tt_description">${description}</div></div>`;
+          const elmentId = 'discard_card_'+id;
+          this.bga.gameui.addTooltipHtml(elmentId, html);
+
+        }
+      }
+
     }
 
     /*************************************************
@@ -1921,6 +2058,7 @@ export class Game {
           for(const card of cards) {
             const card_type = this.getStockCardType(card);
             this.handStock.addToStockWithId(card_type, card.id, deck_container);
+            this.addToolTip(card.id, card_type, 'hand');
           }
           this.handStock.updateDisplay();
         }

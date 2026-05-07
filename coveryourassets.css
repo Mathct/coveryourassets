@@ -874,6 +874,38 @@ body {
   align-items: center;
   width: 70%;
   margin-bottom: 10px;
-  gap: 10px;
+  gap: 2px;
+}
+
+.tt_container {
+  width: 100px;
+  height: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  padding: 2px;
+  gap: 2px;
+}
+
+.tt_container2 {
+  width: 200px;
+  height: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  padding: 2px;
+  gap: 2px;
+}
+
+.tt_title {
+  font-weight: bold;
+  text-align: center;
+
+}
+
+.tt_description {
+  text-align: center;
 }
 
