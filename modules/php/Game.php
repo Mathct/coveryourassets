@@ -324,6 +324,9 @@ class Game extends \Bga\GameFramework\Table
      */
     public function getGameProgression()
     {
+        //$game_mode = $this->getGameStateValue('game_mode');
+        //$winning_condition = $this->getGameStateValue('winning_condition');
+        
         return 0;
     }
 
