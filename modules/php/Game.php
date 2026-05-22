@@ -324,10 +324,52 @@ class Game extends \Bga\GameFramework\Table
      */
     public function getGameProgression()
     {
-        //$game_mode = $this->getGameStateValue('game_mode');
-        //$winning_condition = $this->getGameStateValue('winning_condition');
+        $game_mode = $this->getGameStateValue('game_mode');
+        $winning_condition = $this->getGameStateValue('winning_condition');
+        $max_score = intval($this->getUniqueValueFromDB("SELECT MAX(cumul_value) AS valeur_max FROM player"));
+        $nb_players = count($this->getObjectListFromDB( "SELECT player_id FROM player", true ));
+        $round = intval($this->getGameStateValue("round"));
+        $round_win = intval($this->getUniqueValueFromDB("SELECT MAX(round_win) AS valeur_max FROM player"));
+
+        if($winning_condition == 1)
+        {
+            $progression = floor($max_score*100/1000000);
+            return $progression;
+        }
+        elseif($winning_condition == 2)
+        {
+            $nb_deck_max = 0;
+            if($game_mode == 1)
+            {
+                $nb_deck_max = 104 - 1 - ($nb_players*5);
+            }
+            else
+            {
+                $nb_deck_max = 110 - 1 - ($nb_players*6);
+            }
+
+            $deck = count($this->getObjectListFromDB( "SELECT `card_id` `id` FROM cards WHERE card_location = 'deck'", true ));
+            $progression = floor(100 - ($deck*100/$nb_deck_max));
+
+            
+            return $progression;
+        }
+        elseif($winning_condition == 3)
+        {
+            $progression = floor($round*100/3);
+            return $progression;
+        }
+        elseif($winning_condition == 4)
+        {
+            $progression = floor($round_win*100/2);
+            return $progression;
+        }
+        else
+        {
+            return 0;
+        }
         
-        return 0;
+        
     }
 
 
