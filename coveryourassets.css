@@ -790,7 +790,9 @@ body {
 .aide_modal {
   height: auto;
   width: 70%;
-  background-color: #fec386;
+  /* background-color: #fec386; */
+  /* background-color: #fadcbd; */
+  background-color: #ebd5bd;
   /* background: linear-gradient(-45deg, #f4915c, #fec386); ou 135deg */
   z-index: 900;
   border-radius: 20px;
@@ -874,7 +876,7 @@ body {
   align-items: center;
   width: 70%;
   margin-bottom: 10px;
-  gap: 2px;
+  gap: 10px;
 }
 
 .tt_container {

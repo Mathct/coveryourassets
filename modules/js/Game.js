@@ -1305,7 +1305,7 @@ export class Game {
               <div id="aide_modal" class="aide_modal">
                 <div id="aide_croix" class="aide_croix">X</div>
 
-                <div class="title_condition">${_("Victory conditions")}:</div>
+                <div class="title_condition">${_("Victory conditions for this game")}:</div>
                 <div class="description_condition">${description_condition}</div>
 
                 <div class="title_advanced">${_("Advanced mode")}:</div>
@@ -1316,8 +1316,9 @@ export class Game {
                 </div>
 
                 <div class="section_aide">
-                <div class="image_swap"></div>
+                
                 <div class="description_swap">${_("Swap the top set in your stack with the top set of any other player’s stack. The first set may be swapped.")}</div>
+                <div class="image_swap"></div>
                 </div>
 
                 <div class="section_aide">
