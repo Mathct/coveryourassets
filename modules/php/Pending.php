@@ -1184,6 +1184,13 @@ class Pending extends Game
 
     function getSetLog($type1, $type2)
     {
+        $typeA = 0;
+        $typeB = 0;
+        $positionX1 = 0;
+        $positionX2 = 0;
+        $positionY1 = 0;
+        $positionY2 = 0;
+
         if($type1 <= $type2)
         {
             $typeA = $type1;
@@ -1198,22 +1205,22 @@ class Pending extends Game
 
 
         if($typeA <= 10){
-            $positionX1 = ($type1-1)*100;
+            $positionX1 = ($typeA-1)*100;
             $positionY1 = 0;
         }
         else
         {
-            $positionX1 = ($type1-11)*100;
+            $positionX1 = ($typeA-11)*100;
             $positionY1 = 100;
         }
 
         if($typeB <= 10){
-            $positionX2 = ($type2-1)*100;
+            $positionX2 = ($typeB-1)*100;
             $positionY2 = 0;
         }
         else
         {
-            $positionX2 = ($type2-11)*100;
+            $positionX2 = ($typeB-11)*100;
             $positionY2 = 100;
         }
 
