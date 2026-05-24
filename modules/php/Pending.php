@@ -16,7 +16,7 @@ class Pending extends Game
     public $player_id;
     public $player_no;
     public $player_name;
-    public $player_score;
+    //public $player_score;
     public $player_color;
     public $player_pref_confirm;
 
@@ -27,7 +27,7 @@ class Pending extends Game
         $this->player_no = $p['player_no'];
         $this->player_id = $p['player_id'];
         $this->player_name = $p['player_name'];
-        $this->player_score = $p['player_score'];
+        //$this->player_score = $p['player_score'];
         $this->player_color = $p['player_color'];
 
         $this->round_nb = game::$instance->getGameStateValue('round');
