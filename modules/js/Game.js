@@ -1260,8 +1260,8 @@ export class Game {
               <div id="counter_second_to_last_set_${player.id}" class="counter_second_to_last_set"></div>
               <div id="counter_last_set_${player.id}" class="counter_last_set"></div>
               <div id="lock_set_${player.id}" class="lock_set hidden"></div>
-              <div class="pile_set_impaire"></div>
-              <div class="pile_set_paire"></div>
+              <div id="pile_set_impaire_${player.id}" class="pile_set_impaire"></div>
+              <div id="pile_set_paire_${player.id}" class="pile_set_paire"></div>
               <div class="title title_name_set" style="color: #${player.color};">${player.name}</div>
               <div id="set_cards_impaire_${player.id}" class="set-cards-impaire"></div>
               <div id="set_cards_paire_${player.id}" class="set-cards-paire"></div>
