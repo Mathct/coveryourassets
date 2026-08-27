@@ -214,7 +214,7 @@ class NormalTurn {
                   arg1: key,
                   arg2: this.game.SelectDiscard(),
                 }),
-              { color: "primary", id: "discard_btn", disabled: true },
+              { color: "alert", id: "discard_btn", disabled: true },
             );
             break;
 
