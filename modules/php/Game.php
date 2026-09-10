@@ -599,7 +599,8 @@ class Game extends \Bga\GameFramework\Table
             switch ($state_name) {
                 default: {
                         $player_id = $this->getActivePlayerId();
-                        self::DbQuery("DELETE FROM pending WHERE player_id = {$player_id}");
+                        //self::DbQuery("DELETE FROM pending WHERE player_id = {$player_id}");
+                        self::DbQuery("DELETE FROM `pending`");
                         $this->gamestate->nextState("zombiePass");
                         break;
                     }
